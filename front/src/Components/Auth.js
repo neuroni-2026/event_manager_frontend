@@ -1,41 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Auth.css';
+import './Auth.css'; // Asigură-te că acest fișier există
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate();
-
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    faculty: '', 
-    role: 'user' 
+    phoneNumber: '',
+    role: 'student', 
+    faculty: '',
+    studentYear: '',
+    organizationName: '',
   });
 
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setMessage('');
-    setError('');
-
-    setFormData({ 
-        firstName: '', lastName: '', email: '', password: '', confirmPassword: '', 
-        faculty: '', role: 'user' 
-    });
-  };
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -51,25 +38,29 @@ const AuthPage = () => {
     const baseUrl = 'http://localhost:8080/api/auth';
     const url = isLogin ? `${baseUrl}/signin` : `${baseUrl}/signup`;
 
-
     let bodyData;
-    
+
     if (isLogin) {
-       
-        bodyData = { 
-            email: formData.email, 
-            password: formData.password 
-        };
+      bodyData = {
+        email: formData.email,
+        password: formData.password
+      };
     } else {
-      
-        bodyData = { 
-            firstName: formData.firstName, 
-            lastName: formData.lastName, 
-            email: formData.email, 
-            password: formData.password,
-            studentFaculty: formData.faculty,
-            role: [formData.role] 
-        };
+      bodyData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        phoneNumber: formData.phoneNumber,
+        role: formData.role 
+      };
+
+      if (formData.role === 'student') {
+        bodyData.studentFaculty = formData.faculty;
+        bodyData.studentYear = formData.studentYear ? parseInt(formData.studentYear, 10) : null;
+      } else if (formData.role === 'organizer') {
+        bodyData.organizationName = formData.organizationName;
+      }
     }
 
     try {
@@ -82,34 +73,38 @@ const AuthPage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Ceva nu a mers bine.');
+        throw new Error(data.message || 'Eroare la procesarea cererii.');
       }
 
       if (isLogin) {
-
-        localStorage.setItem('user', JSON.stringify(data)); 
-        navigate('/home'); 
+        localStorage.setItem('user', JSON.stringify(data));
+        navigate('/home');
       } else {
-        setMessage("Cont creat cu succes! Te rugam sa te autentifici.");
-        setIsLogin(true); 
+        setMessage("Cont creat cu succes! Te rugăm să te autentifici.");
+        setIsLogin(true);
+        setFormData((prev) => ({...prev, password: '', confirmPassword: ''}));
       }
 
     } catch (err) {
+      console.error("Eroare:", err);
       setError(err.message);
     }
   };
 
   return (
     <div className="auth-container">
+      {/* Am schimbat auth-box în auth-card conform CSS */}
       <div className="auth-card">
-        <h2 className="auth-title">{isLogin ? 'Bine ai venit!' : 'Creeaza cont'}</h2>
         
-        {error && <div style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
-        {message && <div style={{color: 'green', marginBottom: '10px'}}>{message}</div>}
+        {/* Am adăugat clasa auth-title */}
+        <h2 className="auth-title">{isLogin ? 'Autentificare' : 'Înregistrare'}</h2>
+        
+        {/* Mesaje de eroare/succes */}
+        {error && <div style={{color: '#ef4444', marginBottom: '15px', fontSize: '14px'}}>{error}</div>}
+        {message && <div style={{color: '#10b981', marginBottom: '15px', fontSize: '14px'}}>{message}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          
-          
+        {/* Am adăugat clasa auth-form */}
+        <form className="auth-form" onSubmit={handleSubmit}>
           {!isLogin && (
             <>
               <div className="form-group">
@@ -120,22 +115,13 @@ const AuthPage = () => {
                 <label>Nume</label>
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required />
               </div>
-
-             
               <div className="form-group">
-                <label>Facultate</label>
-                <select name="faculty" value={formData.faculty} onChange={handleChange} required className="auth-select">
-                    <option value="">Alege facultatea...</option>
-                    <option value="FIESC">Facultatea de Inginerie Electrica si Stiinta Calculatoarelor</option>
-                    <option value="MEDICINA">Facultatea de Medicina si Stiinte Biologice</option>
-                    <option value="LITERE">Facultatea de Litere si Stiinte ale Comunicarii</option>
-                    <option value="DREPT">Facultatea de Drept si Stiinte Administrative</option>
-                </select>
+                <label>Telefon</label>
+                <input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
               </div>
             </>
           )}
 
-         
           <div className="form-group">
             <label>Email</label>
             <input type="email" name="email" value={formData.email} onChange={handleChange} required />
@@ -147,24 +133,58 @@ const AuthPage = () => {
           </div>
 
           {!isLogin && (
-            <div className="form-group">
-              <label>Confirmă Parola</label>
-              <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
-            </div>
+            <>
+              <div className="form-group">
+                <label>Confirmă Parola</label>
+                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
+              </div>
+
+              <div className="form-group">
+                <label>Rol</label>
+                <select name="role" value={formData.role} onChange={handleChange}>
+                  <option value="student">Student</option>
+                  <option value="organizer">Organizator</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              {formData.role === 'student' && (
+                <>
+                  <div className="form-group">
+                    <label>Facultate</label>
+                    <input type="text" name="faculty" value={formData.faculty} onChange={handleChange} required />
+                  </div>
+                  <div className="form-group">
+                    <label>An de studiu</label>
+                    <input type="number" name="studentYear" value={formData.studentYear} onChange={handleChange} required />
+                  </div>
+                </>
+              )}
+
+              {formData.role === 'organizer' && (
+                <div className="form-group">
+                  <label>Nume Organizație</label>
+                  <input type="text" name="organizationName" value={formData.organizationName} onChange={handleChange} required />
+                </div>
+              )}
+            </>
           )}
 
+          {/* Am schimbat clasa în buton-auth */}
           <button type="submit" className="buton-auth">
-            {isLogin ? 'AUTENTIFICARE' : 'INREGISTRARE'}
+            {isLogin ? 'Intră în cont' : 'Creează cont'}
           </button>
         </form>
 
+        {/* Am schimbat clasele pentru footer */}
         <div className="auth-footer">
-          <p>
-            {isLogin ? 'Nu ai un cont?' : 'Ai deja un cont?'}
-            <span className="toggle-link" onClick={toggleMode}>
-              {isLogin ? ' Inregistreaza-te aici' : ' Logheaza-te aici'}
-            </span>
-          </p>
+          {isLogin ? 'Nu ai cont?' : 'Ai deja cont?'}
+          <span 
+            className="toggle-link"
+            onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
+          >
+            {isLogin ? ' Înregistrează-te' : ' Loghează-te'}
+          </span>
         </div>
       </div>
     </div>
