@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api'; 
 import './AdminDashboard.css';
+import Circle from '../Icons/circle.png';
 
 const AdminDashboard = () => {
   const [pendingEvents, setPendingEvents] = useState([]);
@@ -21,6 +22,23 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchPendingEvents();
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      
+    
+      const rawRole = parsedUser.roles && 'ADMIN' ;
+                    
+  
+      const cleanRole = rawRole.replace('ROLE_', '');
+
+      setUser({
+        role: cleanRole ,
+        firstName: parsedUser.firstName || '',
+        lastName: parsedUser.lastName || ''
+        
+      });
+    }
   }, []);
 
 
@@ -47,16 +65,49 @@ const AdminDashboard = () => {
           console.error(error);
       }
   };
-
-  if (loading) return <div className="admin-container loading">Se încarcă cererile...</div>;
+  
+const [user, setUser] = useState({
+        firstName: 'Vizitator',
+        lastName: '',
+        role: 'Neautentificat'
+      });
+    
+    
+      useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          let userRole = "USER";
+          if (parsedUser.roles && parsedUser.roles.length > 0) {
+            userRole = parsedUser.roles[0].toUpperCase(); 
+          }
+          setUser({
+            firstName: parsedUser.firstName || '',
+            lastName: parsedUser.lastName || '',
+            role: userRole
+          });
+        }
+      }, []);
+  if (loading) return <div className="admin-container loading">Se incarca cererile...</div>;
+  
 
   return (
     <div className="admin-container">
+         <div className="Header">
+                 <h1>Event Manager</h1>
+                 <div className="user-info">
+                    <div className="user-text">
+                        <span className="user-role">{user.role}</span>
+                        <span className="user-name">{user.firstName} {user.lastName}</span>
+                    </div>
+                    <img src={Circle} alt="icon" className="circle-icon"/>
+                 </div>
+              </div>
       <header className="admin-header">
         <h1>Panou Administrator</h1>
         <p>
             {pendingEvents.length > 0 
-                ? 'Ai ${pendingEvents.length} evenimente care asteapta aprobare.'
+                ? `Ai ${pendingEvents.length} evenimente care asteapta aprobare.`
                 : "Nu exista cereri noi."}
         </p>
       </header>

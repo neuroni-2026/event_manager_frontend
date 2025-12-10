@@ -1,0 +1,126 @@
+.notification-page-container {
+    padding: 20px 40px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #fff; 
+    min-height: 100vh;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.notification-header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.user-profile-notif {
+    display: flex;
+    align-items: center;
+}
+
+.user-details-notif {
+    text-align: right;
+    margin-right: 15px;
+    color: #555;
+}
+
+.user-name-notif {
+    display: block;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.user-group-notif {
+    display: block;
+    font-size: 12px;
+    color: #888;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    
+}
+
+
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+.notification-card {
+    background-color: #f0f0f0; 
+    border-radius: 15px;
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.event-title-notif {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+}
+
+.notification-type-badge {
+    background-color: #e0e0e0; 
+    color: #555;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.notification-message {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+
+.empty-placeholder {
+    height: 80px; 
+}
+
+.Header{
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+  align-items: center;
+  color: #555;
+  
+
+}
+
+.user_name{
+  font-size:2em;
+  font-weight: bold;
+  color: #333;
+}
+
+
+.user-info {
+  gap: 5px;
+  display: flex;
+  color: #555;
+
+  
+}

@@ -181,3 +181,11 @@
     font-size: 20px;
   }
 }
+
+.buton-rezervat {
+    background-color: #2ecc71 !important;
+    cursor: pointer;
+}
+.buton-rezervat:hover {
+    background-color: #27ae60 !important;
+}

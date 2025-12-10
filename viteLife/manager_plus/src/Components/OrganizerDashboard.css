@@ -10,6 +10,31 @@
     margin-bottom: 30px;
 }
 
+.Header{
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+  align-items: center;
+  color: #555;
+  
+
+}
+
+.user_name{
+  font-size:2em;
+  font-weight: bold;
+  color: #333;
+}
+
+
+.user-info {
+  gap: 5px;
+  display: flex;
+  color: #555;
+
+  
+}
 
 .controls-section {
     display: flex;

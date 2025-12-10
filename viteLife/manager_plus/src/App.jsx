@@ -5,7 +5,8 @@ import './App.css';
 import { Routes, Route } from 'react-router-dom';
 import OrganizerDashboard from './Components/OrganizerDashboard';
 import AdminDashboard from './Components/AdminDashboard';
-
+import NotificationPage from './Components/NotificationPage';
+import MyTickets from './Components/MyTickets';
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Route path="/home" element={<Home />} />
       <Route path="/organizer" element={<OrganizerDashboard />} />
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/notifications" element={<NotificationPage />} />
+      <Route path="/my-tickets" element={<MyTickets />} />
     </Routes>
       
   </div>

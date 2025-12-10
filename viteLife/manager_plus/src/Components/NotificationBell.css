@@ -1,0 +1,70 @@
+
+.dropdown-footer {
+    padding: 10px;
+    border-top: 1px solid #444;
+    text-align: center;
+    background-color: #252525;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.view-all-btn {
+    background-color: transparent;
+    border: 1px solid #6C63FF;
+    color: #6C63FF;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    width: 100%;
+    transition: all 0.2s;
+}
+
+.view-all-btn:hover {.bell-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 20px; 
+    transition: transform 0.2s ease;
+}
+
+.bell-wrapper:hover {
+    transform: scale(1.1); 
+}
+
+.bell-icon {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 24px; 
+    color: white; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+}
+
+
+.badge-count {
+    position: absolute;
+    top: -5px;
+    right: -6px;
+    background-color: #ff4757; 
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #2c2c2c; 
+}
+    background-color: #6C63FF;
+    color: white;
+}

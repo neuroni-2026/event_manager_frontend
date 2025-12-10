@@ -4,6 +4,7 @@ import SearchIcon from '../Icons/icon-search.png';
 import Circle from '../Icons/circle.png';
 import api from '../services/api';
 import './Home.css';
+import NotificationBell from './NotificationBell';
 
 const Home = () => {
 
@@ -22,14 +23,23 @@ const Home = () => {
   });
 
   
-  useEffect(() => {
+ useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       const parsedUser = JSON.parse(userData);
+      
+     
+      const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
+                      ? parsedUser.roles[0].toUpperCase() 
+                      : 'GUEST';
+      
+     
+      const cleanRole = rawRole.replace('ROLE_', '');
+
       setUser({
         firstName: parsedUser.firstName || '',
         lastName: parsedUser.lastName || '',
-        role: parsedUser.roles?.[0]?.toUpperCase() || 'USER'
+        role: cleanRole 
       });
     }
   }, []);
@@ -107,6 +117,7 @@ const Home = () => {
       <div className="Header">
         <h1>Event Manager</h1>
         <div className="user-info">
+          <NotificationBell />
           <div className="user-text">
             <span className="user-role">{user.role}</span>
             <span className="user-name">{user.firstName} {user.lastName}</span>
