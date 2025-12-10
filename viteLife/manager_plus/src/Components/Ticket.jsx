@@ -20,17 +20,17 @@ const TicketModal = ({ onClose }) =>    { {
 
   return (
 
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="overlay" onClick={onClose}>
       
 
-      <div className="modal-content" onClick={handleModalClick}>
+      <div className="content" onClick={handleModalClick}>
         
 
-        <div className="modal-header relative-header">
+        <div className="header">
           <button className="buton-back" onClick={onClose}>
              <span style={{marginRight: '4px'}}>‹</span> Back
           </button>
-          <h3 className="modal-title">ASSIST OPEN DOORS 25</h3>
+          <h3 className="title">ASSIST OPEN DOORS 25</h3>
         </div>
 
 
@@ -40,12 +40,12 @@ const TicketModal = ({ onClose }) =>    { {
 
 
         <div className="ticket-details">
-          <p className="event-info-line">
+          <p className="event-info">
             Aula Magna • 13/12/2025 • 09:00
           </p>
           
 
-          <div className="modal-tags">
+          <div className="tags">
             <span className="tag-badge tag-green">FIESC</span>
             <span className="tag-badge tag-blue">ASSIST</span>
             <span className="tag-badge tag-yellow">OPPORTUNITY</span>

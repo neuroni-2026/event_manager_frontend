@@ -1,10 +1,14 @@
 .card {
-  width: 100%;        
-  max-width: 500px;  
+width: 100%;        /* Se adaptează la lățimea coloanei */
+  max-width: 450px;   /* Opțional: Să nu devină uriaș pe ecrane 4K */
+  margin: 0 auto;     /* Centrează cardul în celula grid-ului */
+  
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   overflow: hidden;
+  display: flex;      /* Asigură o structură flexibilă internă */
+  flex-direction: column;
 }
 
 .image-container {

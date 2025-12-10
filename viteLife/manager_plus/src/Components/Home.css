@@ -2,6 +2,7 @@
   text-align: center;
   padding: 20px;
   min-height: 100vh;
+  width: 100%;
   
 }
 
@@ -12,13 +13,20 @@
   margin-right: 20px;
   align-items: center;
   color: #555;
+  
 
 }
+
+.user_name{
+  font-size:2em;
+  font-weight: bold;
+  color: #333;
+}
+
 
 .user-info {
   gap: 5px;
   display: flex;
-  font-size: 14px;
   color: #555;
 
   
@@ -53,15 +61,15 @@
 }
 
 .Grid {
-  display: grid;
+display: grid;
   gap: 20px;
   
- 
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  /* Aceasta este singura linie necesară pentru coloane responsive */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   
-  min-width: 100%; 
-  margin: 0 auto;
-  justify-items: center; 
+  width: 100%; 
+  padding: 20px; /* Asigură un pic de spațiu la margini */
+  box-sizing: border-box; /* Previne scroll-ul orizontal cauzat de padding */
 }
 
 @media (min-width: 768px) {

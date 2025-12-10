@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './EventCardDetails.css'; 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import usv from '../Images/usv.jpg';
-import TicketModal from './Ticket';
+import Ticket from './Ticket';
 import Circle from '../Icons/circle.png';
 
 
@@ -12,7 +12,7 @@ import Circle from '../Icons/circle.png';
 const EventDetails = () => {
     const navigate = useNavigate();
     const handleClick = () => {
-    navigate('/');
+    navigate('/home');
     };
     const [showTicket, setShowTicket] = useState(false);
   const handleParticipa = () => {
@@ -22,17 +22,47 @@ const EventDetails = () => {
     setShowTicket(false);
   };
 
-const [esteInscris, setEsteInscris] = useState(false);
+  const [user, setUser] = useState({
+    firstName: 'Vizitator',
+    lastName: '',
+    role: 'Neautentificat'
+  });
+
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      
+     
+      let userRole = "USER";
+      if (parsedUser.roles && parsedUser.roles.length > 0) {
+        userRole = parsedUser.roles[0].toUpperCase(); 
+      }
+
+      setUser({
+        firstName: parsedUser.firstName || '',
+        lastName: parsedUser.lastName || '',
+        role: userRole
+      });
+    }
+  }, []);
 
   return (
     <div className="event-pagina">
-       <div className= "Header">
-                      <h1>Event Manager</h1>
-                      <div className="user-info">
-                      <p>Nume & Prenume <br/> Statut</p>
-                      <img src={Circle} alt="circle" className="circle-icon"/>
-                      </div>
-                    </div>
+        <div className="Header">
+        <h1>Event Manager</h1>
+        
+        <div className="user-info">
+          <p className="user-name">
+            {user.firstName} {user.lastName} <br/>
+              {user.role}
+          </p>
+          
+          <img src={Circle} alt="circle" className="circle-icon"/>
+        </div>
+      </div>
       <div className="card-detalii">
         
         <div className="header">
@@ -92,7 +122,7 @@ const [esteInscris, setEsteInscris] = useState(false);
         </div>
 
       </div>
-      {showTicket && <TicketModal onClose={handleClose} />}
+      {showTicket && <Ticket onClose={handleClose} />}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Auth.css'; // Asigură-te că acest fișier există
+import './Auth.css'; 
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -93,17 +93,17 @@ const AuthPage = () => {
 
   return (
     <div className="auth-container">
-      {/* Am schimbat auth-box în auth-card conform CSS */}
+    
       <div className="auth-card">
         
-        {/* Am adăugat clasa auth-title */}
+     
         <h2 className="auth-title">{isLogin ? 'Autentificare' : 'Înregistrare'}</h2>
         
-        {/* Mesaje de eroare/succes */}
+        
         {error && <div style={{color: '#ef4444', marginBottom: '15px', fontSize: '14px'}}>{error}</div>}
         {message && <div style={{color: '#10b981', marginBottom: '15px', fontSize: '14px'}}>{message}</div>}
 
-        {/* Am adăugat clasa auth-form */}
+      
         <form className="auth-form" onSubmit={handleSubmit}>
           {!isLogin && (
             <>
@@ -170,13 +170,13 @@ const AuthPage = () => {
             </>
           )}
 
-          {/* Am schimbat clasa în buton-auth */}
+          
           <button type="submit" className="buton-auth">
             {isLogin ? 'Intră în cont' : 'Creează cont'}
           </button>
         </form>
 
-        {/* Am schimbat clasele pentru footer */}
+        
         <div className="auth-footer">
           {isLogin ? 'Nu ai cont?' : 'Ai deja cont?'}
           <span 
