@@ -1,44 +1,84 @@
 import React from 'react';
-import './EventCard.css';
 import { useNavigate } from 'react-router-dom';
-import Assist from '../Images/ASSIST.png'
+import './EventCard.css'; 
+import DefaultImage from '../Images/ASSIST.png'; 
 
 
-
-const EventCard = () => {
+const EventCard = ({ id, title, description, location, date, imageUrl, category }) => {
   const navigate = useNavigate();
-  const handleClick = () => {
-  navigate('/event_detalii');
   
-};
-  return (
+
+  const formatDate = (isoString) => {
+    if (!isoString) return { day: '??', month: 'NAN' };
     
-    <div className="card">
-      <div className="image-container">
-        <img className="card-image" src={Assist} alt="Event" />
-        <div className="date">13 Dec</div>
+    const d = new Date(isoString);
+    const day = d.getDate(); 
+
+    const month = d.toLocaleDateString('ro-RO', { month: 'short' }).toUpperCase();
+    
+    return { day, month };
+  };
+
+  const { day, month } = formatDate(date);
+
+const handleClick = () => {
+   
+    navigate(`/event_detalii/${id}`);
+  };
+
+  return (
+    <div className="card-wrapper">
+   
+      <div className="card-image-header">
+       
+        <img 
+            src={imageUrl || DefaultImage} 
+            alt={title} 
+            className="card-img" 
+            onError={(e) => {e.target.src = DefaultImage}}
+        />
+        
+       
+        <div className="card-date-badge">
+            <span className="date-day">{day}</span>
+            <span className="date-month">{month}</span>
+        </div>
       </div>
       
-      <div className="content">
-        <div className="tags">
-          <span className="tag green">FIESC</span>
-          <span className="tag blue">ASSIST</span>
-          <span className="tag yellow">OPPORTUNITY</span>
+     
+      <div className="card-body">
+        
+       
+        <div className="card-tags">
+        
+          <span className="tag tag-green">USV</span> 
+          
+      
+          <span className="tag tag-blue">{category || 'EVENT'}</span>
         </div>
 
-        <h2 className="title">ASSIST OPEN DOORS 25</h2>
-        <p className="description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam tortor arcu.
+       
+        <h3 className="card-title" title={title}>
+            {title}
+        </h3>
+        
+       
+        <p className="card-description">
+          {description 
+            ? (description.length > 80 ? description.substring(0, 80) + "..." : description)
+            : "Fara descriere disponibila."}
         </p>
         
-        <div className="sep"></div>
-
-        <div className="last">
-
-            <div className="location">
-              <span className="icon">📍</span> USV, Aula Magna
+       
+        <div className="card-footer">
+            <div className="card-location">
+              <span className="location-icon">📍</span> 
+            
+              <span>{location}</span>
             </div>
-          <button className="details" onClick={handleClick}>DETALII</button>
+            <button className="btn-details" onClick={handleClick}>
+                DETALII
+            </button>
         </div>
       </div>
     </div>

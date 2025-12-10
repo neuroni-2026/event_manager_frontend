@@ -42,27 +42,28 @@
   
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  margin-bottom: 25px;
+
+.card-detalii .header {
+    display: flex;            
+    align-items: center;        
+    justify-content: flex-start; 
+    gap: 20px;                 
+    width: 100%;                
+    margin-bottom: 20px;        
+    padding: 0 10px;           
 }
 
 .event-title {
-
-  font-size: 28px;
-  font-weight: 800;
-  color: #444;
-  margin: 0;
-  
+    margin: 0;                  
+    text-align: left;           
+    font-size: 24px;           
 }
+
 
 .back {
 
   display: flex;
-  align-items: center;
+
   gap: 5px;
   background: white;
   border: 1px solid #333;

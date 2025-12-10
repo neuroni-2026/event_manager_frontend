@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Auth.css'; 
 
+
+import api from '../services/api'; 
+
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -35,8 +38,8 @@ const AuthPage = () => {
       return;
     }
 
-    const baseUrl = 'http://localhost:8080/api/auth';
-    const url = isLogin ? `${baseUrl}/signin` : `${baseUrl}/signup`;
+   
+    const endpoint = isLogin ? '/auth/signin' : '/auth/signup';
 
     let bodyData;
 
@@ -64,46 +67,61 @@ const AuthPage = () => {
     }
 
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bodyData),
-      });
 
-      const data = await response.json();
+      const response = await api.post(endpoint, bodyData);
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Eroare la procesarea cererii.');
-      }
 
-      if (isLogin) {
-        localStorage.setItem('user', JSON.stringify(data));
-        navigate('/home');
-      } else {
-        setMessage("Cont creat cu succes! Te rugăm să te autentifici.");
+      const data = response.data;
+
+
+if (isLogin) {
+
+  console.log("User data received:", data);
+  localStorage.setItem('user', JSON.stringify(data));
+
+
+  const roles = data.roles || [];
+
+
+  const isAdmin = roles.some(role => role.toUpperCase().includes('ADMIN'));
+  const isOrganizer = roles.some(role => role.toUpperCase().includes('ORGANIZER'));
+
+
+  if (isAdmin) {
+    console.log("Utilizator Admin detectat -> /admin");
+    navigate('/admin'); 
+  } else if (isOrganizer) {
+    console.log("Utilizator Organizator detectat -> /organizer");
+    navigate('/organizer');
+  } else {
+    console.log("Utilizator Student/Simplu -> /home");
+    navigate('/home');
+  }
+}else {
+     
+        setMessage("Cont creat cu succes! Te rugam sa te autentifici.");
         setIsLogin(true);
         setFormData((prev) => ({...prev, password: '', confirmPassword: ''}));
       }
 
     } catch (err) {
       console.error("Eroare:", err);
-      setError(err.message);
+      
+      
+      const errorMessage = err.response?.data?.message || err.message || 'Eroare la procesarea cererii.';
+      setError(errorMessage);
     }
   };
 
   return (
     <div className="auth-container">
-    
       <div className="auth-card">
         
-     
-        <h2 className="auth-title">{isLogin ? 'Autentificare' : 'Înregistrare'}</h2>
-        
+        <h2 className="auth-title">{isLogin ? 'Autentificare' : 'Inregistrare'}</h2>
         
         {error && <div style={{color: '#ef4444', marginBottom: '15px', fontSize: '14px'}}>{error}</div>}
         {message && <div style={{color: '#10b981', marginBottom: '15px', fontSize: '14px'}}>{message}</div>}
 
-      
         <form className="auth-form" onSubmit={handleSubmit}>
           {!isLogin && (
             <>
@@ -170,20 +188,18 @@ const AuthPage = () => {
             </>
           )}
 
-          
           <button type="submit" className="buton-auth">
             {isLogin ? 'Intră în cont' : 'Creează cont'}
           </button>
         </form>
 
-        
         <div className="auth-footer">
           {isLogin ? 'Nu ai cont?' : 'Ai deja cont?'}
           <span 
             className="toggle-link"
             onClick={() => { setIsLogin(!isLogin); setError(''); setMessage(''); }}
           >
-            {isLogin ? ' Înregistrează-te' : ' Loghează-te'}
+            {isLogin ? ' Inregistreaza-te' : ' Logheaza-te'}
           </span>
         </div>
       </div>
