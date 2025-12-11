@@ -5,6 +5,7 @@ import './EventCardDetails.css';
 import usv from '../Images/usv.jpg';
 import TicketModal from './Ticket';
 import Circle from '../Icons/circle.png';
+import ReviewSection from './ReviewSection';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -76,7 +77,7 @@ const EventDetails = () => {
  
   const handleBuyTicket = async () => {
     if (user.role !== 'STUDENT') {
-        alert("Doar studenții pot participa!");
+        alert("Doar studentii pot participa!");
         return;
     }
 
@@ -105,7 +106,7 @@ const EventDetails = () => {
                  }
              } catch (e) { alert("Eroare recuperare bilet."); }
         } else {
-             alert("Eroare: " + (error.response?.data?.message || "Eroare necunoscută."));
+             alert("Eroare: " + (error.response?.data?.message || "Eroare necunoscuta."));
         }
     }
   };
@@ -179,8 +180,12 @@ const EventDetails = () => {
          
          <div className="description">
             <h3>Descriere</h3>
-            <p>{event.description || "Fără descriere."}</p>
+            <p>{event.description || "Fara descriere."}</p>
          </div>
+         <ReviewSection 
+            eventId={id} 
+            userRole={user.role} 
+         />
       </div>
 
       {showTicketModal && currentTicket && (

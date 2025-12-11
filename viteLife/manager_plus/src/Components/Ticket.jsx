@@ -4,7 +4,6 @@ import QR from '../Images/qr_code.png';
 import AppleWallet from '../Images/a_wallet.png';
 import GoogleWallet from '../Images/g_wallet.png';
 
-// [NOU] Primim prop-ul 'isSaved'
 const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
   if (!ticketData) return null;
 
@@ -15,7 +14,6 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
   const timeFormatted = dateObj.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
 
   const handleWalletClick = () => {
-    // Apelăm logica doar dacă nu e deja salvat (deși butoanele vor fi ascunse oricum)
     if (!isSaved && onAddToWallet) {
         onAddToWallet(); 
     }
@@ -46,17 +44,14 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
           </div>
         </div>
 
-        {/* --- LOGICA DE DEZACTIVARE --- */}
         <div className="wallet-actions">
            
            {isSaved ? (
-               // CAZ 1: DEJA SALVAT -> Afișăm un mesaj static
                <div className="saved-status">
                    <span style={{fontSize: '20px'}}>✅</span>
                    <p>Bilet salvat în portofel</p>
                </div>
            ) : (
-               // CAZ 2: NU E SALVAT -> Afișăm butoanele active
                <>
                    <img 
                       src={AppleWallet} 
@@ -75,7 +70,6 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
                </>
            )}
         </div>
-        {/* ----------------------------- */}
 
         <button className="buton-export">
           EXPORT IN PDF

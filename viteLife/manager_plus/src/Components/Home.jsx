@@ -29,11 +29,7 @@ const Home = () => {
       const parsedUser = JSON.parse(userData);
       
      
-      const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
-                      ? parsedUser.roles[0].toUpperCase() 
-                      : 'GUEST';
-      
-     
+      const rawRole = parsedUser.roles && parsedUser.roles[0].toUpperCase() 
       const cleanRole = rawRole.replace('ROLE_', '');
 
       setUser({
