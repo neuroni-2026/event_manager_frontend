@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Auth.css'; 
-
+import { toast } from 'react-hot-toast';
 
 import api from '../services/api'; 
 
@@ -89,10 +89,10 @@ if (isLogin) {
 
   if (isAdmin) {
     console.log("Utilizator Admin detectat -> /admin");
-    navigate('/admin'); 
+    navigate('/home'); 
   } else if (isOrganizer) {
     console.log("Utilizator Organizator detectat -> /organizer");
-    navigate('/organizer');
+    navigate('/home');
   } else {
     console.log("Utilizator Student/Simplu -> /home");
     navigate('/home');
@@ -159,7 +159,7 @@ if (isLogin) {
 
               <div className="form-group">
                 <label>Rol</label>
-                <select name="role" value={formData.role} onChange={handleChange}>
+                <select name="role" value={formData.role} onChange={handleChange} style={{background:'white'}}>
                   <option value="student">Student</option>
                   <option value="organizer">Organizator</option>
                   <option value="admin">Admin</option>
@@ -189,7 +189,7 @@ if (isLogin) {
           )}
 
           <button type="submit" className="buton-auth">
-            {isLogin ? 'Intră în cont' : 'Creează cont'}
+            {isLogin ? 'Intra in cont' : 'Creeaza cont'}
           </button>
         </form>
 

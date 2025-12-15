@@ -65,7 +65,7 @@
   display: flex;
 
   gap: 5px;
-  background: white;
+  background: black;
   border: 1px solid #333;
   border-radius: 20px; 
   padding: 8px 20px;
@@ -76,7 +76,7 @@
 }
 
 .back:hover {
-  background: #f0f0f0;
+  background: black;
 }
 
 
@@ -188,4 +188,47 @@
 }
 .buton-rezervat:hover {
     background-color: #27ae60 !important;
+}
+
+.card-image-container {
+    position: relative;
+}
+
+
+.card-image-container {
+    position: relative; 
+}
+
+
+
+.card-imagine {
+    position: relative; 
+}
+
+.fav-btn-details {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6); 
+    border: none;
+    border-radius: 50%;
+    width: 50px;       
+    height: 50px;
+    font-size: 24px;   
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, background 0.3s;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.fav-btn-details:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.fav-btn-details:active {
+    transform: scale(0.95);
 }

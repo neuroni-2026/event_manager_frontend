@@ -7,10 +7,23 @@ import OrganizerDashboard from './Components/OrganizerDashboard';
 import AdminDashboard from './Components/AdminDashboard';
 import NotificationPage from './Components/NotificationPage';
 import MyTickets from './Components/MyTickets';
+import Favorites from './Components/Favorites';
+import { Toaster,toast } from 'react-hot-toast';
 
 function App() {
   return (
     <div>
+      <Toaster 
+         position="top-center" 
+         reverseOrder={false} 
+         toastOptions={{
+            style: {
+              borderRadius: '10px',
+              background: '#333',
+              color: '#fff',
+            },
+         }}
+       />
     <Routes>
       <Route path="/" element={<AuthPage />} />
       <Route path="/event_detalii/:id" element={<EventCardDetails />} />
@@ -19,6 +32,8 @@ function App() {
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/notifications" element={<NotificationPage />} />
       <Route path="/my-tickets" element={<MyTickets />} />
+      <Route path="/favorites" element={<Favorites />} />
+      
     </Routes>
       
   </div>

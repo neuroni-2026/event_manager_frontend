@@ -3,34 +3,46 @@ import EventCard from './EventCard';
 import api from '../services/api'; 
 import './OrganizerDashboard.css';
 import Circle from '../Icons/circle.png';
+import { toast} from 'react-hot-toast';
+import {useNavigate } from 'react-router-dom'; 
+
+
 const OrganizerDashboard = () => {
-  
-  
   const [showForm, setShowForm] = useState(false);
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const handleDeleteEvent = async (eventId) => {
    
-    const confirm = window.confirm("Esti sigur ca vrei sa stergi acest eveniment?");
+    const confirm = toast.success('Esti sigur ca vrei sa stergi acest eveniment?', {
+                  duration: 2000
+              });
+    
     if (!confirm) return;
 
     try {
       await api.delete(`/events/${eventId}`);
       setMyEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
       
-      alert("Eveniment sters cu succes!");
+      toast.success('Eveniment sters cu succes!");', {
+                  duration: 2000
+              });
 
     } catch (error) {
       console.error("Eroare la stergere:", error);
       if (error.response && error.response.status === 403) {
-          alert("Nu ai permisiunea sa stergi acest eveniment.");
+          toast.success('Nu ai permisiunea sa stergi acest eveniment.', {
+                  duration: 2000
+              });
       } else {
-          alert("A aparut o eroare la stergere.");
+          toast.success('A aparut o eroare la stergere.', {
+                  duration: 2000
+              });
       }
     }
     
   };
+
   
 
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -96,7 +108,9 @@ const OrganizerDashboard = () => {
     const maxSize = 10 * 1024 * 1024; 
 
     if (file.size > maxSize) {
-        alert("Imaginea este prea mare! Te rog alege o poza sub 10MB.");
+                  toast.success('Imaginea este prea mare! Te rog alege o poza sub 10MB.', {
+                  duration: 2000
+              });
 
         e.target.value = null; 
         return;
@@ -125,7 +139,9 @@ const OrganizerDashboard = () => {
       
     } catch (error) {
       console.error("Eroare la upload:", error);
-      alert("Nu am putut incarca imaginea. Verifica marimea fisierului.");
+    toast.success('Nu am putut incarca imaginea. Verifica marimea fisierului.', {
+                  duration: 2000
+              });
     } finally {
       setUploadingImage(false);
     }
@@ -134,9 +150,13 @@ const OrganizerDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Trimit URL: " + formData.imageUrl);
+       toast.success('Trimit URL', {
+                  duration: 2000
+              });
     if (!formData.title || !formData.startTime || !formData.endTime) {
-        alert("Titlul si datele sunt obligatorii!");
+       toast.success('Titlul si datele sunt obligatorii!', {
+                  duration: 2000
+              });
         return;
     }
 
@@ -167,11 +187,16 @@ const OrganizerDashboard = () => {
       
 
       await fetchMyEvents();
-      alert("Eveniment creat cu succes! AAsteapta aprobarea adminului.");
+       toast.success('Eveniment creat cu succes! AAsteapta aprobarea adminului.', {
+                  duration: 2000
+              });
 
     } catch (error) {
       console.error("Eroare la creare:", error);
-      alert("Eroare la creare eveniment. Verifica consola.");
+
+     toast.success('Eroare la creare eveniment. Verifica consola.', {
+                  duration: 2000
+              });
     }
   };
   const [user, setUser] = useState({
@@ -180,29 +205,18 @@ const OrganizerDashboard = () => {
       role: 'Neautentificat'
     });
   
+const navigate = useNavigate();
   
-    useEffect(() => {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        let userRole = "USER";
-        if (parsedUser.roles && parsedUser.roles.length > 0) {
-          userRole = parsedUser.roles[0].toUpperCase(); 
-        }
-        setUser({
-          firstName: parsedUser.firstName || '',
-          lastName: parsedUser.lastName || '',
-          role: userRole
-        });
-      }
-    }, []);
-
   return (
     
     <div className="organizer-container">
               <div className="Header">
                               <h1>Event Manager</h1>
                               <div className="user-info">
+                                
+                                <button onClick={()=>navigate(-1)}>
+                                  Back
+                                </button>
                                  <div className="user-text">
                                      <span className="user-role">{user.role}</span>
                                      <span className="user-name">{user.firstName} {user.lastName}</span>
@@ -211,8 +225,8 @@ const OrganizerDashboard = () => {
                               </div>
                            </div>
       <header className="organizer-header">
-        <h1>Panou Organizator</h1>
-        <p>Gestionează evenimentele tale</p>
+        <h1 style={{color:'black'}}>Panou Organizator</h1>
+        <p style={{color:'black'}}>Gestioneaza evenimentele tale</p>
       </header>
 
       <div className="controls-section">
@@ -233,7 +247,7 @@ const OrganizerDashboard = () => {
             <div className="form-row">
                 <div className="form-group">
                     <label>Categorie</label>
-                    <select name="category" value={formData.category} onChange={handleChange}>
+                    <select name="category" value={formData.category} onChange={handleChange} style={{background:'white'}}>
                         <option value="SOCIAL">Social</option>
                         <option value="ACADEMIC">Academic</option>
                         <option value="CULTURAL">Cultural</option>
@@ -255,7 +269,7 @@ const OrganizerDashboard = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Start Time *</label>
-                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleChange} required />
+                <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleChange} required/>
               </div>
               <div className="form-group">
                 <label>End Time *</label>
@@ -274,12 +288,12 @@ const OrganizerDashboard = () => {
                 className="file-input"
               />
               
-              {uploadingImage && <p style={{color: '#aaa', fontSize:'12px'}}>Se încarcă imaginea...</p>}
+              {uploadingImage && <p style={{color: '#aaa', fontSize:'12px'}}>Se incarca imaginea...</p>}
               
               
               {formData.imageUrl && !uploadingImage && (
                   <div style={{marginTop: '10px'}}>
-                      <p style={{color: '#4caf50', fontSize:'12px'}}>Imagine încărcată!</p>
+                      <p style={{color: '#4caf50', fontSize:'12px'}}>Imagine incarcata!</p>
                       <img 
                         src={formData.imageUrl} 
                         alt="Preview" 
@@ -297,7 +311,7 @@ const OrganizerDashboard = () => {
 
         
             <button type="submit" className="save-btn" disabled={uploadingImage}>
-                {uploadingImage ? 'Așteaptă încărcarea imaginii...' : 'Salvează Evenimentul'}
+                {uploadingImage ? 'Asteapta incarcarea imaginii...' : 'Salveaza Evenimentul'}
             </button>
           </form>
         )}
@@ -308,7 +322,7 @@ const OrganizerDashboard = () => {
       <div className="my-events-section">
         <h2>Evenimentele Mele</h2>
 
-        {loading ? <p>Se încarcă...</p> : (
+        {loading ? <p>Se incarca...</p> : (
             <div className="events-grid">
                {myEvents.length > 0 ? (
                    myEvents.map((event) => (
@@ -325,7 +339,7 @@ const OrganizerDashboard = () => {
                      />
                    ))
                ) : (
-                   <p style={{color: '#888'}}>Nu ai creat niciun eveniment încă.</p>
+                   <p style={{color: '#888'}}>Nu ai creat niciun eveniment inca.</p>
                )}
             </div>
         )}

@@ -1,19 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EventCard from './EventCard';
 import SearchIcon from '../Icons/icon-search.png';
 import Circle from '../Icons/circle.png';
 import api from '../services/api';
 import './Home.css';
-import NotificationBell from './NotificationBell';
+import NotificationBell from '../components/NotificationBell';
+import { toast } from 'react-hot-toast';
 
 const Home = () => {
+  const navigate = useNavigate();
 
-  const [user, setUser] = useState({ firstName: 'Vizitator', lastName: '', role: 'Neautentificat' });
+
+  const [user, setUser] = useState(null); 
+  
   const [events, setEvents] = useState([]);       
   const [filteredEvents, setFilteredEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     organizer: '',
@@ -22,26 +27,45 @@ const Home = () => {
     faculty: '' 
   });
 
-  
- useEffect(() => {
+  useEffect(() => {
     const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      
-     
-      const rawRole = parsedUser.roles && parsedUser.roles[0].toUpperCase() 
-      const cleanRole = rawRole.replace('ROLE_', '');
 
-      setUser({
-        firstName: parsedUser.firstName || '',
-        lastName: parsedUser.lastName || '',
-        role: cleanRole 
-      });
+    if (!userData) {
+        navigate('/'); 
+        return; 
     }
-  }, []);
+
+    try {
+        const parsedUser = JSON.parse(userData);
+        
+        const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
+                        ? parsedUser.roles[0].toUpperCase() 
+                        : 'USER';
+        const cleanRole = rawRole.replace('ROLE_', '');
+
+        setUser({
+          firstName: parsedUser.firstName || '',
+          lastName: parsedUser.lastName || '',
+          role: cleanRole 
+        });
+    } catch (e) {
+        localStorage.removeItem('user');
+        navigate('/');
+    }
+
+  }, [navigate]);
+
+
+  const handleLogout = () => {
+      localStorage.removeItem('user');
+      navigate('/');
+  };
 
 
   useEffect(() => {
+ 
+    if (!user) return;
+
     const fetchEvents = async () => {
       try {
         const response = await api.get('/events');
@@ -54,66 +78,87 @@ const Home = () => {
       }
     };
     fetchEvents();
-  }, []);
+  }, [user]); 
 
 
-  const uniqueLocations = useMemo(() => {
-    return [...new Set(events.map(e => e.location))].filter(Boolean);
-  }, [events]);
-
-  const uniqueCategories = useMemo(() => {
-    return [...new Set(events.map(e => e.category))].filter(Boolean);
-  }, [events]);
-
-  const uniqueOrganizers = useMemo(() => {
-
-    return [...new Set(events.map(e => e.organizer ? `${e.organizer.firstName} ${e.organizer.lastName}` : ''))].filter(Boolean);
-  }, [events]);
-
+  const uniqueLocations = useMemo(() => [...new Set(events.map(e => e.location))].filter(Boolean), [events]);
+  const uniqueCategories = useMemo(() => [...new Set(events.map(e => e.category))].filter(Boolean), [events]);
+  const uniqueOrganizers = useMemo(() => [...new Set(events.map(e => e.organizer ? `${e.organizer.firstName} ${e.organizer.lastName}` : ''))].filter(Boolean), [events]);
 
   useEffect(() => {
     const results = events.filter(event => {
-    
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
-
-     
-      const matchesLocation = filters.location 
-        ? event.location === filters.location 
-        : true; 
-
-    
-      const matchesCategory = filters.category 
-        ? event.category === filters.category 
-        : true;
-
-    
+      const matchesLocation = filters.location ? event.location === filters.location : true; 
+      const matchesCategory = filters.category ? event.category === filters.category : true;
       const organizerName = event.organizer ? `${event.organizer.firstName} ${event.organizer.lastName}` : '';
-      const matchesOrganizer = filters.organizer 
-        ? organizerName === filters.organizer 
-        : true;
+      const matchesOrganizer = filters.organizer ? organizerName === filters.organizer : true;
 
-     
       return matchesSearch && matchesLocation && matchesCategory && matchesOrganizer;
     });
-
     setFilteredEvents(results);
   }, [searchTerm, filters, events]);
 
-  
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value
-    });
-  };
+  const handleFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
+
+  if (!user) return null;
 
   return (
     <div className="home-container">
    
       <div className="Header">
         <h1>Event Manager</h1>
+        
         <div className="user-info">
+          
+          {user.role === 'ADMIN' && (
+              <button 
+                className="action-btn admin-btn" 
+                onClick={() => navigate('/admin')} 
+                title="Mergi la Panoul de Administrator"
+              >
+                 🛡️ Panou Admin
+              </button>
+          )}
+
+          {user.role === 'ORGANIZER' && (
+              <button 
+                className="action-btn organizer-btn" 
+                onClick={() => navigate('/organizer')} 
+                title="Mergi la Panoul de Organizator"
+              >
+                 📝 Gestioneaza
+              </button>
+          )}
+
+          {user.role === 'STUDENT' && (
+              <button 
+                className="wallet-icon-btn" 
+                onClick={() => navigate('/my-tickets')} 
+                title="Biletele mele"
+              >
+                 🎟️ Tichetele mele
+              </button>
+          )}
+
+
           <NotificationBell />
+
+
+          <button 
+            className="logout-btn" 
+            onClick={handleLogout}
+            title="Deconectare"
+          >
+             🚪 Log out
+          </button>
+          <button 
+        className="wallet-icon-btn" 
+        onClick={() => navigate('/favorites')} 
+        title="Favorite"
+      >
+         ❤️ Favorite
+      </button>
+
           <div className="user-text">
             <span className="user-role">{user.role}</span>
             <span className="user-name">{user.firstName} {user.lastName}</span>
@@ -122,7 +167,6 @@ const Home = () => {
         </div>
       </div>
 
-      
       <div className="search-container">
         <div className="Search">
           <img src={SearchIcon} className="search-icon" alt="Search" />
@@ -136,59 +180,29 @@ const Home = () => {
         </div>
       </div>
 
-   
       <div className="filters-container">
-        
-      
-        <select 
-            name="organizer" 
-            className="filter-buton" 
-            onChange={handleFilterChange}
-            value={filters.organizer}
-        >
-            <option value="">Toți Organizatorii</option>
-            {uniqueOrganizers.map(org => (
-                <option key={org} value={org}>{org}</option>
-            ))}
+        <select name="organizer" className="filter-buton" onChange={handleFilterChange} value={filters.organizer}>
+            <option value="">Toti Organizatorii</option>
+            {uniqueOrganizers.map(org => (<option key={org} value={org}>{org}</option>))}
         </select>
 
-      
-        <select 
-            name="location" 
-            className="filter-buton" 
-            onChange={handleFilterChange}
-            value={filters.location}
-        >
-            <option value="">Toate Locațiile</option>
-            {uniqueLocations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
-            ))}
+        <select name="location" className="filter-buton" onChange={handleFilterChange} value={filters.location}>
+            <option value="">Toate Locatiile</option>
+            {uniqueLocations.map(loc => (<option key={loc} value={loc}>{loc}</option>))}
         </select>
 
-       
-        <select 
-            name="category" 
-            className="filter-buton" 
-            onChange={handleFilterChange}
-            value={filters.category}
-        >
+        <select name="category" className="filter-buton" onChange={handleFilterChange} value={filters.category}>
             <option value="">Toate Tipurile</option>
-            {uniqueCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-            ))}
+            {uniqueCategories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
         </select>
         
-       
-        <button className="filter-buton calendar-buton">
-           Calendar
-        </button>
+        <button className="filter-buton calendar-buton">Calendar</button>
       </div>
 
-     
       <div className="grid-container">
         <div className="Grid">
           {loading ? (
-             <p style={{color: 'white', textAlign:'center', width:'100%'}}>Se încarca evenimentele...</p>
+             <p style={{color: 'white', textAlign:'center', width:'100%'}}>Se incarca evenimentele...</p>
           ) : filteredEvents.length > 0 ? (
              filteredEvents.map((event) => (
                 <EventCard 

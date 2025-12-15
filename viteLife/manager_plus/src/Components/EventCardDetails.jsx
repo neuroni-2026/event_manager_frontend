@@ -1,138 +1,173 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
+import TicketModal from './Ticket';
+import ReviewSection from './ReviewSection';
 import './EventCardDetails.css';
 import usv from '../Images/usv.jpg';
-import TicketModal from './Ticket';
 import Circle from '../Icons/circle.png';
-import ReviewSection from './ReviewSection';
+import { toast } from 'react-hot-toast';
 
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  const [hasTicket, setHasTicket] = useState(false); 
-  const [currentTicket, setCurrentTicket] = useState(null); 
+  const [user, setUser] = useState({ firstName: 'Vizitator', lastName: '', role: 'GUEST' });
+
+  const [currentTicket, setCurrentTicket] = useState(null);
+  const [hasTicket, setHasTicket] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
-  
-  const [user, setUser] = useState({ firstName: '', lastName: '', role: '' });
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
       try {
+        const parsedUser = JSON.parse(userData);
+        const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
+                        ? parsedUser.roles[0].toUpperCase() 
+                        : 'GUEST';
         
-        const userData = localStorage.getItem('user');
-        let currentUserRole = '';
-        if (userData) {
-           const pUser = JSON.parse(userData);
-           const rawRole = pUser.roles && pUser.roles.length > 0 ? pUser.roles[0].toUpperCase() : 'GUEST';
-           currentUserRole = rawRole.replace('ROLE_', '');
-           setUser({
-             firstName: pUser.firstName || 'Vizitator',
-             lastName: pUser.lastName || '',
-             role: currentUserRole
-           });
-        }
-
-        const eventRes = await api.get(`/events/${id}`);
-        setEvent(eventRes.data);
-
-        if (currentUserRole === 'STUDENT') {
-            try {
-                const myTicketsRes = await api.get('/tickets/my-tickets');
-                const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
-                
-                if (foundTicket) {
-                    console.log("Bilet existent găsit (API).");
-                    setCurrentTicket(foundTicket);
-
-                    const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
-                    
-                    if (isWalletAdded === 'true') {
-                        setHasTicket(true); 
-                    } else {
-                        setHasTicket(false); 
-                    }
-                }
-            } catch (err) { console.warn("Check ticket failed"); }
-        }
-
-      } catch (error) {
-        console.error("Eroare:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
-
-
-  const handleOpenTicket = () => {
-      setShowTicketModal(true);
-  };
-
- 
-  const handleBuyTicket = async () => {
-    if (user.role !== 'STUDENT') {
-        alert("Doar studentii pot participa!");
-        return;
+        setUser({
+          firstName: parsedUser.firstName || '',
+          lastName: parsedUser.lastName || '',
+          role: rawRole.replace('ROLE_', '') 
+        });
+      } catch (e) { console.error(e); }
     }
+  }, []);
 
-    if (currentTicket) {
-        console.log("Bilet deja existent. Deschid modal.");
-        handleOpenTicket();
-        return;
-    }
-
+  const fetchData = useCallback(async () => {
     try {
-        console.log("Cumpăr bilet nou...");
-        const response = await api.post('/tickets', { eventId: id });
-        
-        const newTicket = response.data;
-        setCurrentTicket(newTicket);
-        setShowTicketModal(true);
+      setLoading(true);
+
+      const eventRes = await api.get(`/events/${id}`);
+      setEvent(eventRes.data);
+
+      const userData = localStorage.getItem('user');
+      const isStudent = userData && userData.includes('STUDENT');
+
+      if (isStudent) {
+        try {
+           try {
+             const favRes = await api.get(`/favorites/check/${id}`);
+             setIsFavorite(favRes.data);
+           } catch (e) { console.error("Eroare check fav:", e); }
+
+           const myTicketsRes = await api.get('/tickets/my-tickets');
+           const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
+           
+           if (foundTicket) {
+             setCurrentTicket(foundTicket);
+
+
+             const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
+             
+             if (isWalletAdded === 'true') {
+                 setHasTicket(true); 
+             } else {
+                 setHasTicket(false); 
+             }
+           } else {
+               setCurrentTicket(null);
+               setHasTicket(false);
+               localStorage.removeItem(`wallet_added_${id}`);
+           }
+
+        } catch (e) { console.error("Eroare verificare bilet:", e); }
+      }
 
     } catch (error) {
-        if (error.response && error.response.status === 400) {
-             try {
-                 const myTickets = await api.get('/tickets/my-tickets');
-                 const existingTicket = myTickets.data.find(t => t.eventTitle === event.title);
-                 if (existingTicket) {
-                     setCurrentTicket(existingTicket);
-                     setShowTicketModal(true);
-                 }
-             } catch (e) { alert("Eroare recuperare bilet."); }
-        } else {
-             alert("Eroare: " + (error.response?.data?.message || "Eroare necunoscuta."));
-        }
+      console.error("Eroare încărcare:", error);
+    } finally {
+      setLoading(false);
     }
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleToggleFavorite = async () => {
+      try {
+          if (isFavorite) {
+              await api.delete(`/favorites/${id}`);
+              setIsFavorite(false);
+              toast.success('Eliminat de la favorite', { duration: 1500 });
+          } else {
+              await api.post(`/favorites/${id}`);
+              setIsFavorite(true);
+              toast.success('Adaugat la favorite!', { icon: '❤️', duration: 1500 });
+          }
+      } catch (error) {
+          toast.error('Eroare la actualizare favorite.');
+      }
   };
 
-  const handleTicketAddedToWallet = () => {
-      setHasTicket(true); 
-      
-      localStorage.setItem(`wallet_added_${id}`, 'true');
+  const handleOpenTicket = () => setShowTicketModal(true);
+  
+  const handleBuyTicket = () => {
+    if (user.role !== 'STUDENT') {
+        toast.error('Trebuie sa fii autentificat ca STUDENT!');
+        return;
+    }
 
-      setShowTicketModal(false); 
-      alert("Loc confirmat! Biletul a fost salvat.");
+    if (currentTicket && currentTicket.id) { 
+        setShowTicketModal(true); 
+        return; 
+    }
+
+    const previewTicket = {
+        eventTitle: event.title,
+        eventLocation: event.location,
+        eventStartTime: event.startTime,
+        studentName: `${user.firstName} ${user.lastName}`,
+        isPreview: true 
+    };
+
+    setCurrentTicket(previewTicket);
+    setShowTicketModal(true);
   };
 
+
+  const handleTicketAddedToWallet = async () => {
+      try {
+          const response = await api.post('/tickets', { eventId: id });
+          
+          setCurrentTicket(response.data);
+
+          setHasTicket(true);
+          localStorage.setItem(`wallet_added_${id}`, 'true');
+          
+          setShowTicketModal(false);
+          
+          toast.success('Bilet salvat!', {
+              duration: 3000,
+              style: { border: '1px solid #2ecc71', padding: '16px', color: '#15803d', background: '#f0fdf4'},
+              iconTheme: { primary: '#2ecc71', secondary: '#fff' },
+          });
+
+      } catch (error) {
+          console.error(error);
+          toast.error('Eroare: Nu s-a putut salva biletul.');
+      }
+  };
 
   const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString('ro-RO') : "-";
   const formatTime = (iso) => iso ? new Date(iso).toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'}) : "-";
   const formatDeadline = (iso) => iso ? `${formatTime(iso)} ${formatDate(iso)}` : "-";
 
-  if (loading) return <div style={{color:'white', padding:'50px'}}>Se încarcă...</div>;
-  if (!event) return <div style={{color:'white', padding:'50px'}}>Eveniment inexistent.</div>;
+  if (loading) return <div className="loading-screen">Se incarca...</div>;
+  if (!event) return <div className="error-screen">Eveniment inexistent.</div>;
 
   return (
     <div className="event-pagina">
       <div className="Header">
          <h1>Event Manager</h1>
          <div className="user-info">
+             <button onClick={() => navigate('/home')} className="home-btn-details">Home</button>
             <div className="user-text">
                 <span className="user-role">{user.role}</span>
                 <span className="user-name">{user.firstName} {user.lastName}</span>
@@ -148,8 +183,24 @@ const EventDetails = () => {
          </div>
 
          <div className="content-card">
-            <div className="card-imagine">
-               <img src={event.imageUrl || usv} alt={event.title} className="event-imagine" onError={(e)=>{e.target.src=usv}}/>
+            
+            <div className="card-imagine" style={{position: 'relative'}}>
+               <img 
+                 src={event.imageUrl || usv} 
+                 alt={event.title} 
+                 className="event-imagine" 
+                 onError={(e)=>{e.target.src=usv}}
+               />
+
+               {user.role === 'STUDENT' && (
+                   <button 
+                      className="fav-btn-details"
+                      onClick={handleToggleFavorite}
+                      title={isFavorite ? "Scoate de la favorite" : "Adauga la favorite"}
+                   >
+                      {isFavorite ? '❤️' : '🤍'}
+                   </button>
+               )}
             </div>
 
             <div className="info-panel">
@@ -158,12 +209,12 @@ const EventDetails = () => {
                <div className="info-group"><label>Data:</label><div className="info-value">{formatDate(event.startTime)}</div></div>
                <div className="info-group"><label>Ora:</label><div className="info-value">{formatTime(event.startTime)}</div></div>
                <div className="info-group"><label>Deadline:</label><div className="info-value" style={{color: '#ff4757'}}>{formatDeadline(event.startTime)}</div></div>
-
+                
                {hasTicket ? (
                    <button 
                        className="buton-participare buton-rezervat" 
                        onClick={handleOpenTicket} 
-                       style={{backgroundColor: '#2ecc71'}}
+                       style={{backgroundColor: '#2ecc71', cursor: 'default'}}
                    >
                        ✅ REZERVAT
                    </button>
@@ -182,19 +233,15 @@ const EventDetails = () => {
             <h3>Descriere</h3>
             <p>{event.description || "Fara descriere."}</p>
          </div>
-         <ReviewSection 
-            eventId={id} 
-            userRole={user.role} 
-         />
+
+         <ReviewSection eventId={id} userRole={user.role} />
       </div>
 
       {showTicketModal && currentTicket && (
           <TicketModal 
               ticketData={currentTicket} 
-              onClose={() => setShowTicketModal(false)}
-              onAddToWallet={handleTicketAddedToWallet}
-              
-            
+              onClose={() => setShowTicketModal(false)} 
+              onAddToWallet={handleTicketAddedToWallet} 
               isSaved={hasTicket} 
           />
       )}

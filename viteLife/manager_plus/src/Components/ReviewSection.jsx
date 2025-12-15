@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import './ReviewSection.css'; 
+import { toast } from 'react-hot-toast';
 
 const ReviewSection = ({ eventId, userRole }) => {
   const [reviews, setReviews] = useState([]);
@@ -44,11 +45,15 @@ const ReviewSection = ({ eventId, userRole }) => {
       setNewComment('');
       setNewRating(5);
       await fetchReviews();
-      alert("Recenzie adăugată!");
+    toast.success('Recenzie adaugata!', {
+                  duration: 2000
+              });
 
     } catch (error) {
       console.error("Eroare la adaugare review:", error);
-      alert(error.response?.data?.message || "Eroare la trimitere.");
+           toast.success('Eroare la trimitere.', {
+                  duration: 2000
+              });
     } finally {
       setSubmitting(false);
     }

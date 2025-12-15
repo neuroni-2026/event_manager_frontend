@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import api from '../services/api';
 import './NotificationBell.css';
+import { toast } from 'react-hot-toast';
 
 const NotificationBell = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const NotificationBell = () => {
         const response = await api.get('/notifications');
         setNotificationsCount(response.data.length); 
       } catch (error) {
-        console.error("Eroare notif:", error);
+        console.error("Eroare notificare:", error);
       }
     };
 
@@ -37,7 +38,7 @@ const NotificationBell = () => {
         onClick={handleClick} 
         title="Vezi notificarile"
     >
-      <button className="bell-icon">🔔</button>
+      <button className="bell-icon">🔔 Notificari</button>
 
       {unreadCount > 0 && (
         <span className="badge-count">{unreadCount}</span>
