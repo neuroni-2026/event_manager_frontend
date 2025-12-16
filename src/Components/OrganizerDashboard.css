@@ -165,3 +165,122 @@ input:focus, textarea:focus {
             saturate(10000%)
             hue-rotate(180deg)
 }
+
+.org-container {
+    padding: 20px;
+    background-color: #121212;
+    min-height: 100vh;
+    color: white;
+}
+
+.org-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+}
+
+.back-btn {
+    background: transparent;
+    color: #bbb;
+    border: 1px solid #555;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+.events-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.events-table th, .events-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.events-table th {
+    background-color: #333;
+    color: #fff;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.badge.PUBLISHED { background: #2ecc71; color: black; }
+.badge.PENDING { background: #f1c40f; color: black; }
+.badge.REJECTED { background: #e74c3c; color: white; }
+
+.btn-edit, .btn-delete {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-edit { background: #3498db; color: white; }
+.btn-delete { background: #e74c3c; color: white; }
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #222;
+    padding: 25px;
+    border-radius: 10px;
+    width: 800px;      
+    max-width: 95%;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    
+    gap: 15px;
+}
+
+.edit-form label { font-size: 0.9em; color: #ccc; margin-bottom: 5px; display: block;}
+.edit-form input, .edit-form textarea, .edit-form select {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 5px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+.form-row > div { flex: 1; }
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-save { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;}
+.btn-cancel { background: transparent; color: #ccc; border: 1px solid #555; padding: 10px 20px; border-radius: 5px; cursor: pointer;}

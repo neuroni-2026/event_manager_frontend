@@ -18,7 +18,21 @@ export const ticketApi = {
         return api.get('/tickets/my-tickets');
     }
 };
+export const eventApi = {
 
+    getMyEvents: () => {
+        return api.get('/events/my-events');
+    },
+
+   
+    deleteEvent: (eventId) => {
+        return api.delete(`/events/${eventId}`);
+    },
+
+    updateEvent: (eventId, eventData) => {
+        return api.put(`/events/${eventId}`, eventData);
+    }
+};
 api.interceptors.request.use(
   (config) => {
    
