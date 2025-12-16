@@ -7,7 +7,17 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+export const ticketApi = {
 
+    purchase: (eventId) => {
+        return api.post('/tickets/purchase', { eventId: eventId });
+    },
+    
+
+    getMyTickets: () => {
+        return api.get('/tickets/my-tickets');
+    }
+};
 
 api.interceptors.request.use(
   (config) => {

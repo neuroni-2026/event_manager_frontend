@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import EventCard from './EventCard';
 import SearchIcon from '../Icons/icon-search.png';
 import Circle from '../Icons/circle.png';
-import api from '../services/api';
+
+import api, { ticketApi } from '../services/api'; 
 import './Home.css';
 import NotificationBell from '../components/NotificationBell';
 import { toast } from 'react-hot-toast';
@@ -11,13 +12,13 @@ import { toast } from 'react-hot-toast';
 const Home = () => {
   const navigate = useNavigate();
 
-
   const [user, setUser] = useState(null); 
-  
   const [events, setEvents] = useState([]);       
   const [filteredEvents, setFilteredEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
+  
 
+  const [purchasingId, setPurchasingId] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -26,6 +27,7 @@ const Home = () => {
     category: '',
     faculty: '' 
   });
+
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -38,10 +40,14 @@ const Home = () => {
     try {
         const parsedUser = JSON.parse(userData);
         
-        const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
-                        ? parsedUser.roles[0].toUpperCase() 
-                        : 'USER';
-        const cleanRole = rawRole.replace('ROLE_', '');
+       
+        let displayRole = 'USER';
+        if (parsedUser.roles && parsedUser.roles.length > 0) {
+    
+             const r = parsedUser.roles[0];
+             displayRole = (typeof r === 'string' ? r : r.name).toUpperCase();
+        }
+        const cleanRole = displayRole.replace('ROLE_', '');
 
         setUser({
           firstName: parsedUser.firstName || '',
@@ -52,9 +58,39 @@ const Home = () => {
         localStorage.removeItem('user');
         navigate('/');
     }
-
   }, [navigate]);
 
+ 
+  const handleBuyTicket = async (eventId, eventTitle) => {
+      
+      const confirm = window.confirm(`Vrei să participi la "${eventTitle}"?`);
+      if (!confirm) return;
+
+
+      setPurchasingId(eventId);
+
+      try {
+
+          await ticketApi.purchase(eventId);
+
+
+          toast.success("Te-ai înscris cu succes! Verifică-ți emailul pentru bilet.");
+          
+
+      } catch (error) {
+          console.error("Eroare cumparare:", error);
+          
+          if (error.response && error.response.data) {
+
+              toast.error(error.response.data); 
+          } else {
+              toast.error("A apărut o eroare. Încearcă din nou.");
+          }
+      } finally {
+
+          setPurchasingId(null);
+      }
+  };
 
   const handleLogout = () => {
       localStorage.removeItem('user');
@@ -63,23 +99,22 @@ const Home = () => {
 
 
   useEffect(() => {
- 
     if (!user) return;
 
     const fetchEvents = async () => {
       try {
-        const response = await api.get('/events');
+        const response = await api.get('/events'); 
         setEvents(response.data);
         setFilteredEvents(response.data);
       } catch (error) {
         console.error("Eroare la incarcarea evenimentelor:", error);
+        toast.error("Nu am putut încărca evenimentele.");
       } finally {
         setLoading(false);
       }
     };
     fetchEvents();
   }, [user]); 
-
 
   const uniqueLocations = useMemo(() => [...new Set(events.map(e => e.location))].filter(Boolean), [events]);
   const uniqueCategories = useMemo(() => [...new Set(events.map(e => e.category))].filter(Boolean), [events]);
@@ -140,9 +175,7 @@ const Home = () => {
               </button>
           )}
 
-
           <NotificationBell />
-
 
           <button 
             className="logout-btn" 
@@ -151,13 +184,14 @@ const Home = () => {
           >
              🚪 Log out
           </button>
+          
           <button 
-        className="wallet-icon-btn" 
-        onClick={() => navigate('/favorites')} 
-        title="Favorite"
-      >
-         ❤️ Favorite
-      </button>
+            className="wallet-icon-btn" 
+            onClick={() => navigate('/favorites')} 
+            title="Favorite"
+          >
+             ❤️ Favorite
+          </button>
 
           <div className="user-text">
             <span className="user-role">{user.role}</span>
@@ -214,6 +248,12 @@ const Home = () => {
                     description={event.description}
                     imageUrl={event.imageUrl}
                     category={event.category}
+                    organizer={event.organizer} 
+                    
+
+                    userRole={user.role}
+                    onBuyTicket={() => handleBuyTicket(event.id, event.title)}
+                    isPurchasing={purchasingId === event.id}
                 />
              ))
           ) : (
