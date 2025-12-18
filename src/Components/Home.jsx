@@ -6,7 +6,7 @@ import Circle from '../Icons/circle.png';
 
 import api, { ticketApi } from '../services/api'; 
 import './Home.css';
-import NotificationBell from '../components/NotificationBell';
+import NotificationBell from '../Components/NotificationBell';
 import { toast } from 'react-hot-toast';
 
 const Home = () => {
