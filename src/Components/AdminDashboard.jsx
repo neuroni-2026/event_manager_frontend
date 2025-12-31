@@ -2,27 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api'; 
 import { toast } from 'react-hot-toast';
-import Circle from '../Icons/circle.png';
 import './AdminDashboard.css';
-import './Home.css'; 
 import Swal from 'sweetalert2';
+import { FaArrowLeft, FaCheck, FaTimes, FaEye } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   
   const [pendingEvents, setPendingEvents] = useState([]);
+  const [publishedEvents, setPublishedEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
   
-  const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    role: ''
-  });
+  
+  const [activeTab, setActiveTab] = useState('events');
 
   const fetchPendingEvents = async () => {
     try {
       const response = await api.get('/admin/pending-events');
       setPendingEvents(response.data);
+      
+      
+      
     } catch (error) {
       console.error("Eroare la încărcare evenimente:", error);
     } finally {
@@ -31,33 +31,8 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    const userDataStr = localStorage.getItem('user');
-    
-    if (userDataStr) {
-      try {
-        const parsedUser = JSON.parse(userDataStr);
-        
-        let displayRole = 'UTILIZATOR';
-        if (parsedUser.roles && parsedUser.roles.length > 0) {
-            displayRole = parsedUser.roles[0].replace('ROLE_', '');
-        }
-
-        setUser({
-          firstName: parsedUser.firstName || 'User',
-          lastName: parsedUser.lastName || '',
-          role: displayRole
-        });
-
-        fetchPendingEvents();
-
-      } catch (e) {
-        console.error("Eroare la citirea datelor utilizatorului:", e);
-        navigate('/login');
-      }
-    } else {
-        navigate('/');
-    }
-  }, [navigate]);
+    fetchPendingEvents();
+  }, []);
 
   const handleApprove = async (eventId) => {
     try {
@@ -70,116 +45,124 @@ const AdminDashboard = () => {
     }
   };
 
-const handleReject = async (eventId) => {
-    
+  const handleReject = async (eventId) => {
     const { value: reason } = await Swal.fire({
         title: 'Respinge Evenimentul',
         input: 'textarea', 
         inputLabel: 'Motivul respingerii',
         inputPlaceholder: 'Scrie aici de ce respingi evenimentul...',
-        inputAttributes: {
-            'aria-label': 'Scrie motivul respingerii'
-        },
         showCancelButton: true,
         confirmButtonText: 'Respinge',
         cancelButtonText: 'Anulează',
-        confirmButtonColor: '#d33', 
-        cancelButtonColor: '#3085d6',
+        confirmButtonColor: '#ff4757', 
         inputValidator: (value) => {
-            if (!value) {
-                return 'Trebuie să scrii un motiv!';
-            }
+            if (!value) return 'Trebuie să scrii un motiv!';
         }
     });
 
-    
     if (!reason) return;
 
     try {
-        
-        await api.put(`/admin/reject/${eventId}`, null, {
-            params: { reason: reason }
-        });
-        
+        const encodedReason = encodeURIComponent(reason);
+        await api.put(`/admin/reject/${eventId}?reason=${encodedReason}`, null);
         setPendingEvents(prevEvents => prevEvents.filter(e => e.id !== eventId));
-        
-       
-        Swal.fire('Respins!', 'Evenimentul a fost respins și organizatorul notificat.', 'success');
-        
+        Swal.fire('Respins!', 'Evenimentul a fost respins.', 'success');
     } catch (error) {
-        console.error("Eroare la respingere:", error);
-       
+        console.error("Eroare:", error);
         toast.error("Eroare la respingere.");
     }
-};
+  };
 
-  if (loading) return <div className="admin-container loading">Se încarcă cererile...</div>;
+  const handleViewDetails = (eventId) => {
+      navigate(`/event_detalii/${eventId}`);
+  };
+
+  if (loading) return <div className="admin-loader">Se încarcă...</div>;
 
   return (
-    <div className="admin-container">
-       <div className="Header">
-           <h1>Event Manager</h1>
-           
-           <div className="user-info">
-            <button 
-                className="wallet-icon-btn"
-                onClick={() => navigate(-1)} 
-                title="Înapoi"
-                style={{ border: 'none', cursor:'pointer', background:'black', color:'white', marginRight:'10px'}}
-            >
-                 Back
-            </button>
-
-             <div className="user-text">
-                 <span className="user-role">{user.role}</span>
-                 <span className="user-name">{user.firstName} {user.lastName}</span>
-             </div>
-             <img src={Circle} alt="icon" className="circle-icon"/>
-           </div>
+    <div className="admin-page">
+       
+       <div className="admin-top-bar">
+           <button onClick={() => navigate(-1)} className="back-btn">
+               <FaArrowLeft />
+           </button>
        </div>
 
-      <header className="admin-header">
-        <h1>Panou Administrator</h1>
-        <p>
-            {pendingEvents.length > 0 
-                ? `Ai ${pendingEvents.length} evenimente care așteaptă aprobare.`
-                : "Nu există cereri noi."}
-        </p>
-      </header>
+       <div className="admin-content">
+           <h1 className="admin-title">Panou admin</h1>
+           <p className="admin-subtitle">Gestionează evenimente, utilizatori și analize de sistem</p>
 
-      <div className="pending-list">
-        {pendingEvents.length === 0 ? (
-           <div className="empty-state">Totul este la zi!</div>
-        ) : (
-          pendingEvents.map((event) => (
-            <div key={event.id} className="pending-card">
-              <div className="card-info">
-                <span className="status-badge">PENDING</span>
-                <h3>{event.title}</h3>
-                <div className="details-grid">
-                    <p><strong>Organizator:</strong> {event.organizer ? `${event.organizer.firstName} ${event.organizer.lastName}` : 'N/A'}</p>
-                    <p><strong>Categorie:</strong> {event.category}</p>
-                    <p><strong>Data:</strong> {new Date(event.startTime).toLocaleDateString('ro-RO')}</p>
-                    <p><strong>Locație:</strong> {event.location}</p>
-                </div>
-                <p className="card-desc">
-                    {event.description 
-                        ? (event.description.length > 100 ? event.description.substring(0, 100) + '...' : event.description) 
-                        : "Fără descriere"}
-                </p>
-              </div>
-              <div className="card-actions">
-                <button className="buton-approve" onClick={() => handleApprove(event.id)}>
-                    ✅ Aprobă
-                </button>
-                <button className="buton-reject" onClick={() => handleReject(event.id)}>
-                    ❌ Respinge
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+           
+           <div className="admin-tabs">
+               <button 
+                 className={`tab-btn ${activeTab === 'events' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('events')}
+               >
+                 Evenimente ({pendingEvents.length})
+               </button>
+               <button 
+                 className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('users')}
+               >
+                 Utilizatori
+               </button>
+               <button 
+                 className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+                 onClick={() => setActiveTab('analytics')}
+               >
+                 Analize
+               </button>
+           </div>
+
+           
+           {activeTab === 'events' && (
+               <div className="tab-content">
+                   
+                   
+                   <div className="section-block">
+                       <h3 className="section-title">În așteptarea aprobării</h3>
+                       
+                       {pendingEvents.length === 0 ? (
+                           <p className="empty-msg">Nu sunt cereri în așteptare.</p>
+                       ) : (
+                           <div className="events-list">
+                               {pendingEvents.map(event => (
+                                   <div key={event.id} className="admin-event-card">
+                                       <div className="event-info">
+                                           <h4 className="ev-title">{event.title}</h4>
+                                           <p className="ev-meta">
+                                               {event.organizer ? `${event.organizer.firstName} ${event.organizer.lastName}` : 'Organizator'} • {new Date(event.startTime).toLocaleDateString('ro-RO')}
+                                           </p>
+                                       </div>
+                                       <div className="event-actions">
+                                           <button className="action-btn btn-details" onClick={() => handleViewDetails(event.id)}>
+                                               <FaEye /> Detalii
+                                           </button>
+                                           <button className="action-btn btn-approve" onClick={() => handleApprove(event.id)}>
+                                               <FaCheck /> Aprobă
+                                           </button>
+                                           <button className="action-btn btn-reject" onClick={() => handleReject(event.id)}>
+                                               <FaTimes /> Respinge
+                                           </button>
+                                       </div>
+                                   </div>
+                               ))}
+                           </div>
+                       )}
+                   </div>
+
+                  
+                   <div className="section-block">
+                       <h3 className="section-title">Evenimente publicate</h3>
+                    
+                       <div className="events-list">
+                           
+                       </div>
+                   </div>
+
+               </div>
+           )}
+       </div>
     </div>
   );
 };

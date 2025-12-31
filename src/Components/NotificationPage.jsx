@@ -2,92 +2,134 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './NotificationPage.css';
-import Circle from '../Icons/circle.png';
 import { toast } from 'react-hot-toast';
-import './Home.css'; 
+import { FaChevronDown, FaArrowLeft } from 'react-icons/fa';
 
 const NotificationPage = () => {
   const navigate = useNavigate(); 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState({
-    firstName: '',
-    lastName: '',
-    role: ''
-  });
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        const rawRole = parsedUser.roles && parsedUser.roles.length > 0 ? parsedUser.roles[0].toUpperCase() : 'USER';
-        
-        setUser({
-          firstName: parsedUser.firstName || 'Student',
-          lastName: parsedUser.lastName || 'USV',
-          role: rawRole.replace('ROLE_', '') 
-        });
-      } catch (e) {
-        console.error("Eroare parsing user", e);
-      }
-    }
-  }, []);
-
+  
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const response = await api.get('/notifications');
         setNotifications(response.data);
       } catch (error) {
-        console.error("Eroare la incarcarea notificarilor:", error);
-        toast.error("Nu s-au putut incarca notificarile.");
+        console.error("Eroare:", error);
+        toast.error("Eroare la încărcare.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchNotifications();
   }, []);
+
+  
+  const formatTimestamp = (isoStr) => {
+      if (!isoStr) return '';
+      const date = new Date(isoStr);
+      const day = date.getDate();
+      const month = date.toLocaleDateString('ro-RO', { month: 'short' }).replace('.', '');
+      const time = date.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+      return `${day} ${month} • ${time}`;
+  };
+
+ 
+  const getNotificationConfig = (message) => {
+      const msg = message.toLowerCase();
+
+      
+      if (msg.includes('aprobat') || msg.includes('felicitări') || msg.includes('publicat')) {
+          return { type: 'APPROVE', label: 'APROBAT' };
+      }
+      
+      if (msg.includes('respins') || msg.includes('nu a fost aprobat') || msg.includes('reject')) {
+          return { type: 'REJECT', label: 'RESPINS' };
+      }
+     
+      if (msg.includes('anulat') || msg.includes('cancelled')) {
+          return { type: 'CANCEL', label: 'ANULAT' };
+      }
+      
+      if (msg.includes('locația') || msg.includes('location')) {
+          return { type: 'LOCATION', label: 'LOCAȚIE SCHIMBATĂ' };
+      }
+      
+      if (msg.includes('ora') || msg.includes('data') || msg.includes('amânat')) {
+          return { type: 'TIME', label: 'ORĂ SCHIMBATĂ' };
+      }
+      
+      return { type: 'INFO', label: 'INFO' };
+  };
+
+  const handleMarkAllRead = () => {
+      toast.success("Toate notificările au fost marcate ca citite.");
+      
+  };
 
   return (
     <div className="notification-page-container">
       
-      <div className="Header">
-        <h1>Notificari</h1>
-        <div className="user-info">
-            <button className="wallet-icon-btn" onClick={() => navigate('/home')} title="Înapoi la Home">
-                 Home
+      
+      <div className="notif-header-row">
+        <div className="header-left-group">
+            <button className="back-arrow-btn" onClick={() => navigate('/home')}>
+                <FaArrowLeft />
             </button>
-            <div className="user-text">
-                <span className="user-role">{user.role}</span>
-                <span className="user-name">{user.firstName} {user.lastName}</span>
+            <div className="title-group">
+                <h1>Notificări</h1>
+                <span className="subtitle-text">{notifications.length} notificări noi</span>
             </div>
-            <img src={Circle} alt="Profile" className="circle-icon"/>
         </div>
+        
+        <button className="mark-read-btn" onClick={handleMarkAllRead} style={{color:"black"}}>
+            Marchează toate ca citite
+        </button>
       </div>
 
-      <div className="notification-list">
+      <div className="notification-list-styled">
         {loading ? (
-          <p style={{color:'white', textAlign:'center', marginTop:'20px'}}>Se incarca notificarile...</p>
+          <p className="loading-text">Se încarcă notificările...</p>
         ) : notifications.length > 0 ? (
-          notifications.map((notif) => (
-            <div key={notif.id} className="notification-card">
-              <div className="card-header-row">
-                <span className="event-title-notif">{notif.eventTitle || "Sistem"}</span>
-                {notif.type && <span className="notification-type-badge">{notif.type}</span>}
-              </div>
-              <p className="notification-message">{notif.message}</p>
-              {notif.timestamp && (
-                  <span className="notification-date">
-                      {new Date(notif.timestamp).toLocaleString('ro-RO')}
-                  </span>
-              )}
-            </div>
-          ))
+          notifications.map((notif) => {
+            const config = getNotificationConfig(notif.message);
+            
+            const cardClass = `styled-notif-card card-type-${config.type}`;
+
+            return (
+                <div key={notif.id} className={cardClass}>
+                  
+                 
+                  <div className="card-header-line">
+                      <div className="header-left">
+                         
+                          <span className={`tag-pill tag-${config.type}`}>{config.label}</span>
+                          
+                          
+                          <span className="notif-event-title">{notif.eventTitle || "Notificare Sistem"}</span>
+                          
+                        
+                          <span className="red-dot">●</span>
+                      </div>
+                      
+                      <div className="header-right">
+                          <span className="notif-date">{formatTimestamp(notif.timestamp)}</span>
+                          <FaChevronDown className="chevron-icon" />
+                      </div>
+                  </div>
+
+               
+                  <div className="card-body-text">
+                      {notif.message}
+                  </div>
+                </div>
+            );
+          })
         ) : (
-          <div style={{display:'flex', flexDirection:'column', alignItems:'center', marginTop:'50px'}}>
-             <p style={{color:'#ccc'}}>Nu ai nicio notificare noua. 🔔</p>
+          <div className="empty-state">
+              <p>Nu ai nicio notificare nouă. 🔔</p>
           </div>
         )}
       </div>

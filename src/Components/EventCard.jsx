@@ -3,28 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api'; 
 import './EventCard.css'; 
 import DefaultImage from '../Images/usv.jpg'; 
-
+import Location from '../Icons/location_icon.png';
 import toast from 'react-hot-toast';
 
 const EventCard = ({ 
-    id, 
-    title, 
-    description, 
-    location, 
-    date, 
-    imageUrl, 
-    category, 
-    
- 
-    onDelete,           
-    onEdit,            
-    onBuyTicket,        
-    isPurchasing,       
-    
-    userRole,           
-    currentUserRole,    
-    isFavoriteProp,     
-    onToggle           
+    id, title, description, location, date, imageUrl, category, 
+    onDelete, onEdit, onBuyTicket, isPurchasing, 
+    userRole, currentUserRole, isFavoriteProp, onToggle           
 }) => {
   const navigate = useNavigate();
   const activeRole = userRole || currentUserRole;
@@ -42,73 +27,83 @@ const EventCard = ({
      }
   }, [id, activeRole, isFavoriteProp]);
 
-  const formatDate = (isoString) => {
-    if (!isoString) return { day: '??', month: '-' };
-    const d = new Date(isoString);
-    return {
-        day: d.getDate(),
-        month: d.toLocaleDateString('ro-RO', { month: 'short' }).toUpperCase()
-    };
-  };
-  const { day, month } = formatDate(date);
-
-  const handleClick = () => {
-    if (id) navigate(`/event_detalii/${id}`);
-  };
   
-  const handleFavoriteClick = async (e) => {
-      e.stopPropagation(); 
-      const newState = !isFavorite;
-      setIsFavorite(newState);
-      try {
-          if (newState) {
-             await api.post(`/favorites/${id}`);
-             toast.success('Favorit ❤️');
-          } else {
-             await api.delete(`/favorites/${id}`);
-             toast.success('Sters 💔');
-          }
-          if (onToggle) onToggle();
-      } catch (error) { setIsFavorite(!newState); }
+  const formatDate = (isoString) => {
+    if (!isoString) return { text: 'DATA' };
+    const d = new Date(isoString);
+    const month = d.toLocaleDateString('ro-RO', { month: 'short' }).toUpperCase().replace('.', '');
+    const day = d.getDate();
+    return { text: `${month} ${day}` }; 
   };
 
-  const handleDeleteClick = (e) => {
-      e.stopPropagation();
-      if (onDelete) onDelete(id);
-  };
+    const CATEGORY_COLORS = {
+  SOCIAL: '#ffcc00',     
+  ACADEMIC: '#4a90e2',   
+  SPORT: '#2ecc71',      
+  CAREER: '#8e44ad',     
+  VOLUNTEERING: '#3498db', 
+  OTHER: '#95a5a6'      
+};
+  const { text: dateText } = formatDate(date);
+
+  const handleClick = () => { if (id) navigate(`/event_detalii/${id}`); };
+  const handleDeleteClick = (e) => { e.stopPropagation(); if (onDelete) onDelete(id); };
+  const badgeColor = CATEGORY_COLORS[category] || CATEGORY_COLORS.OTHER;
 
   return (
-    <div className="card-wrapper" onClick={handleClick}>
-      <div className="card-image-header">
-        <img src={imageUrl || DefaultImage} alt={title} className="card-img" onError={(e) => {e.target.src = DefaultImage}} />
-        <div className="card-date-badge"><span className="date-day">{day}</span><span className="date-month">{month}</span></div>
-        <div className="card-overlays">
-            {onDelete && (<button className="delete-icon-btn" onClick={handleDeleteClick} title="Șterge">🗑️</button>)}
-            {activeRole === 'STUDENT' && (<button className={`fav-btn ${isFavorite ? 'active' : ''}`} onClick={handleFavoriteClick}>{isFavorite ? '❤️' : '🤍'}</button>)}
+    <div className="event-card-container" onClick={handleClick}>
+      <div className="card-media">
+        <img 
+            src={imageUrl || DefaultImage} 
+            alt={title} 
+            className="card-img" 
+            onError={(e) => {e.target.src = DefaultImage}} 
+        />
+        
+       
+        <div className="badge-category" style={{ backgroundColor: badgeColor }}>
+          
+            {category || 'Event'}
         </div>
+
+       
+        <div className="badge-date">
+            {dateText}
+        </div>
+
+        
+        {onDelete && (
+             <button className="overlay-btn delete-btn" onClick={handleDeleteClick}>🗑️</button>
+        )}
       </div>
       
-      <div className="card-body">
-        <div className="card-tags"><span className="tag tag-green">USV</span><span className={`tag tag-blue`}>{category || 'EVENT'}</span></div>
-        <h3 className="card-title">{title || "Titlu"}</h3>
-        <p className="card-description">{description ? (description.length > 80 ? description.substring(0, 80) + "..." : description) : "Fara descriere."}</p>
+      <div className="card-content">
+        <div className="card-top-info">
+        <h3 className="card-title" title={title}>{title || "Titlu"}</h3>
         
+        <p className="card-desc" style={{color:"#252525ff"}}>
+          {description 
+            ? (description.length > 80 ? description.substring(0, 80) + "..." : description)
+            : "Fara descriere."}
+        </p>
+        </div>
+        <div className="divider-line" style={{backgroundColor:"black", width:"100%", opacity:"0.3"}}></div>
         <div className="card-footer">
-            <div className="card-location"><span className="location-icon">📍</span><span>{location || 'Online'}</span></div>
-            <div className="card-actions-right">
+            <div className="card-loc">
+              <span className="pin-icon"><img src={Location} alt="Pin" style={{width:"15px", height:"15px"}} /></span> 
+              <span>{location || 'Online'}</span>
+            </div>
+            
+            
+            <div className="card-action">
                 {onEdit ? (
-                    
-                    <button 
-                        className="btn-details" 
-                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                        style={{ backgroundColor: '#3498db' }} 
-                    >
+                    <button className="btn-action red-btn" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
                         Edit
                     </button>
-                
                 ) : (
-                   
-                    <button className="btn-details" onClick={handleClick}>DETALII</button>
+                    <button className="btn-action red-btn" onClick={handleClick}>
+                        Detalii
+                    </button>
                 )}
             </div>
         </div>

@@ -5,7 +5,6 @@ import TicketModal from './Ticket';
 import ReviewSection from './ReviewSection';
 import './EventCardDetails.css';
 import usv from '../Images/usv.jpg';
-import Circle from '../Icons/circle.png';
 import { toast } from 'react-hot-toast';
 
 const EventDetails = () => {
@@ -21,6 +20,7 @@ const EventDetails = () => {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
+
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -29,7 +29,6 @@ const EventDetails = () => {
         const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
                         ? parsedUser.roles[0].toUpperCase() 
                         : 'GUEST';
-        
         setUser({
           firstName: parsedUser.firstName || '',
           lastName: parsedUser.lastName || '',
@@ -42,7 +41,6 @@ const EventDetails = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-
       const eventRes = await api.get(`/events/${id}`);
       setEvent(eventRes.data);
 
@@ -54,31 +52,22 @@ const EventDetails = () => {
            try {
              const favRes = await api.get(`/favorites/check/${id}`);
              setIsFavorite(favRes.data);
-           } catch (e) { console.error("Eroare check fav:", e); }
+           } catch (e) { console.error("Ignorat eroare fav", e); }
 
            const myTicketsRes = await api.get('/tickets/my-tickets');
            const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
            
            if (foundTicket) {
              setCurrentTicket(foundTicket);
-
-
              const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
-             
-             if (isWalletAdded === 'true') {
-                 setHasTicket(true); 
-             } else {
-                 setHasTicket(false); 
-             }
+             setHasTicket(isWalletAdded === 'true'); 
            } else {
                setCurrentTicket(null);
                setHasTicket(false);
                localStorage.removeItem(`wallet_added_${id}`);
            }
-
         } catch (e) { console.error("Eroare verificare bilet:", e); }
       }
-
     } catch (error) {
       console.error("Eroare încărcare:", error);
     } finally {
@@ -86,9 +75,8 @@ const EventDetails = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
+
 
   const handleToggleFavorite = async () => {
       try {
@@ -113,12 +101,10 @@ const EventDetails = () => {
         toast.error('Trebuie sa fii autentificat ca STUDENT!');
         return;
     }
-
     if (currentTicket && currentTicket.id) { 
         setShowTicketModal(true); 
         return; 
     }
-
     const previewTicket = {
         eventTitle: event.title,
         eventLocation: event.location,
@@ -126,117 +112,168 @@ const EventDetails = () => {
         studentName: `${user.firstName} ${user.lastName}`,
         isPreview: true 
     };
-
     setCurrentTicket(previewTicket);
     setShowTicketModal(true);
   };
 
+const handleTicketAddedToWallet = async () => {
+       try {
+           const response = await api.post('/tickets', { eventId: id });
 
-  const handleTicketAddedToWallet = async () => {
-      try {
-          const response = await api.post('/tickets', { eventId: id });
-          
           setCurrentTicket(response.data);
-
           setHasTicket(true);
           localStorage.setItem(`wallet_added_${id}`, 'true');
-          
-          setShowTicketModal(false);
-          
-          toast.success('Bilet salvat!', {
-              duration: 3000,
-              style: { border: '1px solid #2ecc71', padding: '16px', color: '#15803d', background: '#f0fdf4'},
-              iconTheme: { primary: '#2ecc71', secondary: '#fff' },
-          });
+           setShowTicketModal(false);
+          toast.success('Bilet salvat!');
 
+         
+          setEvent(prevEvent => {
+              
+              if (prevEvent && prevEvent.maxCapacity) {
+                  return {
+                      ...prevEvent,
+                      maxCapacity: prevEvent.maxCapacity - 1
+                  };
+              }
+              return prevEvent;
+          });
+          
       } catch (error) {
-          console.error(error);
-          toast.error('Eroare: Nu s-a putut salva biletul.');
-      }
+        console.error(error);
+        toast.error('Eroare: Nu s-a putut salva biletul.');
+   }
   };
 
-  const formatDate = (iso) => iso ? new Date(iso).toLocaleDateString('ro-RO') : "-";
-  const formatTime = (iso) => iso ? new Date(iso).toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'}) : "-";
-  const formatDeadline = (iso) => iso ? `${formatTime(iso)} ${formatDate(iso)}` : "-";
+  
+  const formatDateFull = (iso) => iso ? new Date(iso).toLocaleDateString('ro-RO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "-";
+  const formatTimeSimple = (iso) => iso ? new Date(iso).toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'}) : "-";
 
   if (loading) return <div className="loading-screen">Se incarca...</div>;
   if (!event) return <div className="error-screen">Eveniment inexistent.</div>;
 
   return (
-    <div className="event-pagina">
-      <div className="Header">
-         <h1>Event Manager</h1>
-         <div className="user-info">
-             <button onClick={() => navigate('/home')} className="home-btn-details">Home</button>
-            <div className="user-text">
-                <span className="user-role">{user.role}</span>
-                <span className="user-name">{user.firstName} {user.lastName}</span>
-            </div>
-            <img src={Circle} alt="icon" className="circle-icon"/>
-         </div>
-      </div>
+    <div className="page-background">
+    
+      <div className="main-card-container">
+        
+        
+        <div className="hero-section">
+           <img 
+              src={event.imageUrl || usv} 
+              alt={event.title} 
+              className="hero-image" 
+              onError={(e)=>{e.target.src=usv}}
+           />
+           
+           <div className="hero-overlay-gradient"></div>
 
-      <div className="card-detalii">
-         <div className="header">
-            <button className="back" onClick={() => navigate(-1)}>&lt; Back</button>
-            <h1 className="event-title">{event.title}</h1>
-         </div>
-
-         <div className="content-card">
-            
-            <div className="card-imagine" style={{position: 'relative'}}>
-               <img 
-                 src={event.imageUrl || usv} 
-                 alt={event.title} 
-                 className="event-imagine" 
-                 onError={(e)=>{e.target.src=usv}}
-               />
-
+           <div className="hero-top-actions">
+               <button className="circle-btn back-btn" onClick={() => navigate(-1)} style={{background:"white", color:"black"}}>
+                   ←
+               </button>
                {user.role === 'STUDENT' && (
-                   <button 
-                      className="fav-btn-details"
-                      onClick={handleToggleFavorite}
-                      title={isFavorite ? "Scoate de la favorite" : "Adauga la favorite"}
-                   >
-                      {isFavorite ? '❤️' : '🤍'}
+                   <button className="circle-btn fav-btn" onClick={handleToggleFavorite}>
+                       {isFavorite ? '❤️' : '🤍'}
                    </button>
                )}
-            </div>
+           </div>
 
-            <div className="info-panel">
-               <div className="info-group"><label>Organizator:</label><div className="info-value">{event.organizer?.firstName} {event.organizer?.lastName}</div></div>
-               <div className="info-group"><label>Locație:</label><div className="info-value">{event.location}</div></div>
-               <div className="info-group"><label>Data:</label><div className="info-value">{formatDate(event.startTime)}</div></div>
-               <div className="info-group"><label>Ora:</label><div className="info-value">{formatTime(event.startTime)}</div></div>
-               <div className="info-group"><label>Deadline:</label><div className="info-value" style={{color: '#ff4757'}}>{formatDeadline(event.startTime)}</div></div>
+          
+           <div className="hero-content">
+               <span className="category-pill">{event.category || 'EVENT'}</span>
+               <h1 className="hero-title">{event.title}</h1>
+           </div>
+        </div>
+
+     
+        <div className="body-content">
+            
+           
+            <div className="info-grid">
                 
-               {hasTicket ? (
-                   <button 
-                       className="buton-participare buton-rezervat" 
-                       onClick={handleOpenTicket} 
-                       style={{backgroundColor: '#2ecc71', cursor: 'default'}}
-                   >
-                       ✅ REZERVAT
-                   </button>
-               ) : (
-                   <button 
-                       className="buton-participare" 
-                       onClick={handleBuyTicket}
-                   >
-                       PARTICIP
-                   </button>
-               )}
-            </div>
-         </div>
-         
-         <div className="description">
-            <h3>Descriere</h3>
-            <p>{event.description || "Fara descriere."}</p>
-         </div>
+              
+                <div className="info-box">
+                    <h3>Detalii eveniment</h3>
+                    <div className="divider-line"></div>
+                    
+                    <div className="detail-row">
+                        <span className="detail-icon">📅</span>
+                        <div>
+                            <span className="detail-label">Dată</span>
+                            <span className="detail-value">{formatDateFull(event.startTime)}</span>
+                        </div>
+                    </div>
 
-         <ReviewSection eventId={id} userRole={user.role} />
+                    <div className="divider-line"></div>
+
+                    <div className="detail-row">
+                        <span className="detail-icon">⏰</span>
+                        <div>
+                            <span className="detail-label">Oră</span>
+                            <span className="detail-value">{formatTimeSimple(event.startTime)}</span>
+                        </div>
+                    </div>
+
+                    <div className="divider-line"></div>
+
+                    <div className="detail-row">
+                        <span className="detail-icon">📍</span>
+                        <div>
+                            <span className="detail-label">Locație</span>
+                            <span className="detail-value">{event.location}</span>
+                        </div>
+                    </div>
+
+                    <div className="divider-line"></div>
+
+                    <div className="detail-row">
+                        <span className="detail-icon">👤</span>
+                        <div>
+                            <span className="detail-label">Organizator</span>
+                            <span className="detail-value">{event.organizer?.firstName} {event.organizer?.lastName}</span>
+                        </div>
+                    </div>
+                </div>
+
+              
+                <div className="info-box">
+                    <h3>Despre acest eveniment</h3>
+                    <div className="divider-line"></div>
+                    <p className="description-text">
+                        {event.description || "Nu există descriere disponibilă."}
+                    </p>
+                </div>
+            </div>
+
+           
+            <div className="ticket-box">
+                <div className="ticket-header">
+                    <span className="ticket-label-small">Locuri disponibile</span>
+                    <span className="ticket-count-big">
+                        {event.maxCapacity ? `${event.maxCapacity} rămase` : "Nelimitat"}
+                    </span>
+                </div>
+                
+                {hasTicket ? (
+                    <button className="big-action-btn btn-green" onClick={handleOpenTicket}>
+                        ✅ Vezi Biletul
+                    </button>
+                ) : (
+                    <button className="big-action-btn btn-red" onClick={handleBuyTicket}>
+                        Participă
+                    </button>
+                )}
+            </div>
+
+       
+            <div className="reviews-section-container">
+                <ReviewSection eventId={id} userRole={user.role} />
+            </div>
+
+        </div>
       </div>
 
+  
       {showTicketModal && currentTicket && (
           <TicketModal 
               ticketData={currentTicket} 

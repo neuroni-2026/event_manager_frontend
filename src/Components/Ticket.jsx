@@ -1,102 +1,134 @@
 import React from 'react';
 import './Ticket.css';
 import QR from '../Images/qr_code.png';
+
 import AppleWallet from '../Images/a_wallet.png';
 import GoogleWallet from '../Images/g_wallet.png';
 
 const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
   if (!ticketData) return null;
 
-  const { eventTitle, eventLocation, studentName } = ticketData;
-
-  const rawDate = ticketData.eventStartTime || 
-                  ticketData.startTime || 
-                  ticketData.date || 
-                  ticketData.eventDate;
+  const { eventTitle, eventLocation, studentName, id } = ticketData;
 
   const parseDate = (d) => {
       if (!d) return null;
-      if (Array.isArray(d)) {
-          return new Date(d[0], (d[1] || 1) - 1, d[2], d[3] || 0, d[4] || 0);
-      }
+      if (Array.isArray(d)) return new Date(d[0], (d[1]||1)-1, d[2], d[3]||0, d[4]||0);
       return new Date(d);
   };
 
-  let dateFormatted = '??.??.????';
-  let timeFormatted = '--:--';
-
+  const rawDate = ticketData.eventStartTime || ticketData.startTime || ticketData.date || ticketData.eventDate;
   const dateObj = parseDate(rawDate);
   
-  if (dateObj && !isNaN(dateObj.getTime())) {
-      dateFormatted = dateObj.toLocaleDateString('ro-RO');
-      timeFormatted = dateObj.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
-  }
+  const dateString = dateObj ? dateObj.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Data necunoscută';
+  const timeString = dateObj ? dateObj.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+  const purchaseDate = ticketData.purchaseDate ? parseDate(ticketData.purchaseDate).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) : "2 decembrie 2025";
+  const ticketIdDisplay = `TICKET-00${id || 'X'}-ASSIST-2025`;
 
   const handleWalletClick = () => {
-    if (!isSaved && onAddToWallet) {
-        onAddToWallet(); 
-    }
+    if (onAddToWallet) onAddToWallet();
   };
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="ticket-card-modal" onClick={(e) => e.stopPropagation()}>
         
-        <div className="header">
-          <button className="buton-back" onClick={onClose}>‹ Back</button>
-        </div>
-        
-        <h3 className="title">{eventTitle || "Bilet Fără Titlu"}</h3>
-        
-        <div className="qr-container">
-          <img src={QR} alt="QR Code" className="qr-image" />
+  
+        <div className="modal-header-section">
+            <button className="close-x-btn" onClick={onClose}>✕</button>
+            <h2 className="main-heading">Biletul tău</h2>
+            <p className="sub-heading">{eventTitle || "Eveniment"}</p>
         </div>
 
-        <div className="ticket-details">
-          <p className="student-name">Deținător: <strong>{studentName || "Student"}</strong></p>
-          <p className="event-info">
-            {eventLocation || "Locație online"} • {dateFormatted} • {timeFormatted}
-          </p>
-          
-          <div className="tags">
-             <span className="tag-badge tag-green">VALID</span>
-             <span className="tag-badge tag-yellow">TICKET</span>
-          </div>
+     
+        <div className="qr-section-wrapper">
+            <div className="qr-box">
+                <img src={QR} alt="QR Code" className="qr-img" />
+            </div>
         </div>
 
-        <div className="wallet-actions">
-           {isSaved ? (
-               <div className="saved-status" style={{textAlign: 'center', padding: '10px', backgroundColor: '#f0fdf4', borderRadius: '8px', border: '1px solid #2ecc71'}}>
-                   <span style={{fontSize: '24px', display:'block'}}>✅</span>
-                   <p style={{margin: '5px 0 0 0', fontWeight: 'bold', color: '#15803d'}}>
-                       Bilet salvat în portofel
-                   </p>
-               </div>
-           ) : (
-               <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
-                   <img 
-                      src={AppleWallet} 
-                      alt="Add to Apple Wallet" 
-                      className="wallet-buton" 
-                      onClick={handleWalletClick}
-                      style={{cursor: 'pointer', height: '45px'}}
-                   />
-                   <img 
-                      src={GoogleWallet} 
-                      alt="Add to Google Wallet" 
-                      className="wallet-buton" 
-                      onClick={handleWalletClick}
-                      style={{cursor: 'pointer', height: '45px'}}
-                   />
-               </div>
-           )}
-        </div>
-
-        <button className="buton-export">
-          EXPORT IN PDF
-        </button>
+     
+        <div className="dashed-separator"></div>
 
         
+        <div className="details-list">
+            <div className="detail-item">
+                <div className="icon-col">📅</div>
+                <div className="info-col">
+                    <span className="label">Data și ora</span>
+                    <span className="value-primary">{dateString}</span>
+                    <span className="value-secondary">{timeString}</span>
+                </div>
+            </div>
+
+            <div className="detail-item">
+                <div className="icon-col">📍</div>
+                <div className="info-col">
+                    <span className="label">Locație</span>
+                    <span className="value-primary">{eventLocation || "Online"}</span>
+                </div>
+            </div>
+
+            <div className="detail-item">
+                <div className="icon-col">👤</div>
+                <div className="info-col">
+                    <span className="label">Participant</span>
+                    <span className="value-primary">{studentName || "Alex Student"}</span>
+                </div>
+            </div>
+
+            <div className="detail-item">
+                <div className="icon-col">🎫</div>
+                <div className="info-col">
+                    <span className="label">ID Bilet</span>
+                    <span className="value-primary ticket-id-text">{ticketIdDisplay}</span>
+                </div>
+            </div>
+
+            <div className="detail-item">
+                <div className="icon-col">📅</div>
+                <div className="info-col">
+                    <span className="label">Data achiziției</span>
+                    <span className="value-primary">{purchaseDate}</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div className="modal-footer-section">
+            
+           
+            {!isSaved && (
+                <div className="wallet-actions-wrapper">
+                    <p className="wallet-label">Adaugă în portofel:</p>
+                    <div className="wallet-buttons-row">
+                        <img 
+                            src={AppleWallet} 
+                            alt="Apple Wallet" 
+                            className="wallet-img-btn"
+                            onClick={handleWalletClick}
+                        />
+                        <img 
+                            src={GoogleWallet} 
+                            alt="Google Wallet" 
+                            className="wallet-img-btn"
+                            onClick={handleWalletClick}
+                        />
+                    </div>
+                </div>
+            )}
+
+           
+            {isSaved && (
+                <div className="saved-success-msg">
+                    ✅ Bilet salvat în portofel
+                </div>
+            )}
+
+            <button className="download-pdf-btn">
+                <span className="btn-icon">📥</span> Descarcă PDF
+            </button>
+            <p className="footer-note">Arată acest cod QR la intrarea în eveniment</p>
+        </div>
 
       </div>
     </div>

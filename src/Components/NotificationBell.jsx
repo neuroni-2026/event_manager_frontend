@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import api from '../services/api';
 import './NotificationBell.css';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; 
 
 const NotificationBell = () => {
   const navigate = useNavigate();
@@ -11,8 +11,17 @@ const NotificationBell = () => {
   useEffect(() => {
     const fetchCount = async () => {
       try {
+       
         const response = await api.get('/notifications');
-        setNotificationsCount(response.data.length); 
+       
+        if (Array.isArray(response.data)) {
+             setNotificationsCount(response.data.length);
+        } else {
+           
+             console.warn("Format notificări neașteptat", response.data);
+             setNotificationsCount(0);
+        }
+
       } catch (error) {
         console.error("Eroare notificare:", error);
       }
@@ -38,7 +47,10 @@ const NotificationBell = () => {
         onClick={handleClick} 
         title="Vezi notificarile"
     >
-      <button className="bell-icon">🔔 Notificari</button>
+      
+      <button className="bell-btn-styled">
+        <span className="bell-icon">🔔</span> Notificari
+      </button>
 
       {unreadCount > 0 && (
         <span className="badge-count">{unreadCount}</span>
