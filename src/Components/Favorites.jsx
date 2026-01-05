@@ -48,7 +48,6 @@ const Favorites = () => {
   return (
     <div className="favorites-page-container">
       
-     
       <div className="fav-header-simple">
           <button className="back-arrow-btn" onClick={() => navigate('/home')}>←</button>
           <div className="fav-header-text">
@@ -67,7 +66,6 @@ const Favorites = () => {
                     <EventCard 
                         key={favItem.id} 
                         
-                        
                         id={favItem.eventId} 
                         title={favItem.eventTitle}
                         location={favItem.eventLocation}
@@ -77,10 +75,10 @@ const Favorites = () => {
                         category={favItem.category || "EVENT"}
                         organizer={favItem.organizer} 
 
-                        
+                       
                         userRole={userRole} 
                         isFavoriteProp={true} 
-                        onToggle={handleToggle}
+                        onToggle={handleToggle} 
                     />
                  ))}
              </div>

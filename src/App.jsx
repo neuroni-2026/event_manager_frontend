@@ -8,6 +8,7 @@ import AdminDashboard from './Components/AdminDashboard';
 import NotificationPage from './Components/NotificationPage';
 import MyTickets from './Components/MyTickets';
 import Favorites from './Components/Favorites';
+import Settingss from './Components/Settings';
 import { Toaster,toast } from 'react-hot-toast';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
       <Route path="/notifications" element={<NotificationPage />} />
       <Route path="/my-tickets" element={<MyTickets />} />
       <Route path="/favorites" element={<Favorites />} />
+      <Route path="/settings" element={<Settingss />} />
       
     </Routes>
       

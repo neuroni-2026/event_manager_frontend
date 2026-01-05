@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import './EventCardDetails.css'; 
+import './ReviewSection.css'; 
 import { toast } from 'react-hot-toast';
 import Circle from '../Icons/circle.png'; 
+
 
 const ReviewSection = ({ eventId, userRole }) => {
     const [reviews, setReviews] = useState([]);
@@ -10,7 +11,7 @@ const ReviewSection = ({ eventId, userRole }) => {
     const [hoverRating, setHoverRating] = useState(0); 
     const [loading, setLoading] = useState(false);
 
-    
+
     useEffect(() => {
         const fetchReviews = async () => {
             if (!eventId) return;
@@ -25,10 +26,9 @@ const ReviewSection = ({ eventId, userRole }) => {
         fetchReviews();
     }, [eventId]);
 
-    
-
+  
     const getReviewerName = (review) => {
-   
+ 
         if (review.reviewer) {
             const { firstName, lastName } = review.reviewer;
             if (firstName || lastName) {
@@ -36,7 +36,7 @@ const ReviewSection = ({ eventId, userRole }) => {
             }
         }
 
-       
+      
         if (review.userName) return review.userName;
 
        
@@ -63,7 +63,7 @@ const ReviewSection = ({ eventId, userRole }) => {
         try {
             setLoading(true);
 
-         
+            
             const payload = {
                 eventId: parseInt(eventId), 
                 rating: newReview.rating,
@@ -72,8 +72,8 @@ const ReviewSection = ({ eventId, userRole }) => {
 
             await api.post('/reviews', payload);
             
-            
-      
+       
+    
             const userStr = localStorage.getItem('user');
             let currentUser = { firstName: 'Eu', lastName: '' };
             if (userStr) {
@@ -96,7 +96,7 @@ const ReviewSection = ({ eventId, userRole }) => {
 
         } catch (error) {
             console.error("Eroare postare:", error);
-      
+           
             if (error.response) {
                 if (error.response.status === 400 || error.response.status === 409) {
                     toast.error("Ai lăsat deja o recenzie la acest eveniment!");
@@ -144,23 +144,23 @@ const ReviewSection = ({ eventId, userRole }) => {
         : 0;
 
     return (
-        <div className="reviews-section-container">
+        <div className="reviews-section-container" style={{panding:"0px", border:"1px solid rgba(192, 192, 192, 1)"}}>
             
-          
+        
             {userRole === 'STUDENT' && (
                 <div className="review-form-card">
-                    <h3 className="section-title">Adaugă recenzia ta</h3>
+                    <h3 className="section-title" style={{fontWeight:"700"}}>Adaugă recenzia ta</h3>
                     
                     <div className="form-group">
-                        <label className="form-label">Rating</label>
+                        <label className="form-label" style={{fontSize:"16px", fontWeight:"700"}}>Rating</label>
                         <div className="stars-input">
                             {renderStars(newReview.rating, true)}
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Recenzia ta</label>
-                        <textarea 
+                        <label className="form-label" style={{fontSize:"16px"}}>Recenzia ta</label>
+                        <textarea style={{border:"2px solid black"}}
                             className="review-textarea"
                             placeholder="Împărtășește experiența ta..."
                             value={newReview.comment}
@@ -179,10 +179,10 @@ const ReviewSection = ({ eventId, userRole }) => {
                 </div>
             )}
 
-         
+           
             <div className="reviews-list-card">
                 <div className="reviews-header">
-                    <h3 className="section-title">Recenzii</h3>
+                    <h3 className="section-title" style={{fontSize:"18px", margin:"0"}}>Recenzii</h3>
                     <div className="rating-summary">
                         <span className="star-icon-yellow">★</span>
                         <span className="avg-score">{averageRating}</span>
@@ -200,7 +200,7 @@ const ReviewSection = ({ eventId, userRole }) => {
                                 <div className="review-content">
                                     <div className="review-top-row">
                                         <h4 className="reviewer-name">
-                                         
+                                            
                                             {getReviewerName(review)}
                                         </h4>
                                         <span className="review-date">

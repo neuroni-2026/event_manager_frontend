@@ -3,8 +3,10 @@
 .my-tickets-container {
     padding: 40px 60px;
     font-family: 'Poppins', sans-serif;
-    background-color: #fff; 
+     background-color: #f9fafb;
     min-height: 100vh;
+    margin: 0 45px 0px 45px;
+    max-width: 1470px; 
 }
 
 
@@ -46,7 +48,7 @@
 
 
 .ticket-visual-card {
-    border: 1px solid #333; 
+    border: 1px solid #333;
     border-radius: 16px;
     overflow: hidden;
     display: flex;

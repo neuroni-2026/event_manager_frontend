@@ -5,33 +5,31 @@ import SearchIcon from '../Icons/icon-search.png';
 import api, { ticketApi } from '../services/api'; 
 import './Home.css';
 import NotificationBell from '../Components/NotificationBell';
-
+import Notifications from '../Components/NotificationPage';
+import Settingss from './Settings';
 
 import Calendar from 'react-calendar'; 
 import 'react-calendar/dist/Calendar.css'; 
-import calendarIcon from '../Icons/calendar.png'; 
+import { Calendar as CalendarIcon, Shield, Briefcase, Ticket, Heart, LogOut, Settings } from 'lucide-react'; // Folosim Lucide icons
 
 
-import ticket from '../Icons/ticket.png';
-import heart from '../Icons/heart.png';
-import logout from '../Icons/logout.png';
-import setings from '../Icons/setings.png';
-import shield from '../Icons/shield.png';
-import organizer from '../Icons/organizer.png';
 import { toast } from 'react-hot-toast';
 
 
 const CATEGORY_COLORS = {
-  SOCIAL: '#ffcc00',     
-  ACADEMIC: '#4a90e2',   
-  CULTURAL: '#e44d26',  
-  SPORT: '#2ecc71',     
+  SOCIAL: '#ffcc00',    
+  ACADEMIC: '#4a90e2',  
+  VOLUNTEERING: '#e44d26',  
+  SPORT: '#2ecc71',    
+  CAREER: '#e67e22',  
   OTHER: '#95a5a6'       
 };
 
 const Home = () => {
+  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const [showNotifications, setShowNotifications] = useState(false);
   
   const [user, setUser] = useState(null); 
   const [events, setEvents] = useState([]);       
@@ -40,8 +38,6 @@ const Home = () => {
   const [purchasingId, setPurchasingId] = useState(null);
   
   const [showDropdown, setShowDropdown] = useState(false);
-  
-  
   const [showCalendar, setShowCalendar] = useState(false);
   const [date, setDate] = useState(new Date());
 
@@ -76,7 +72,7 @@ const Home = () => {
     }
   }, [navigate]);
 
- 
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -87,7 +83,7 @@ const Home = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
 
-  
+ 
   const handleBuyTicket = async (eventId, eventTitle) => {
       const confirm = window.confirm(`Vrei să participi la "${eventTitle}"?`);
       if (!confirm) return;
@@ -108,7 +104,7 @@ const Home = () => {
       navigate('/');
   };
 
-  
+ 
   useEffect(() => {
     if (!user) return;
     const fetchEvents = async () => {
@@ -125,7 +121,7 @@ const Home = () => {
     fetchEvents();
   }, [user]);
 
-  
+
   const uniqueLocations = useMemo(() => [...new Set(events.map(e => e.location))].filter(Boolean), [events]);
   const uniqueCategories = useMemo(() => [...new Set(events.map(e => e.category))].filter(Boolean), [events]);
   const uniqueOrganizers = useMemo(() => [...new Set(events.map(e => e.organizer ? `${e.organizer.firstName} ${e.organizer.lastName}` : ''))].filter(Boolean), [events]);
@@ -144,10 +140,9 @@ const Home = () => {
 
   const handleFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
 
- 
+
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
-        
         const dayEvent = events.find(evt => {
             const eventDate = new Date(evt.startTime);
             return eventDate.getDate() === date.getDate() &&
@@ -156,7 +151,6 @@ const Home = () => {
         });
 
         if (dayEvent) {
-           
             return (
                 <div 
                     className="day-highlight-circle"
@@ -173,7 +167,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-     
+      
       {showCalendar && (
         <div className="calendar-modal-overlay" onClick={() => setShowCalendar(false)}>
             <div className="calendar-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -193,61 +187,64 @@ const Home = () => {
                     <small style={{color: CATEGORY_COLORS.SOCIAL}}>● Social</small>
                     <small style={{color: CATEGORY_COLORS.SPORT}}>● Sport</small>
                     <small style={{color: CATEGORY_COLORS.ACADEMIC}}>● Academic</small>
-                    <small style={{color: CATEGORY_COLORS.CULTURAL}}>● Cultural</small>
+                    <small style={{color: CATEGORY_COLORS.CAREER}}>● Carieră</small>
+                    <small style={{color: CATEGORY_COLORS.VOLUNTEERING}}>● Voluntariat</small>
                 </div>
             </div>
         </div>
       )}
 
-     
-      <div className="Header">
-        <h1 className="logo-text">Event Manager</h1>
+      
+      <div className="home-header">
+        <div className="header-left">
+            <h1 className="logo-text">Event Manager</h1>
+        </div>
+
         <div className="header-right">
             <div className="notification-wrapper">
                  <NotificationBell /> 
             </div>
+            
             <div className="profile-container" ref={dropdownRef}>
                 <div className="profile-pill" onClick={() => setShowDropdown(!showDropdown)}>
                     <div className="avatar-circle">
                          {user.firstName.charAt(0)}
                     </div> 
-                    <span className="user-name">{user.firstName} {user.lastName}</span>
+                    <span className="user-name">{user.firstName}</span>
                 </div>
                 {showDropdown && (
-                    <div className="dropdown-menu" style={{border:"solid 2px #b8b7b7ff"}}>
+                    <div className="dropdown-menu">
                         <div className="dropdown-header">
-                            <p className="dd-name" style={{fontSize:"20px"}}>{user.firstName} {user.lastName}</p>
-                            <p className="dd-email" style={{fontSize:"20px"}}>{user.email || 'user@student.usv.ro'}</p>
+                            <p className="dd-name">{user.firstName} {user.lastName}</p>
+                            <p className="dd-email">{user.email || 'student@usv.ro'}</p>
                         </div>
                         <div className="dropdown-divider"></div>
                         <ul className="dropdown-list">
                             {user.role === 'ADMIN' && (
                                 <li onClick={() => navigate('/admin')}>
-                                    <span className="dd-icon"><img src={shield} alt="Shield" /></span> Panou Admin
+                                    <Shield size={16} /> Panou Admin
                                 </li>
                             )}
-                        <div className="dropdown-divider"></div>
                             {user.role === 'ORGANIZER' && (
                                 <li onClick={() => navigate('/organizer')}>
-                                    <span className="dd-icon"><img src={organizer} alt="Organizer" /></span> Gestionează Evenimente
+                                    <Briefcase size={16} /> Gestionează
                                 </li>
                             )}
                             {user.role === 'STUDENT' && (
                                 <li onClick={() => navigate('/my-tickets')}>
-                                    <span className="dd-icon"><img src={ticket} alt="Ticket" /></span> Biletele mele
+                                    <Ticket size={16} /> Biletele mele
                                 </li>
                             )}
                             <li onClick={() => navigate('/favorites')}>
-                                <span className="dd-icon"><img src={heart} alt="Heart" /></span> Favoritele mele
+                                <Heart size={16} /> Favorite
                             </li>
-                        <div className="dropdown-divider"></div>
-                            <li>
-                                <span className="dd-icon"><img src={setings} alt="Settings" /></span> Setări
+                            <li onClick={() => navigate('/settings')}>
+                                <Settings size={16} /> Setări
                             </li>
                         </ul>
                         <div className="dropdown-divider"></div>
                         <div className="dropdown-footer" onClick={handleLogout}>
-                            <span className="dd-icon-logout"><img src={logout} alt="Logout" /></span> Deconectare
+                            <LogOut size={16} /> Deconectare
                         </div>
                     </div>
                 )}
@@ -255,48 +252,49 @@ const Home = () => {
         </div>
       </div>
 
-    
-      <div className="search-section">
-        <div className="search-bar" style={{border:"solid 1px black"}}>
-          <img src={SearchIcon} className="search-icon" alt="" />
-          <input style={{background:"white", border:"none"} }
-            type="text" 
-            placeholder="Scrie aici..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      
+      <div className="search-container-full">
+         <div className="search-bar-large">d
+            <img src={SearchIcon} className="search-icon" alt="" />
+            <input style={{border:"none", outline:"none", width:"100%", fontSize:"16px", color:"#000000"}}
+                type="text" 
+                placeholder="Scrie aici" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value) }
+            />
         </div>
       </div>
 
-      
-      <div className="filters-section">
-        <select name="organizer" className="filter-pill" onChange={handleFilterChange} style={{border:"solid 1px black"}}>
-            <option value="">Organizator</option>
-            {uniqueOrganizers.map(org => (<option key={org} value={org}>{org}</option>))}
-        </select>
-        <select name="location" className="filter-pill" onChange={handleFilterChange} style={{border:"solid 1px black"}}>
-            <option value="">Locație</option>
-            {uniqueLocations.map(loc => (<option key={loc} value={loc}>{loc}</option>))}
-        </select>
-        <select name="category" className="filter-pill" onChange={handleFilterChange} style={{border:"solid 1px black"}}>
-            <option value="">Tip eveniment</option>
-            {uniqueCategories.map(cat => (<option key={cat} value={cat}>{cat}</option>)) }
-        </select>
-
-        
-        <div className="calendar-wrapper">
-            <button 
-                className="calendar-btn" 
-                onClick={() => setShowCalendar(true)}
-                title="Vezi Calendar"
-            >
-                <img src={calendarIcon} alt="Calendar" style={{width: '20px', height: '20px'}} />
-            </button>
+     
+      <div className="filters-row">
+        <div className="filters-group">
+            <div className="filter-item">
+                <select name="organizer" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
+                    <option value="">Organizator</option>
+                    {uniqueOrganizers.map(org => (<option key={org} value={org}>{org}</option>))}
+                </select>
+            </div>
+            <div className="filter-item" >
+                <select name="location" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
+                    <option value="" >Locație</option>
+                    {uniqueLocations.map(loc => (<option key={loc} value={loc}>{loc}</option>))}
+                </select>
+            </div>
+            <div className="filter-item">
+                <select name="category" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
+                    <option value="">Tip eveniment</option>
+                    {uniqueCategories.map(cat => (<option key={cat} value={cat}>{cat}</option>)) }
+                </select>
+            </div>
         </div>
+
+        <button className="calendar-trigger-btn" onClick={() => setShowCalendar(true)} style={{borderRadius:"50px", border:"1px solid #000000"}}>
+            <CalendarIcon size={18} /> Calendar
+        </button>
       </div>
 
-      
-      <div className="events-grid">
+     
+      <div className="events-grid-large">
           {loading ? (
              <p className="loading-text">Se încarcă evenimentele...</p>
           ) : filteredEvents.length > 0 ? (
@@ -317,7 +315,7 @@ const Home = () => {
                 />
              ))
           ) : (
-             <p className="no-events-text">Nu am găsit evenimente.</p>
+             <p className="no-events-text" >Nu am găsit evenimente.</p>
           )}
       </div>
     </div>

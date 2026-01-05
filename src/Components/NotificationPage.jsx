@@ -10,12 +10,14 @@ const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  
+ 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const response = await api.get('/notifications');
-        setNotifications(response.data);
+     
+        const sorted = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setNotifications(sorted);
       } catch (error) {
         console.error("Eroare:", error);
         toast.error("Eroare la încărcare.");
@@ -36,38 +38,55 @@ const NotificationPage = () => {
       return `${day} ${month} • ${time}`;
   };
 
- 
+  
   const getNotificationConfig = (message) => {
-      const msg = message.toLowerCase();
+      const msg = message ? message.toLowerCase() : "";
 
-      
       if (msg.includes('aprobat') || msg.includes('felicitări') || msg.includes('publicat')) {
           return { type: 'APPROVE', label: 'APROBAT' };
       }
-      
       if (msg.includes('respins') || msg.includes('nu a fost aprobat') || msg.includes('reject')) {
           return { type: 'REJECT', label: 'RESPINS' };
       }
-     
       if (msg.includes('anulat') || msg.includes('cancelled')) {
           return { type: 'CANCEL', label: 'ANULAT' };
       }
-      
       if (msg.includes('locația') || msg.includes('location')) {
           return { type: 'LOCATION', label: 'LOCAȚIE SCHIMBATĂ' };
       }
-      
       if (msg.includes('ora') || msg.includes('data') || msg.includes('amânat')) {
           return { type: 'TIME', label: 'ORĂ SCHIMBATĂ' };
       }
-      
       return { type: 'INFO', label: 'INFO' };
   };
 
-  const handleMarkAllRead = () => {
-      toast.success("Toate notificările au fost marcate ca citite.");
-      
+
+  const handleMarkAllRead = async () => {
+      try {
+     
+          const updatePromises = notifications
+            .filter(n => !n.isRead) 
+            .map(notif => api.put(`/notifications/${notif.id}/read`, {}));
+          
+          await Promise.all(updatePromises);
+
+         
+          window.dispatchEvent(new Event('notificationsRead'));
+
+       
+          setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+
+          toast.success("Toate notificările au fost marcate ca citite.");
+
+      } catch (error) {
+          console.error("Eroare la marcare:", error);
+          
+          setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      }
   };
+
+ 
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <div className="notification-page-container">
@@ -76,18 +95,24 @@ const NotificationPage = () => {
       <div className="notif-header-row">
         <div className="header-left-group">
             <button className="back-arrow-btn" onClick={() => navigate('/home')}>
-                <FaArrowLeft />
+                ←
             </button>
-            <div className="title-group">
+           <div className="title-group">
                 <h1>Notificări</h1>
-                <span className="subtitle-text">{notifications.length} notificări noi</span>
+                <span className="subtitle-text">
+                    {unreadCount > 0 ? `${unreadCount} notificări noi` : 'Nu ai notificări noi'}
+                </span>
             </div>
         </div>
         
-        <button className="mark-read-btn" onClick={handleMarkAllRead} style={{color:"black"}}>
-            Marchează toate ca citite
-        </button>
+        
+        {unreadCount > 0 && (
+            <button className="mark-read-btn" onClick={handleMarkAllRead} style={{color:"black"}}>
+                Marchează toate ca citite
+            </button>
+        )}
       </div>
+       
 
       <div className="notification-list-styled">
         {loading ? (
@@ -95,32 +120,29 @@ const NotificationPage = () => {
         ) : notifications.length > 0 ? (
           notifications.map((notif) => {
             const config = getNotificationConfig(notif.message);
-            
             const cardClass = `styled-notif-card card-type-${config.type}`;
 
             return (
                 <div key={notif.id} className={cardClass}>
                   
-                 
                   <div className="card-header-line">
                       <div className="header-left">
-                         
                           <span className={`tag-pill tag-${config.type}`}>{config.label}</span>
+                    
+                          <span className="notif-event-title">
+                              {notif.event ? notif.event.title : (notif.eventTitle || "Notificare Sistem")}
+                          </span>
                           
                           
-                          <span className="notif-event-title">{notif.eventTitle || "Notificare Sistem"}</span>
-                          
-                        
-                          <span className="red-dot">●</span>
+                          {!notif.isRead && <span className="red-dot">●</span>}
                       </div>
                       
                       <div className="header-right">
-                          <span className="notif-date">{formatTimestamp(notif.timestamp)}</span>
+                          <span className="notif-date">{formatTimestamp(notif.createdAt || notif.timestamp)}</span>
                           <FaChevronDown className="chevron-icon" />
                       </div>
                   </div>
 
-               
                   <div className="card-body-text">
                       {notif.message}
                   </div>
@@ -129,7 +151,7 @@ const NotificationPage = () => {
           })
         ) : (
           <div className="empty-state">
-              <p>Nu ai nicio notificare nouă. 🔔</p>
+              <p>Nu ai nicio notificare. 🔔</p>
           </div>
         )}
       </div>

@@ -1,151 +1,149 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Auth.css';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; 
 import api from '../services/api';
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaGraduationCap, FaBuilding, FaUniversity, FaMapMarkerAlt } from 'react-icons/fa';
+import { Mail, Lock, User, Phone, MapPin, Building2, GraduationCap, University, Calendar, Timer, User2 } from 'lucide-react';
+import { CgOrganisation } from 'react-icons/cg';
 
 const FALLBACK_EVENTS = [
-  { id: 101, title: "Concert Rock", desc: "O noapte incendiară...", date: "DEC 26", location: "Campus", tag: "SOCIAL", img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=300" },
-  { id: 102, title: "Tech Meetup", desc: "Viitorul în IT...", date: "JAN 10", location: "Aula Magna", tag: "EDUCATIONAL", img: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=300" },
-  { id: 103, title: "Art Gallery", desc: "Expoziție modernă...", date: "FEB 05", location: "Centru", tag: "CULTURAL", img: "https://images.unsplash.com/photo-1518998053901-5348d3969161?auto=format&fit=crop&w=300" },
-  { id: 104, title: "Maraton", desc: "Aleargă pentru cauză...", date: "MAR 12", location: "Parc", tag: "SPORT", img: "https://images.unsplash.com/photo-1552674605-5d226a5cfb99?auto=format&fit=crop&w=300" },
-  { id: 105, title: "Workshop AI", desc: "Inteligență Artificială...", date: "APR 20", location: "Lab C", tag: "WORKSHOP", img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=300" },
+  { id: 101, title: "Concert Rock", desc: "Live music night", date: "DEC 26", location: "Campus", tag: "SOCIAL", img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=600" },
+  { id: 102, title: "Tech Meetup", desc: "Networking IT", date: "JAN 10", location: "Aula Magna", tag: "TECH", img: "https://images.unsplash.com/photo-1544531586-fde5298cdd40?auto=format&fit=crop&w=600" },
+  { id: 103, title: "Art Gallery", desc: "Modern Art", date: "FEB 05", location: "City Center", tag: "ART", img: "https://images.unsplash.com/photo-1518998053901-5348d3969161?auto=format&fit=crop&w=600" },
+  { id: 104, title: "Charity Run", desc: "5k Run", date: "MAR 12", location: "Park", tag: "SPORT", img: "https://images.unsplash.com/photo-1552674605-5d226a5cfb99?auto=format&fit=crop&w=600" },
+];
+
+const ANIMATION_LANES = [
+    { left: '-25%', delay: '0s', duration: '40s', anim: 'flow-up-right' },
+    { left: '-25%', delay: '-20s', duration: '40s', anim: 'flow-up-right' },
+    { left: '5%',  delay: '-5s', duration: '45s', anim: 'flow-up-right' },
+    { left: '5%',  delay: '-25s', duration: '45s', anim: 'flow-up-right' },
+    { left: '25%', delay: '-10s', duration: '48s', anim: 'flow-up-right' },
+    { left: '25%', delay: '-30s', duration: '48s', anim: 'flow-up-right' },
+    { left: '65%', delay: '-8s', duration: '42s', anim: 'flow-down-left' },
+    { left: '65%', delay: '-28s', duration: '42s', anim: 'flow-down-left' },
+    { left: '85%', delay: '-2s', duration: '46s', anim: 'flow-down-left' },
+    { left: '85%', delay: '-22s', duration: '46s', anim: 'flow-down-left' },
+    { left: '-15%', delay: '-8s', duration: '42s', anim: 'flow-down-left' },
+    { left: '-15%', delay: '-8s', duration: '42s', anim: 'flow-down-left' },
 ];
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isFocused, setIsFocused] = useState(false);
-  const [backgroundEvents, setBackgroundEvents] = useState([]);
+  const [backgroundCards, setBackgroundCards] = useState([]);
   
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', password: '', confirmPassword: '',
-    phoneNumber: '', role: 'student', faculty: '', studentYear: '', organizationName: '',
+    firstName: '', 
+    lastName: '', 
+    email: '', 
+    password: '', 
+    confirmPassword: '',
+    phoneNumber: '', 
+    role: 'student', 
+    faculty: '', 
+    studentYear: '', 
+    organizationName: '',
   });
 
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  
-  const enhanceEventsWithRandomness = (events) => {
-    const multiplied = [...events, ...events, ...events].slice(0, 15);
-    
-    return multiplied.map(evt => {
-      
-      const startTop = Math.random() * 100;
-      const startLeft = Math.random() * 100;
-
-      
-      const rotation = -20 + Math.random() * 60 + 'deg'; 
-
-    
-     
-      const distance = 300 + Math.random() * 200;
-      
-     
-      const moveX = distance + 'px';
-      const moveY = (-distance) + 'px'; 
-
-      
-      const duration = 15 + Math.random() * 15 + 's';
-      const delay = Math.random() * -15 + 's';
-
-      return {
-        ...evt,
-        style: {
-          top: `${startTop}%`,
-          left: `${startLeft}%`,
-          '--rot': rotation,
-          '--tx': moveX,
-          '--ty': moveY,
-          animationName: 'floatAnimation',
-          animationDuration: duration,
-          animationDelay: delay,
-          animationIterationCount: 'infinite',
-          animationDirection: 'alternate', 
-          animationTimingFunction: 'ease-in-out'
-        }
-      };
-    });
-  };
-
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchBackgroundEvents = async () => {
       try {
         const response = await api.get('/events'); 
         let eventsData = Array.isArray(response.data) ? response.data : response.data.content;
-        
-        if (!eventsData || eventsData.length === 0) {
-          setBackgroundEvents(enhanceEventsWithRandomness(FALLBACK_EVENTS));
-        } else {
-          const mapped = eventsData.map((evt, idx) => ({
-             id: evt.id || idx,
-             title: evt.name || evt.title || "Eveniment",
-             desc: evt.description ? evt.description.substring(0, 20) + "..." : "Detalii...",
-             date: evt.date ? new Date(evt.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}).toUpperCase() : "DATE",
-             location: evt.location || "Suceava",
-             tag: "SOCIAL",
-             img: evt.imageUrl || FALLBACK_EVENTS[idx % FALLBACK_EVENTS.length].img
-          }));
-          setBackgroundEvents(enhanceEventsWithRandomness(mapped));
-        }
+        let sourceEvents = (eventsData && eventsData.length > 0) ? eventsData.map(evt => {
+            const d = new Date(evt.startTime);
+            return {
+                id: evt.id,
+                title: evt.title,
+                desc: evt.description || "Detalii eveniment...",
+                date: `${d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} ${d.getDate()}`,
+                location: evt.location || "Online",
+                tag: evt.category || "EVENT",
+                img: evt.imageUrl || FALLBACK_EVENTS[Math.floor(Math.random() * FALLBACK_EVENTS.length)].img
+            };
+        }) : FALLBACK_EVENTS;
+
+        const cards = ANIMATION_LANES.map((lane, index) => ({
+            ...lane,
+            id: `bg-card-${index}`,
+            event: sourceEvents[index % sourceEvents.length]
+        }));
+        setBackgroundCards(cards);
       } catch (err) {
-        setBackgroundEvents(enhanceEventsWithRandomness(FALLBACK_EVENTS));
+        const cards = ANIMATION_LANES.map((lane, idx) => ({ 
+            ...lane, 
+            id: `fallback-${idx}`, 
+            event: FALLBACK_EVENTS[idx % FALLBACK_EVENTS.length] 
+        }));
+        setBackgroundCards(cards);
       }
     };
-    fetchEvents();
+    fetchBackgroundEvents();
   }, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = (e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsFocused(false); };
 
- 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setMessage(''); setError('');
-    
+    e.preventDefault(); 
+    setMessage(''); 
+    setError('');
+
     if (!isLogin && formData.password !== formData.confirmPassword) { 
         setError("Parolele nu coincid!"); 
         return; 
     }
     
     const endpoint = isLogin ? '/auth/signin' : '/auth/signup';
-    let bodyData = isLogin ? { email: formData.email, password: formData.password } : 
-    { firstName: formData.firstName, lastName: formData.lastName, email: formData.email, password: formData.password, phoneNumber: formData.phoneNumber, role: formData.role,
-      ...(formData.role === 'student' && { studentFaculty: formData.faculty, studentYear: formData.studentYear ? parseInt(formData.studentYear) : null }),
-      ...(formData.role === 'organizer' && { organizationName: formData.organizationName }) };
+    
+   
+    let bodyData;
+    
+    if (isLogin) {
+        bodyData = { email: formData.email, password: formData.password };
+    } else {
+        bodyData = { 
+            firstName: formData.firstName, 
+            lastName: formData.lastName, 
+            email: formData.email, 
+            password: formData.password, 
+            phoneNumber: formData.phoneNumber, 
+            role: formData.role,
+            
+            ...(formData.role === 'student' && { 
+                faculty: formData.faculty, 
+                yearOfStudy: formData.studentYear ? parseInt(formData.studentYear) : null
+            }),
+           
+            ...(formData.role === 'organizer' && { 
+                organizationName: formData.organizationName 
+            }),
+        };
+    }
 
     try {
       const response = await api.post(endpoint, bodyData);
       const data = response.data;
-
+      
       if (isLogin) {
         localStorage.setItem('user', JSON.stringify(data));
-        
-       
         const roles = data.roles || [];
-        
-       
-        if (roles.some(role => role.toUpperCase().includes('ADMIN'))) {
-            navigate('/home'); 
-        } 
-        
-        else if (roles.some(role => role.toUpperCase().includes('ORGANIZER'))) {
-            navigate('/home'); 
-        } 
-        
-        else {
-            navigate('/home');
-        }
-
+        if (roles.some(r => r.toUpperCase().includes('ADMIN'))) navigate('/home');
+        else if (roles.some(r => r.toUpperCase().includes('ORGANIZER'))) navigate('/home');
+        else navigate('/home');
       } else {
-        setMessage("Cont creat! Te rugăm să te autentifici.");
+        setMessage("Cont creat cu succes! Te rugăm să te autentifici.");
         setIsLogin(true);
+        
         setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Eroare.');
+      console.error("Eroare la submit:", err);
+      setError(err.response?.data?.message || err.message || 'Eroare de autentificare.');
     }
   };
 
@@ -154,120 +152,166 @@ const AuthPage = () => {
       
     
       <div className={`animated-background ${isFocused ? 'blurred' : ''}`}>
-        {backgroundEvents.map((evt, idx) => (
-          <div key={`${evt.id}-${idx}`} className="floating-card" style={evt.style}>
-            <div className="card-image-header">
-              <img src={evt.img} alt={evt.title} />
-              <div className="tag-social">{evt.tag}</div>
-              <div className="tag-date">{evt.date}</div>
-            </div>
-            <div className="card-body">
-              <div className="card-title">{evt.title}</div>
-              <div className="card-desc">{evt.desc}</div>
-              <div className="card-footer">
-                <div className="card-location">
-                  <FaMapMarkerAlt color="#ff6b6b" /> {evt.location}
+        {backgroundCards.map((card) => (
+          <div key={card.id} className="floating-lane-container" 
+            style={{ 
+                left: card.left, 
+                animation: `${card.anim} ${card.duration} linear infinite`, 
+                animationDelay: card.delay 
+            }}>
+          
+            <div className="visual-card">
+                <div className="card-image-header">
+                  <img src={card.event.img} alt={card.event.title} />
+                  <div className="tag-social">{card.event.tag}</div>
+                  <div className="tag-date">{card.event.date}</div>
                 </div>
-                <button className="btn-details">Detalii</button>
-              </div>
+                <div className="card-body">
+                  <div className="card-title">{card.event.title}</div>
+                  <div className="card-desc">{card.event.desc}</div>
+                  <div className="card-footer">
+                    <div className="card-location"><MapPin size={12} /> {card.event.location}</div>
+                    <button className="btn-details">Detalii</button>
+                  </div>
+                </div>
             </div>
           </div>
         ))}
       </div>
 
-    
+      
       <div 
         className="auth-container"
-        onMouseEnter={handleFocus}
+        onMouseEnter={() => setIsFocused(true)}
         onMouseLeave={() => setIsFocused(false)}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
       >
-        <div className="auth-card">
-          <h2 className="auth-title">{isLogin ? 'Bine ai venit!' : 'Creează cont'}</h2>
-          <p className="auth-subtitle">
-            {isLogin 
-              ? 'Autentifică-te în contul tău Event Manager' 
-              : 'Completează detaliile pentru a te înregistra.'}
-          </p>
+        <div className="auth-card" style={{border:"solid 2px black"}}>
+          <div className="auth-header">
+            <h2 className="auth-title">{isLogin ? 'Bine ai venit!' : 'Creează cont'}</h2>
+            <p className="auth-subtitle">
+                {isLogin ? 'Autentifică-te în contul tău Event Manager' : 'Alătură-te Event Manager și descoperă evenimente uimitoare.'}
+            </p>
+          </div>
 
-          {error && <div style={{color:'#ef4444', marginBottom:15, textAlign:'center', fontSize:14}}>{error}</div>}
-          {message && <div style={{color:'#10b981', marginBottom:15, textAlign:'center', fontSize:14}}>{message}</div>}
+          {error && <div className="msg-error">{error}</div>}
+          {message && <div className="msg-success">{message}</div>}
 
           <form onSubmit={handleSubmit}>
             {!isLogin && (
-              <div className="form-row">
-                <div className="input-group">
+              <div>
+                <div className="input-group" >
                   <label>Prenume</label>
                   <div className="input-wrapper">
-                    <FaUser className="input-icon" />
-                    <input type="text" name="firstName" placeholder="Ion" value={formData.firstName} onChange={handleChange} required  style={{border:"solid 2px black", borderRadius:"12px", padding:"0 20px 0 55px"}}/>
+                    <User className="input-icon" size={18} />
+                    <input type="text" name="firstName" placeholder="Ion" value={formData.firstName} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}/>
                   </div>
                 </div>
                 <div className="input-group">
                   <label>Nume</label>
                   <div className="input-wrapper">
-                    <FaUser className="input-icon" />
-                    <input type="text" name="lastName" placeholder="Popescu" value={formData.lastName} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"12px", padding:"0 20px 0 55px"}}/>
+                    <User className="input-icon" size={18} />
+                    <input type="text" name="lastName" placeholder="Popescu" value={formData.lastName} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}/>
                   </div>
                 </div>
               </div>
             )}
             
             {!isLogin && (
-             <div className="input-group">
-               <label>Telefon</label>
-               <div className="input-wrapper">
-                 <FaPhone className="input-icon" />
-                 <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required style={{border:"solid 2px black"}}/>
-               </div>
-             </div>
+                <div className="input-group">
+                  <label>Telefon</label>
+                  <div className="input-wrapper">
+                    <Phone className="input-icon" size={18} />
+                    <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required style={{border:"solid 2px black"}}/>
+                  </div>
+                </div>
             )}
 
             <div className="input-group" >
-              <label>Email</label>
+              <label >Email</label>
               <div className="input-wrapper" >
-                <FaEnvelope className="input-icon" />
-                <input type="email" name="email" placeholder="student@university.edu" value={formData.email} onChange={handleChange} required  style={{border:"solid 2px black"}}/>
+                <Mail className="input-icon" size={18} />
+                <input type="email" name="email" placeholder="student@university.edu" value={formData.email} onChange={handleChange} required style={{border:"solid 2px black"}}/>
               </div>
             </div>
 
+          
             {!isLogin && (
               <>
                 <div className="input-group">
-                  <label>Facultate</label>
-                  <div className="input-wrapper">
-                    <FaUniversity className="input-icon" />
-                    {formData.role === 'student' ? (
-                        <select name="faculty" value={formData.faculty} onChange={handleChange} style={{paddingLeft:'55px',border:"solid 2px black"}}>
-                          <option value="">Selectează facultatea</option>
-                          <option value="FIESC">FIESC</option>
-                          <option value="FEAA">FEAA</option>
-                          <option value="Litere">Litere</option>
-                          <option value="Mecanica">Mecanică</option>
-                        </select>
-                    ) : (
-                         <input type="text" name="faculty" placeholder="Nume Instituție" value={formData.faculty} onChange={handleChange} />
-                    )}
-                  </div>
-                </div>
-
-                <div className="input-group">
                    <label>Tip de cont</label>
-                   <div className="input-wrapper" >
-                      <select name="role" value={formData.role} onChange={handleChange} style={{paddingLeft:'20px',border:"solid 2px black"}} > 
+                   <div className="input-wrapper">
+                      
+                      {formData.role === 'admin' ? <User2 className="input-icon" size={18} /> : <User className="input-icon" size={18} />}
+                      
+                      <select name="role" value={formData.role} onChange={handleChange} style={{border:"solid 2px black"}}>
                         <option value="student">Student</option>
                         <option value="organizer">Organizator</option>
+                        <option value="admin">Admin</option>
                       </select>
                    </div>
                 </div>
+
+                {formData.role === 'student' && (
+                
+                    <div className="student-fields-group">
+                        <div className="input-group">
+                            <label>Facultate</label>
+                            <div className="input-wrapper">
+                                <Building2 className="input-icon" size={18} />
+                                <select name="faculty" value={formData.faculty} onChange={handleChange} style={{border:"solid 2px black"}} required={formData.role === 'student'}>
+                                    <option value="">Selectează facultatea</option>
+                                    <option value="FIESC">FIESC</option>
+                                    <option value="FEAA">FEAA</option>
+                                    <option value="FIM">FIM</option>
+                                    <option value="FLSC">FLSC</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="input-group">
+                            <label>An de studiu</label>
+                            <div className="input-wrapper">
+                                <Timer className="input-icon" size={18} />
+                                <select name="studentYear" value={formData.studentYear} onChange={handleChange} style={{border:"solid 2px black"}} required={formData.role === 'student'}>
+                                    <option value="">Selectează anul</option>
+                                    <option value="1">Anul 1</option>
+                                    <option value="2">Anul 2</option>
+                                    <option value="3">Anul 3</option>
+                                    <option value="4">Anul 4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {formData.role === 'organizer' && (
+
+                    <div className="input-group">
+                        <label>Nume Organizație</label>
+                        <div className="input-wrapper">
+                            <CgOrganisation className="input-icon" size={18} />
+                            <input 
+                                type="text" 
+                                name="organizationName" 
+                                placeholder="Ex: Liga Studenților" 
+                                value={formData.organizationName} 
+                                onChange={handleChange} 
+                                style={{border:"solid 2px black"}}
+                                required={formData.role === 'organizer'}
+                            />
+                        </div>
+                    </div>
+                )}
+              
               </>
             )}
+              
+           
 
             <div className="input-group">
               <label>Parolă</label>
               <div className="input-wrapper">
-                <FaLock className="input-icon" />
+                <Lock className="input-icon" size={18} />
                 <input type="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required style={{border:"solid 2px black"}}/>
               </div>
             </div>
@@ -276,26 +320,27 @@ const AuthPage = () => {
                <div className="input-group">
                 <label>Confirmă parola</label>
                 <div className="input-wrapper">
-                  <FaLock className="input-icon" />
+                  <Lock className="input-icon" size={18} />
                   <input type="password" name="confirmPassword" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required style={{border:"solid 2px black"}}/>
                 </div>
               </div>
             )}
 
             <button type="submit" className="auth-btn">
-              {isLogin ? 'Autentificare' : 'Creează cont'}
+                {isLogin ? 'Autentificare' : 'Creează cont'}
             </button>
 
-            <div className="separator">
-               <span>Sau continuă cu</span>
-            </div>
-
-            <button type="button" className="idp-btn">
-               <FaUniversity size={20}/> idp.usv.ro
-            </button>
+            {!isLogin && (
+                <>
+                    <div className="separator"><span>Sau continuă cu</span></div>
+                    <button type="button" className="idp-btn" style={{border:"solid 2px black"}}>
+                        <University size={18}/> idp.usv.ro
+                    </button>
+                </>
+            )}
 
           </form>
-
+          
           <div className="auth-footer">
             {isLogin ? 'Nu ai un cont? ' : 'Ai deja un cont? '}
             <span className="link-text" onClick={() => { setIsLogin(!isLogin); setError(''); }}>

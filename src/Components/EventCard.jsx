@@ -27,7 +27,7 @@ const EventCard = ({
      }
   }, [id, activeRole, isFavoriteProp]);
 
-  
+
   const formatDate = (isoString) => {
     if (!isoString) return { text: 'DATA' };
     const d = new Date(isoString);
@@ -41,8 +41,8 @@ const EventCard = ({
   ACADEMIC: '#4a90e2',   
   SPORT: '#2ecc71',      
   CAREER: '#8e44ad',     
-  VOLUNTEERING: '#3498db', 
-  OTHER: '#95a5a6'      
+  VOLUNTEERING: '#e44d26',
+  OTHER: '#95a5a6'       
 };
   const { text: dateText } = formatDate(date);
 
@@ -66,7 +66,7 @@ const EventCard = ({
             {category || 'Event'}
         </div>
 
-       
+        
         <div className="badge-date">
             {dateText}
         </div>
@@ -87,7 +87,7 @@ const EventCard = ({
             : "Fara descriere."}
         </p>
         </div>
-        <div className="divider-line" style={{backgroundColor:"black", width:"100%", opacity:"0.3"}}></div>
+        <div className="divider-line" style={{backgroundColor:"black", width:"100%", opacity:"0.2", margin:"0 0 10px 0"}}></div>
         <div className="card-footer">
             <div className="card-loc">
               <span className="pin-icon"><img src={Location} alt="Pin" style={{width:"15px", height:"15px"}} /></span> 

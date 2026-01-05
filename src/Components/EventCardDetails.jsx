@@ -7,6 +7,7 @@ import './EventCardDetails.css';
 import usv from '../Images/usv.jpg';
 import { toast } from 'react-hot-toast';
 
+
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const EventDetails = () => {
     }
   }, []);
 
+ 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -49,23 +51,23 @@ const EventDetails = () => {
 
       if (isStudent) {
         try {
-           try {
-             const favRes = await api.get(`/favorites/check/${id}`);
-             setIsFavorite(favRes.data);
-           } catch (e) { console.error("Ignorat eroare fav", e); }
+            try {
+              const favRes = await api.get(`/favorites/check/${id}`);
+              setIsFavorite(favRes.data);
+            } catch (e) { console.error("Ignorat eroare fav", e); }
 
-           const myTicketsRes = await api.get('/tickets/my-tickets');
-           const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
-           
-           if (foundTicket) {
-             setCurrentTicket(foundTicket);
-             const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
-             setHasTicket(isWalletAdded === 'true'); 
-           } else {
-               setCurrentTicket(null);
-               setHasTicket(false);
-               localStorage.removeItem(`wallet_added_${id}`);
-           }
+            const myTicketsRes = await api.get('/tickets/my-tickets');
+            const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
+            
+            if (foundTicket) {
+              setCurrentTicket(foundTicket);
+              const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
+              setHasTicket(isWalletAdded === 'true'); 
+            } else {
+                setCurrentTicket(null);
+                setHasTicket(false);
+                localStorage.removeItem(`wallet_added_${id}`);
+            }
         } catch (e) { console.error("Eroare verificare bilet:", e); }
       }
     } catch (error) {
@@ -76,7 +78,6 @@ const EventDetails = () => {
   }, [id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-
 
   const handleToggleFavorite = async () => {
       try {
@@ -97,6 +98,7 @@ const EventDetails = () => {
   const handleOpenTicket = () => setShowTicketModal(true);
   
   const handleBuyTicket = () => {
+    
     if (user.role !== 'STUDENT') {
         toast.error('Trebuie sa fii autentificat ca STUDENT!');
         return;
@@ -126,9 +128,8 @@ const handleTicketAddedToWallet = async () => {
            setShowTicketModal(false);
           toast.success('Bilet salvat!');
 
-         
+          
           setEvent(prevEvent => {
-              
               if (prevEvent && prevEvent.maxCapacity) {
                   return {
                       ...prevEvent,
@@ -137,14 +138,14 @@ const handleTicketAddedToWallet = async () => {
               }
               return prevEvent;
           });
-          
+
       } catch (error) {
         console.error(error);
         toast.error('Eroare: Nu s-a putut salva biletul.');
    }
   };
 
-  
+ 
   const formatDateFull = (iso) => iso ? new Date(iso).toLocaleDateString('ro-RO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "-";
   const formatTimeSimple = (iso) => iso ? new Date(iso).toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'}) : "-";
 
@@ -156,7 +157,7 @@ const handleTicketAddedToWallet = async () => {
     
       <div className="main-card-container">
         
-        
+       
         <div className="hero-section">
            <img 
               src={event.imageUrl || usv} 
@@ -167,6 +168,7 @@ const handleTicketAddedToWallet = async () => {
            
            <div className="hero-overlay-gradient"></div>
 
+          
            <div className="hero-top-actions">
                <button className="circle-btn back-btn" onClick={() => navigate(-1)} style={{background:"white", color:"black"}}>
                    ←
@@ -178,17 +180,16 @@ const handleTicketAddedToWallet = async () => {
                )}
            </div>
 
-          
+        
            <div className="hero-content">
                <span className="category-pill">{event.category || 'EVENT'}</span>
                <h1 className="hero-title">{event.title}</h1>
            </div>
         </div>
 
-     
+      
         <div className="body-content">
-            
-           
+        
             <div className="info-grid">
                 
               
@@ -235,10 +236,9 @@ const handleTicketAddedToWallet = async () => {
                     </div>
                 </div>
 
-              
+                
                 <div className="info-box">
                     <h3>Despre acest eveniment</h3>
-                    <div className="divider-line"></div>
                     <p className="description-text">
                         {event.description || "Nu există descriere disponibilă."}
                     </p>
@@ -259,21 +259,90 @@ const handleTicketAddedToWallet = async () => {
                         ✅ Vezi Biletul
                     </button>
                 ) : (
-                    <button className="big-action-btn btn-red" onClick={handleBuyTicket}>
+                    <button 
+                        className="big-action-btn btn-red" 
+                        onClick={handleBuyTicket}
+                        disabled={user.role !== 'STUDENT'}
+                        style={user.role !== 'STUDENT' ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#999', borderColor: '#999' } : {}}
+                        title={user.role !== 'STUDENT' ? "Trebuie să fii autentificat ca student pentru a participa" : "Participă la eveniment"}
+                    >
                         Participă
                     </button>
                 )}
             </div>
 
        
-            <div className="reviews-section-container">
+            {event.materials && event.materials.length > 0 && (
+                <div className="materials-section-container" style={{ margin: '30px 0' }}>
+                    <div className="info-box" style={{ width: '100%' }}>
+                         <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'15px'}}>
+                            <h3 style={{margin:0}}>📂 Materiale și Resurse</h3>
+                            <span style={{background:'#e0f2fe', color:'#0284c7', padding:'2px 8px', borderRadius:'10px', fontSize:'0.8rem', fontWeight:'600'}}>
+                                {event.materials.length}
+                            </span>
+                         </div>
+                         <div className="divider-line"></div>
+                         
+                         <div className="materials-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '15px', marginTop: '20px' }}>
+                             {event.materials.map((mat, index) => (
+                                 <a 
+                                    key={mat.id || index} 
+                                    href={mat.url || mat.fileUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        padding: '15px', 
+                                        backgroundColor: '#fff', 
+                                        border: '1px solid #e5e7eb', 
+                                        borderRadius: '8px',
+                                        textDecoration: 'none',
+                                        color: '#374151',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                                        e.currentTarget.style.borderColor = '#3b82f6';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                                        e.currentTarget.style.borderColor = '#e5e7eb';
+                                    }}
+                                 >
+                                    <div style={{
+                                        display:'flex', alignItems:'center', justifyContent:'center',
+                                        width:'40px', height:'40px', background:'#eff6ff', borderRadius:'8px', marginRight:'12px', color:'#2563eb'
+                                    }}>
+                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </div>
+                                    <div style={{overflow:'hidden'}}>
+                                        <div style={{ fontWeight: '600', fontSize:'0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {mat.fileName || `Document ${index+1}`}
+                                        </div>
+                                        <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop:'2px' }}>
+                                            Deschide document
+                                        </div>
+                                    </div>
+                                 </a>
+                             ))}
+                         </div>
+                    </div>
+                </div>
+            )}
+
+          
+            <div >
                 <ReviewSection eventId={id} userRole={user.role} />
             </div>
 
         </div>
       </div>
 
-  
+    
       {showTicketModal && currentTicket && (
           <TicketModal 
               ticketData={currentTicket} 

@@ -32,21 +32,21 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="ticket-card-modal" onClick={(e) => e.stopPropagation()}>
         
-  
+     
         <div className="modal-header-section">
             <button className="close-x-btn" onClick={onClose}>✕</button>
             <h2 className="main-heading">Biletul tău</h2>
             <p className="sub-heading">{eventTitle || "Eveniment"}</p>
         </div>
 
-     
+       
         <div className="qr-section-wrapper">
             <div className="qr-box">
                 <img src={QR} alt="QR Code" className="qr-img" />
             </div>
         </div>
 
-     
+       
         <div className="dashed-separator"></div>
 
         
@@ -93,10 +93,10 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
             </div>
         </div>
 
-        
+     
         <div className="modal-footer-section">
             
-           
+         
             {!isSaved && (
                 <div className="wallet-actions-wrapper">
                     <p className="wallet-label">Adaugă în portofel:</p>

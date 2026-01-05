@@ -46,7 +46,7 @@ const MyTickets = () => {
       });
   };
 
- 
+  
   const formatTime = (dateInput) => {
       if (!dateInput) return "--:--";
       let d;
@@ -61,16 +61,16 @@ const MyTickets = () => {
   return (
     <div className="my-tickets-container">
       
-      
+     
       <div className="tickets-header-simple">
           <button className="back-arrow" onClick={() => navigate('/home')}>←</button>
           <div className="header-texts">
-              <h1>Biletele mele</h1>
+              <h1 style={{fontWeight:"300", fontSize:"20px"}}>My Tickets</h1>
               <p>Vezi și gestionează biletele tale la evenimente</p>
           </div>
       </div>
 
-      
+    
       <div className="tickets-list-section">
         {loading ? (
             <p className="loading-msg">Se încarcă...</p>
@@ -79,14 +79,14 @@ const MyTickets = () => {
         ) : (
             <div className="tickets-cards-grid">
                 {tickets.map(ticket => {
-                   
+                    
                     const dateVal = ticket.eventStartTime || ticket.eventDate || ticket.date;
                     const imageUrl = ticket.eventImageUrl || ticket.imageUrl || DefaultImage;
 
                     return (
                         <div key={ticket.id} className="ticket-visual-card">
                             
-                        
+                       
                             <div className="ticket-img-wrapper">
                                 <img 
                                     src={imageUrl} 
@@ -95,7 +95,7 @@ const MyTickets = () => {
                                 />
                             </div>
 
-                        
+                         
                             <div className="ticket-content">
                                 <h3 className="ticket-title">
                                     {ticket.eventTitle || "Eveniment Fără Titlu"}
@@ -117,7 +117,7 @@ const MyTickets = () => {
                                 </div>
                             </div>
 
-                          
+                            
                             <button 
                                 className="view-ticket-btn" 
                                 onClick={() => setSelectedTicket(ticket)}
@@ -131,7 +131,7 @@ const MyTickets = () => {
         )}
       </div>
 
-     
+      
       {selectedTicket && (
           <TicketModal 
              ticketData={selectedTicket} 
