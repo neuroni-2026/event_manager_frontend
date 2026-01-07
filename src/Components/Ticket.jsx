@@ -5,8 +5,9 @@ import QR from '../Images/qr_code.png';
 import AppleWallet from '../Images/a_wallet.png';
 import GoogleWallet from '../Images/g_wallet.png';
 
-const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
+const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved, hideWallet }) => {
   if (!ticketData) return null;
+  
 
   const { eventTitle, eventLocation, studentName, id } = ticketData;
 
@@ -97,32 +98,21 @@ const TicketModal = ({ ticketData, onClose, onAddToWallet, isSaved }) => {
         <div className="modal-footer-section">
             
          
-            {!isSaved && (
-                <div className="wallet-actions-wrapper">
-                    <p className="wallet-label">Adaugă în portofel:</p>
-                    <div className="wallet-buttons-row">
-                        <img 
-                            src={AppleWallet} 
-                            alt="Apple Wallet" 
-                            className="wallet-img-btn"
-                            onClick={handleWalletClick}
-                        />
-                        <img 
-                            src={GoogleWallet} 
-                            alt="Google Wallet" 
-                            className="wallet-img-btn"
-                            onClick={handleWalletClick}
-                        />
-                    </div>
-                </div>
-            )}
+            {!hideWallet && !isSaved && (
+            <div className="wallet-actions-wrapper">
+              <p className="wallet-label">Adaugă în portofel:</p>
+              <div className="wallet-buttons-row">
+                <img src={AppleWallet} alt="Apple Wallet" className="wallet-img-btn" onClick={handleWalletClick} />
+                <img src={GoogleWallet} alt="Google Wallet" className="wallet-img-btn" onClick={handleWalletClick} />
+              </div>
+            </div>
+          )}
 
-           
-            {isSaved && (
-                <div className="saved-success-msg">
-                    ✅ Bilet salvat în portofel
-                </div>
-            )}
+          {isSaved && !hideWallet && (
+            <div className="saved-success-msg">
+              ✅ Bilet salvat în portofel
+            </div>
+          )}
 
             <button className="download-pdf-btn">
                 <span className="btn-icon">📥</span> Descarcă PDF

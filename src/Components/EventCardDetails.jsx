@@ -56,18 +56,20 @@ const EventDetails = () => {
               setIsFavorite(favRes.data);
             } catch (e) { console.error("Ignorat eroare fav", e); }
 
-            const myTicketsRes = await api.get('/tickets/my-tickets');
-            const foundTicket = myTicketsRes.data.find(t => t.eventTitle === eventRes.data.title);
-            
-            if (foundTicket) {
-              setCurrentTicket(foundTicket);
-              const isWalletAdded = localStorage.getItem(`wallet_added_${id}`);
-              setHasTicket(isWalletAdded === 'true'); 
-            } else {
-                setCurrentTicket(null);
-                setHasTicket(false);
-                localStorage.removeItem(`wallet_added_${id}`);
-            }
+      
+const myTicketsRes = await api.get('/tickets/my-tickets');
+
+const foundTicket = myTicketsRes.data.find(t => t.eventId === parseInt(id) || t.eventTitle === eventRes.data.title);
+
+if (foundTicket) {
+    setCurrentTicket(foundTicket);
+    setHasTicket(true); 
+    localStorage.setItem(`wallet_added_${id}`, 'true'); 
+} else {
+    setCurrentTicket(null);
+    setHasTicket(false);
+    localStorage.removeItem(`wallet_added_${id}`);
+}
         } catch (e) { console.error("Eroare verificare bilet:", e); }
       }
     } catch (error) {
@@ -170,7 +172,7 @@ const handleTicketAddedToWallet = async () => {
 
           
            <div className="hero-top-actions">
-               <button className="circle-btn back-btn" onClick={() => navigate(-1)} style={{background:"white", color:"black"}}>
+               <button className="circle-btn back-btn" onClick={() => navigate(-1)} style={{background:"white", color:"black", borderRadius:'30%', border:'1px solid black'}}>
                    ←
                </button>
                {user.role === 'STUDENT' && (
@@ -343,14 +345,17 @@ const handleTicketAddedToWallet = async () => {
       </div>
 
     
-      {showTicketModal && currentTicket && (
-          <TicketModal 
-              ticketData={currentTicket} 
-              onClose={() => setShowTicketModal(false)} 
-              onAddToWallet={handleTicketAddedToWallet} 
-              isSaved={hasTicket} 
-          />
-      )}
+      
+        {showTicketModal && currentTicket && (
+             <TicketModal 
+                 ticketData={currentTicket} 
+                    onClose={() => setShowTicketModal(false)} 
+                 onAddToWallet={handleTicketAddedToWallet} 
+                    isSaved={hasTicket} 
+       
+        hideWallet={hasTicket && !currentTicket.isPreview} 
+    />
+)}
     </div>
   );
 };

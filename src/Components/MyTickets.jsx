@@ -133,11 +133,12 @@ const MyTickets = () => {
 
       
       {selectedTicket && (
-          <TicketModal 
-             ticketData={selectedTicket} 
-             onClose={() => setSelectedTicket(null)} 
-          />
-      )}
+  <TicketModal 
+    ticketData={selectedTicket} 
+    onClose={() => setSelectedTicket(null)} 
+    hideWallet={true} 
+  />
+)}
     </div>
   );
 };

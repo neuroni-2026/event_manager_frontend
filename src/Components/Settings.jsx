@@ -9,7 +9,8 @@ import {
   Radius,
   University,
   Mail,
-  Timer
+  Timer,
+  Briefcase
 } from 'lucide-react';
 import OrganizerDashboard from './OrganizerDashboard';
 import { CgOrganisation } from 'react-icons/cg';
@@ -18,7 +19,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+const [requesting, setRequesting] = useState(false);
   
   const [profileData, setProfileData] = useState({
     firstName: '', lastName: '', phoneNumber: '',
@@ -27,6 +28,10 @@ const Settings = () => {
 
   const [passData, setPassData] = useState({
     currentPassword: '', newPassword: '', confirmPassword: ''
+  });
+  const [orgRequest, setOrgRequest] = useState({
+    organizationName: '',
+    reason: ''
   });
 
   
@@ -44,7 +49,8 @@ const Settings = () => {
           role: data.role || '',
           faculty: data.faculty || '',
           organization: data.organizationName || '',
-          studentYear: data.studentYear
+          studentYear: data.studentYear,
+          pendingUpgradeRequest: data.pendingUpgradeRequest || false
         });
       } catch (error) {
         console.error("Eroare profil:", error);
@@ -59,8 +65,9 @@ const Settings = () => {
   
   const handleProfileChange = (e) => setProfileData({ ...profileData, [e.target.name]: e.target.value });
   const handlePassChange = (e) => setPassData({ ...passData, [e.target.name]: e.target.value });
+  const handleOrgRequestChange = (e) => setOrgRequest({ ...orgRequest, [e.target.name]: e.target.value });
 
-
+  
   const handleSaveAll = async () => {
     setSaving(true);
     let hasError = false;
@@ -112,12 +119,34 @@ const Settings = () => {
              }
         }
     }
+   
+
 
     setSaving(false);
     if (!hasError) {
         toast.success("Modificările au fost salvate cu succes!");
     }
+    
   };
+   const handleSendOrgRequest = async () => {
+    if (!orgRequest.organizationName.trim()) {
+      toast.error("Numele organizației este obligatoriu.");
+      return;
+    }
+    setRequesting(true);
+    try {
+      await api.post('/user/request-organizer', {
+        organizationName: orgRequest.organizationName,
+        reason: orgRequest.reason
+      });
+      toast.success("Cererea a fost trimisă cu succes!");
+      fetchProfile();
+    } catch (error) {
+
+    } finally {
+      setRequesting(false);
+    }
+};
 
   if (loading) return <div className="settings-loading"><Loader2 className="animate-spin" /> Se încarcă setările...</div>;
 
@@ -128,7 +157,7 @@ const Settings = () => {
        
         <div className="settings-header-group">
           <button className="back-btn" onClick={() => navigate('/home')}>
-            <ArrowLeft size={24} />
+            ←
           </button>
           <div className="header-text">
             <h2>Setări cont</h2>
@@ -160,7 +189,63 @@ const Settings = () => {
                 </div>
             </div>
         </div>
+        {profileData.role === 'STUDENT' && (
+          <div className="panel-card-request">
+            <div className="request-header">
+              <div className="request-icon-container">
+                <Briefcase size={24} color="#3b82f6" />
+              </div>
+              <div className="request-title-group">
+                <h3>Cont Organizator</h3>
+                <p>Solicită drepturi de organizare evenimente</p>
+              </div>
+            </div>
 
+            <div className="request-body">
+              {profileData.pendingUpgradeRequest ? (
+                <div className="pending-message">
+                  Cererea ta este în curs de revizuire de către un administrator.
+                </div>
+              ) : (
+                <>
+                  <div className="info-box-light">
+                    Ca organizator, vei putea publica evenimente, scana bilete și gestiona participarea studenților.
+                  </div>
+
+                  <div className="form-group">
+                    <label>Numele Organizației / Asociației</label>
+                    <input 
+                      type="text" 
+                      name="organizationName"
+                      placeholder="ex: Liga Studenților FIESC"
+                      className="settings-input-simple"
+                      value={orgRequest.organizationName}
+                      onChange={handleOrgRequestChange}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>De ce dorești să devii organizator?</label>
+                    <textarea 
+                      name="reason"
+                      placeholder="Descrie pe scurt activitățile tale..."
+                      className="settings-textarea"
+                      value={orgRequest.reason}
+                      onChange={handleOrgRequestChange}
+                    />
+                  </div>
+
+                  <div className="request-actions">
+                    <button className="btn-send-request" onClick={handleSendOrgRequest} disabled={requesting}>
+                      {requesting ? <Loader2 className="animate-spin" size={18}/> : <Briefcase size={18}/>}
+                      Trimite Cererea
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
   
         <div className="panel-card-info">
             <div className="panel-header">Informații Personale</div>

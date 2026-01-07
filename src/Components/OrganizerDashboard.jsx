@@ -18,15 +18,15 @@ const OrganizerDashboard = () => {
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+
+
+
+  const [restriction, setRestriction] = useState({ isRestricted: false, msg: "" });
 
   const [selectedMaterials, setSelectedMaterials] = useState([]);
 
-  const [user, setUser] = useState({
-    firstName: 'Vizitator',
-    lastName: '',
-    role: 'Neautentificat'
-  });
+
+ 
 
 
   const [formData, setFormData] = useState({
@@ -40,9 +40,30 @@ const OrganizerDashboard = () => {
   const [currentEventId, setCurrentEventId] = useState(null);
   const [editFormData, setEditFormData] = useState({
     title: '', description: '', location: '', startTime: '',
-    endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL'
+    endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL', materials:[]
   });
+const checkStatus = useCallback(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      const now = new Date();
+      
+      let restricted = false;
+      let message = "";
 
+      if (parsedUser.isEnabled === false) {
+        restricted = true;
+        message = "CONT BLOCAT (BAN). Nu poți crea sau edita evenimente.";
+      } else if (parsedUser.suspendedUntil && new Date(parsedUser.suspendedUntil) > now) {
+        restricted = true;
+        message = `CONT SUSPENDAT până la ${new Date(parsedUser.suspendedUntil).toLocaleDateString()}.`;
+      }
+
+      setRestriction({ isRestricted: restricted, msg: message });
+      return restricted;
+    }
+    return false;
+  }, []);
   const fetchMyEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -56,28 +77,39 @@ const OrganizerDashboard = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchMyEvents();
+
+
+useEffect(() => {
+  const checkStatusAndFetch = async () => {
     const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        const rawRole = parsedUser.roles && parsedUser.roles.length > 0 
-                        ? parsedUser.roles[0].toUpperCase() 
-                        : 'ORGANIZATOR';
-        const cleanRole = rawRole.replace('ROLE_', '');
-        setUser({
-          firstName: parsedUser.firstName || '',
-          lastName: parsedUser.lastName || '',
-          role: cleanRole 
-        });
-      } catch (e) {
-        localStorage.removeItem('user'); navigate('/');
+    if (!userData) return navigate('/');
+
+    try {
+  
+      const userObj = JSON.parse(userData);
+      const res = await api.get(`/admin/users`); 
+      const currentUser = res.data.find(u => u.id === userObj.id);
+
+      if (currentUser) {
+        const now = new Date();
+        const isBanned = currentUser.isEnabled === false;
+        const isSuspended = currentUser.suspendedUntil && new Date(currentUser.suspendedUntil) > now;
+
+        if (isBanned || isSuspended) {
+          setRestriction({
+            isRestricted: true,
+            msg: isBanned ? "Contul tău este BLOCAT (BAN)." : "Activitatea ta este SUSPENDATĂ."
+          });
+        }
       }
-    } else {
-        navigate('/');
+      fetchMyEvents();
+    } catch (e) {
+      fetchMyEvents(); 
     }
-  }, [fetchMyEvents, navigate]);
+  };
+
+  checkStatusAndFetch();
+}, [fetchMyEvents, navigate]);
 
   const handleDeleteEvent = async (eventId) => {
     if (!window.confirm('Esti sigur ca vrei sa stergi acest eveniment?')) return;
@@ -134,6 +166,41 @@ const OrganizerDashboard = () => {
       toast.error('Nu am putut incarca imaginea.');
     } finally {
       setUploadingImage(false);
+    }
+  };
+  const handleDeleteImage = async (isEdit = false) => {
+    const urlToDelete = isEdit ? editFormData.imageUrl : formData.imageUrl;
+    if (!urlToDelete) return;
+
+    try {
+  
+      await api.delete(`/images/delete?url=${encodeURIComponent(urlToDelete)}`);
+      
+      if (isEdit) {
+        setEditFormData(prev => ({ ...prev, imageUrl: '' }));
+      } else {
+        setFormData(prev => ({ ...prev, imageUrl: '' }));
+      }
+      toast.success("Imaginea a fost ștearsă de pe server.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Eroare la ștergerea imaginii.");
+    }
+  };
+  const handleDeleteSavedMaterial = async (materialId) => {
+    if (!window.confirm("Ștergi definitiv acest fișier atașat?")) return;
+    try {
+    
+      await api.delete(`/api/materials/${materialId}`);
+      
+      
+      setEditFormData(prev => ({
+        ...prev,
+        materials: prev.materials.filter(m => m.id !== materialId)
+      }));
+      toast.success("Fișier șters!");
+    } catch (error) {
+      toast.error("Nu s-a putut șterge fișierul.");
     }
   };
 
@@ -290,231 +357,264 @@ const OrganizerDashboard = () => {
     setIsEditing(true);
   };
 
-  return (
+ return (
     <div className="organizer-container">
-      
-     
       <div className="top-nav-header">
-         <button className="back-arrow-btn" onClick={() => navigate(-1)}>←</button>
+        <button className="back-arrow-btn" onClick={() => navigate(-1)}>←</button>
       </div>
 
       <div className="content-wrapper">
-        
-        
+        {restriction.isRestricted ? (
+          <div className="info-box-red" style={{ textAlign: 'center', padding: '50px', margin: '20px', background: '#ffe5e5', borderRadius: '15px', color: '#b30000' }}>
+            <FaBan size={50} />
+            <h2>Acces Restricționat</h2>
+            <p>{restriction.msg}</p>
+          </div>
+        ) : (
+          <>
             <div className="page-header-simple">
-                <h1>Crează eveniment nou</h1>
-                <p>Completează detaliile pentru a crea evenimentul tău</p>
+              <h1>Crează eveniment nou</h1>
+              <p>Completează detaliile pentru a crea evenimentul tău</p>
             </div>
-        
 
-        <div className="controls-section">
-            
-            
-            <form className="event-form-clean" onSubmit={handleCreateSubmit}>
-                
+            <div className="controls-section">
+              <form className="event-form-clean" onSubmit={handleCreateSubmit}>
                 <div className="form-group">
-                    <label>Titlu eveniment *</label>
-                    <input type="text" name="title" placeholder="Introdu titlul evenimentului" value={formData.title} onChange={handleCreateChange} required style={{border:"1px solid black"}}/>
+                  <label>Titlu eveniment *</label>
+                  <input type="text" name="title" placeholder="Introdu titlul evenimentului" value={formData.title} onChange={handleCreateChange} required style={{ border: "1px solid black" }} />
                 </div>
 
                 <div className="form-group">
-                    <label>Descriere *</label>
-                    <textarea name="description" rows="4" placeholder="Descriere detaliată a evenimentului" value={formData.description} onChange={handleCreateChange} style={{border:"1px solid black"}}/>
-                </div>
-                
-                <div className="form-row">
-                    <div className="form-group">
-                        <label>Facultate / Categorie *</label>
-                        <select name="category" value={formData.category} onChange={handleCreateChange} style={{border:"1px solid black"}}>
-                            <option value="SOCIAL">Social</option>
-                            <option value="ACADEMIC">Academic</option>
-                            <option value="CAREER">Career</option>
-                            <option value="SPORT">Sport</option>
-                            <option value="VOLUNTEERING">Volunteering</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Capacitate (Locuri) *</label>
-                        <input type="number" name="maxCapacity" placeholder="Ex: 100" value={formData.maxCapacity} onChange={handleCreateChange} min="1" style={{border:"1px solid black"}}/>
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label>Locație *</label>
-                    <input type="text" name="location" placeholder="Introdu locația evenimentului" value={formData.location} onChange={handleCreateChange} required style={{border:"1px solid black"}}/>
+                  <label>Descriere *</label>
+                  <textarea name="description" rows="4" placeholder="Descriere detaliată a evenimentului" value={formData.description} onChange={handleCreateChange} style={{ border: "1px solid black" }} />
                 </div>
 
                 <div className="form-row">
-                    <div className="form-group"><label>Start *</label><input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleCreateChange} required style={{border:"1px solid black"}}/></div>
-                    <div className="form-group"><label>End *</label><input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleCreateChange} required style={{border:"1px solid black"}}/></div>
+                  <div className="form-group">
+                    <label>Facultate / Categorie *</label>
+                    <select name="category" value={formData.category} onChange={handleCreateChange} style={{ border: "1px solid black" }}>
+                      <option value="SOCIAL">Social</option>
+                      <option value="ACADEMIC">Academic</option>
+                      <option value="CAREER">Career</option>
+                      <option value="SPORT">Sport</option>
+                      <option value="VOLUNTEERING">Volunteering</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Capacitate (Locuri) *</label>
+                    <input type="number" name="maxCapacity" placeholder="Ex: 100" value={formData.maxCapacity} onChange={handleCreateChange} min="1" style={{ border: "1px solid black" }} />
+                  </div>
                 </div>
 
-              
-                <div className="form-group" style={{marginTop:'20px', color:"black"}}>
-                    <label style={{fontSize:"14px"}}>Imagine Principală</label>
-                    <div className="custom-dropzone" style={{position: 'relative'}}>
-                        <div className="upload-icon-large"><UploadIcon /></div>
-                        <p className="upload-text">
-                            {uploadingImage ? 'Se încarcă...' : (
-                                <><span>Click pentru a încărca</span> sau trage imaginea aici</>
-                            )}
-                        </p>
-                        <p className="upload-hint">PNG, JPG până la 10MB</p>
-                        
-                        
-                        <input 
-                            type="file" 
-                            className="file-input-hidden"
-                            accept="image/*" 
-                            onChange={(e) => handleImageUpload(e, false)}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                        />
+                <div className="form-group">
+                  <label>Locație *</label>
+                  <input type="text" name="location" placeholder="Introdu locația evenimentului" value={formData.location} onChange={handleCreateChange} required style={{ border: "1px solid black" }} />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group"><label>Start *</label><input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleCreateChange} required style={{ border: "1px solid black" }} /></div>
+                  <div className="form-group"><label>End *</label><input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleCreateChange} required style={{ border: "1px solid black" }} /></div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '20px', color: "black" }}>
+                  <label style={{ fontSize: "14px" }}>Imagine Principală</label>
+                  
+                  {!formData.imageUrl ? (
+                    <div className="custom-dropzone" style={{ position: 'relative' }}>
+                      <div className="upload-icon-large"><UploadIcon /></div>
+                      <p className="upload-text">
+                        {uploadingImage ? 'Se încarcă...' : (
+                          <><span>Click pentru a încărca</span> sau trage imaginea aici</>
+                        )}
+                      </p>
+                      <p className="upload-hint">PNG, JPG până la 10MB</p>
+                      <input
+                        type="file"
+                        className="file-input-hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, false)}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
+                      />
                     </div>
-
-                    {formData.imageUrl && !uploadingImage && (
-                        <div className="preview-container">
-                            <div className="img-preview-box">
-                                <img src={formData.imageUrl} alt="Preview" />
-                            </div>
-                        </div>
-                    )}
+                  ) : (
+                    <div className="preview-container" style={{ position: 'relative', width: 'fit-content' }}>
+                      <div className="img-preview-box">
+                        <img src={formData.imageUrl} alt="Preview" style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #ccc' }} />
+                        <button 
+                          type="button" 
+                          onClick={() => handleDeleteImage(false)} 
+                          style={{ position: 'absolute', top: '0px', right: '0px', background: '#ff4757', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 'bold', fontSize: '18px', padding: '0', lineHeight: '0' }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-           
-                <h4 className="materials-title" style={{fontSize:"14px", fontWeight:"500"}}>Materiale și Atașamente</h4>
+                <h4 className="materials-title" style={{ fontSize: "14px", fontWeight: "500" }}>Materiale și Atașamente</h4>
                 <div className="materials-section">
-                    
-                    <div className="custom-dropzone" style={{borderStyle: 'dotted', minHeight: '80px', position: 'relative'}}>
-                        <div className="upload-icon-large" style={{fontSize:'24px'}}>📎</div>
-                        <p className="upload-text"><span>Adaugă fișiere</span> (PDF, Imagini, Docx)</p>
-                        
-                        
-                        <input 
-                            type="file" 
-                            className="file-input-hidden" 
-                            multiple 
-                            onChange={handleMaterialSelect} 
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                        />
-                    </div>
+                  <div className="custom-dropzone" style={{ borderStyle: 'dotted', minHeight: '80px', position: 'relative' }}>
+                    <div className="upload-icon-large" style={{ fontSize: '24px' }}>📎</div>
+                    <p className="upload-text"><span>Adaugă fișiere</span> (PDF, Imagini, Docx)</p>
+                    <input
+                      type="file"
+                      className="file-input-hidden"
+                      multiple
+                      onChange={handleMaterialSelect}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
+                    />
+                  </div>
 
-                    {selectedMaterials.length > 0 && (
-                        <div className="preview-container">
-                            {selectedMaterials.map((file, idx) => (
-                                <div key={idx} className="file-preview-item">
-                                    <span>{file.name}</span>
-                                    <button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button>
-                                </div>
-                            ))}
+                  {selectedMaterials.length > 0 && (
+                    <div className="preview-container">
+                      {selectedMaterials.map((file, idx) => (
+                        <div key={idx} className="file-preview-item">
+                          <span>{file.name}</span>
+                          <button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button>
                         </div>
-                    )}
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="info-box-green" style={{marginTop:'20px', fontWeight:"500", fontSize:"20px", border:"2px solid #aceed8ff"}}>
-                    Evenimentul va fi trimis spre aprobare. Materialele vor fi încărcate automat.
+                <div className="info-box-green" style={{ marginTop: '20px', fontWeight: "500", fontSize: "20px", border: "2px solid #aceed8ff" }}>
+                  Evenimentul va fi trimis spre aprobare. Materialele vor fi încărcate automat.
                 </div>
-                
+
                 <div className="form-actions-row">
-                    <button type="button" className="btn-cancel" onClick={() => setShowForm(false)} disabled={uploadingImage}>Anulează</button>
-                    <button type="submit" className="btn-submit" disabled={uploadingImage}>{uploadingImage ? 'Se procesează...' : 'Trimite Evenimentul'}</button>
+                  <button 
+                    type="button" 
+                    className="btn-cancel" 
+                    onClick={() => {
+                      setFormData({ title: '', description: '', location: '', startTime: '', endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL' });
+                      setSelectedMaterials([]);
+                      toast.success("Câmpurile au fost resetate");
+                    }} 
+                    disabled={uploadingImage}
+                  >
+                    Anulează
+                  </button>
+                  <button type="submit" className="btn-submit" disabled={uploadingImage}>{uploadingImage ? 'Se procesează...' : 'Trimite Evenimentul'}</button>
                 </div>
-            </form>
-            
-        </div>
+              </form>
+            </div>
+          </>
+        )}
 
-        <hr className="divider"/>
+        <hr className="divider" />
 
         <div className="my-events-section">
-            <h2>Evenimentele Mele</h2>
-            {loading ? <p>Se incarca...</p> : (
-                <div className="events-grid">
-                {myEvents.length > 0 ? (
-                    myEvents.map((event) => (
-                        <EventCard 
-                        key={event.id}
-                        id={event.id}
-                        title={event.title}
-                        date={event.startTime}
-                        location={event.location}
-                        description={event.description}
-                        imageUrl={event.imageUrl} 
-                        category={event.category}
-                        maxCapacity={event.maxCapacity} 
-                        onDelete={() => handleDeleteEvent(event.id)}
-                        onEdit={() => openEditModal(event)} 
-                        />
-                    ))
-                ) : (
-                    <p style={{color: '#888'}}>Nu ai creat niciun eveniment inca.</p>
-                )}
-                </div>
-            )}
+          <h2>Evenimentele Mele</h2>
+          {loading ? <p>Se incarca...</p> : (
+            <div className="events-grid">
+              {myEvents.length > 0 ? (
+                myEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    id={event.id}
+                    title={event.title}
+                    date={event.startTime}
+                    location={event.location}
+                    description={event.description}
+                    imageUrl={event.imageUrl}
+                    category={event.category}
+                    maxCapacity={event.maxCapacity}
+                    onDelete={() => handleDeleteEvent(event.id)}
+                    onEdit={() => openEditModal(event)}
+                  />
+                ))
+              ) : (
+                <p style={{ color: '#888' }}>Nu ai creat niciun eveniment inca.</p>
+              )}
+            </div>
+          )}
         </div>
 
-        
         {isEditing && (
-            <div className="modal-overlay">
-                <div className="modal-content-clean">
-                    <h3>Editează Eveniment</h3>
-                    <form onSubmit={handleUpdateSubmit} className="edit-form-clean">
-                        
-                        <div className="form-group"><label>Titlu</label><input type="text" name="title" value={editFormData.title} onChange={handleEditChange} required/></div>
-                        <div className="form-row">
-                             <div className="form-group"><label>Categorie</label><select name="category" value={editFormData.category} onChange={handleEditChange}><option value="SOCIAL">Social</option><option value="VOLUNTEERING">Volunteering</option><option value="CAREER">Carrer</option><option value="ACADEMIC">Academic</option><option value="SPORT">Sport</option></select></div>
-                             <div className="form-group"><label>Capacitate</label><input type="number" name="maxCapacity" value={editFormData.maxCapacity} onChange={handleEditChange}/></div>
-                        </div>
-                        <div className="form-group"><label>Locație</label><input type="text" name="location" value={editFormData.location} onChange={handleEditChange} required/></div>
-                        <div className="form-row">
-                             <div className="form-group"><label>Start</label><input type="datetime-local" name="startTime" value={editFormData.startTime} onChange={handleEditChange} required/></div>
-                             <div className="form-group"><label>End</label><input type="datetime-local" name="endTime" value={editFormData.endTime} onChange={handleEditChange} required/></div>
-                        </div>
-                        <div className="form-group"><label>Descriere</label><textarea name="description" rows="3" value={editFormData.description} onChange={handleEditChange}/></div>
-
-                        
-                        <div className="form-group">
-                            <label>Schimbă Imaginea</label>
-                            <div className="custom-dropzone" style={{padding:'15px', position: 'relative'}}>
-                                <div className="upload-text">Click sau Drag & Drop</div>
-                                <input 
-                                    type="file" 
-                                    className="file-input-hidden" 
-                                    accept="image/*" 
-                                    onChange={(e) => handleImageUpload(e, true)} 
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                                />
-                            </div>
-                            {editFormData.imageUrl && !uploadingImage && <div className="preview-container"><div className="img-preview-box"><img src={editFormData.imageUrl} alt="Preview"/></div></div>}
-                        </div>
-
-                       
-                         <div className="materials-section">
-                            <h4 className="materials-title">Adaugă Materiale Noi</h4>
-                            <div className="custom-dropzone" style={{padding:'15px', borderStyle: 'dotted', marginBottom:"20px", position: 'relative'}}>
-                                <div className="upload-text">📎 Adaugă fișiere</div>
-                                <input 
-                                    type="file" 
-                                    className="file-input-hidden" 
-                                    multiple 
-                                    onChange={handleMaterialSelect} 
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                                />
-                            </div>
-                            {selectedMaterials.length > 0 && (
-                                <div className="preview-container">
-                                    {selectedMaterials.map((file, idx) => (
-                                        <div key={idx} className="file-preview-item"><span>{file.name}</span><button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button></div>
-                                    ))}
-                                </div>
-                            )}
-                         </div>
-
-                        <div className="form-actions-row">
-                            <button type="button" className="btn-cancel" onClick={() => {setIsEditing(false); setSelectedMaterials([])}}>Anulează</button>
-                            <button type="submit" className="btn-submit">Salvează</button>
-                        </div>
-                    </form>
+          <div className="modal-overlay">
+            <div className="modal-content-clean">
+              <h3>Editează Eveniment</h3>
+              <form onSubmit={handleUpdateSubmit} className="edit-form-clean">
+                <div className="form-group"><label>Titlu</label><input type="text" name="title" value={editFormData.title} onChange={handleEditChange} required /></div>
+                <div className="form-row">
+                  <div className="form-group"><label>Categorie</label><select name="category" value={editFormData.category} onChange={handleEditChange}><option value="SOCIAL">Social</option><option value="VOLUNTEERING">Volunteering</option><option value="CAREER">Carrer</option><option value="ACADEMIC">Academic</option><option value="SPORT">Sport</option></select></div>
+                  <div className="form-group"><label>Capacitate</label><input type="number" name="maxCapacity" value={editFormData.maxCapacity} onChange={handleEditChange} /></div>
                 </div>
+                <div className="form-group"><label>Locație</label><input type="text" name="location" value={editFormData.location} onChange={handleEditChange} required /></div>
+                <div className="form-row">
+                  <div className="form-group"><label>Start</label><input type="datetime-local" name="startTime" value={editFormData.startTime} onChange={handleEditChange} required /></div>
+                  <div className="form-group"><label>End</label><input type="datetime-local" name="endTime" value={editFormData.endTime} onChange={handleEditChange} required /></div>
+                </div>
+                <div className="form-group"><label>Descriere</label><textarea name="description" rows="3" value={editFormData.description} onChange={handleEditChange} /></div>
+
+                <div className="form-group">
+                  <label>Imagine Eveniment</label>
+                  {!editFormData.imageUrl ? (
+                    <div className="custom-dropzone" style={{ padding: '15px', position: 'relative' }}>
+                      <div className="upload-text">Click sau Drag & Drop</div>
+                      <input
+                        type="file"
+                        className="file-input-hidden"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, true)}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="preview-container" style={{ position: 'relative', width: 'fit-content' }}>
+                      <div className="img-preview-box">
+                        <img src={editFormData.imageUrl} alt="Preview" style={{ maxWidth: '150px', borderRadius: '8px' }} />
+                        <button 
+                          type="button" 
+                          onClick={() => handleDeleteImage(true)}
+                          style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#ff4757', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', width: '25px', height: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="materials-section">
+                  <h4 className="materials-title">Adaugă Materiale Noi</h4>
+                  <div className="custom-dropzone" style={{ padding: '15px', borderStyle: 'dotted', marginBottom: "20px", position: 'relative' }}>
+                    <div className="upload-text">📎 Adaugă fișiere</div>
+                    <input
+                      type="file"
+                      className="file-input-hidden"
+                      multiple
+                      onChange={handleMaterialSelect}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
+                    />
+                  </div>
+                  {selectedMaterials.length > 0 && (
+                    <div className="preview-container">
+                      {selectedMaterials.map((file, idx) => (
+                        <div style={{marginBottom:'15px'}} key={idx} className="file-preview-item"><span>{file.name}</span><button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button></div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-actions-row">
+                  <button 
+                    type="button" 
+                    className="btn-cancel" 
+                    onClick={() => {
+                      setIsEditing(false);
+                      setSelectedMaterials([]);
+                      setEditFormData({ title: '', description: '', location: '', startTime: '', endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL' });
+                    }}
+                  >
+                    Anulează
+                  </button>                  
+                  <button type="submit" className="btn-submit">Salvează</button>
+                </div>
+              </form>
             </div>
+          </div>
         )}
       </div>
     </div>

@@ -9,6 +9,33 @@ const api = axios.create({
   },
 });
 
+export const adminApi = {
+    // Evenimente
+    getPendingEvents: () => api.get('/admin/pending-events'),
+    getAllEvents: () => api.get('/admin/all-events'),
+    approveEvent: (id) => api.put(`/admin/approve/${id}`),
+    rejectEvent: (id, reason) => api.put(`/admin/reject/${id}?reason=${encodeURIComponent(reason)}`),
+    deleteEvent: (id) => api.delete(`/admin/events/${id}`),
+
+    // Organizatori & Cereri
+    getOrganizerRequests: () => api.get('/admin/organizer-requests'),
+    approveOrganizer: (userId) => api.post(`/admin/approve-organizer/${userId}`),
+    getOrganizerStats: () => api.get('/admin/organizers/stats'),
+    
+    // Acțiuni Utilizatori/Organizatori (Logica cerută de tine)
+    suspendUser: (userId, days) => api.post(`/admin/organizers/${userId}/suspend?days=${days}`),
+    unsuspendUser: (userId) => api.post(`/admin/organizers/${userId}/unsuspend`),
+    toggleBan: (userId) => api.post(`/admin/organizers/${userId}/ban`),
+    downgradeUser: (userId) => api.post(`/admin/organizers/${userId}/downgrade`),
+
+    // Utilizatori & Recenzii
+    getAllUsers: () => api.get('/admin/users'),
+    getAllReviews: () => api.get('/admin/reviews'),
+    deleteReview: (reviewId) => api.delete(`/admin/reviews/${reviewId}`),
+
+    // Rapoarte
+    getReports: () => api.get('/admin/reports'),
+};
 export const ticketApi = {
     purchase: (eventId) => {
         return api.post('/tickets/purchase', { eventId: eventId });

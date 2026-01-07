@@ -26,6 +26,8 @@
   position: relative;
   max-height: 90vh;
   overflow-y: auto; 
+  -ms-overflow-style: none; 
+  scrollbar-width: none;
 }
 
 

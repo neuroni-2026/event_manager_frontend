@@ -50,6 +50,7 @@ const AuthPage = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
+  
   useEffect(() => {
     const fetchBackgroundEvents = async () => {
       try {
@@ -86,7 +87,28 @@ const AuthPage = () => {
     fetchBackgroundEvents();
   }, []);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "phoneNumber") {
+
+    const onlyNums = value.replace(/[^0-9]/g, '');
+    
+  
+    if (onlyNums.length <= 10) {
+      setFormData({
+        ...formData,
+        [name]: onlyNums
+      });
+    }
+  } else {
+    
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault(); 
@@ -221,7 +243,8 @@ const AuthPage = () => {
                   <label>Telefon</label>
                   <div className="input-wrapper">
                     <Phone className="input-icon" size={18} />
-                    <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required style={{border:"solid 2px black"}}/>
+                    <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required maxLength="10" pattern="[0-9]{10}"  title="Numărul de telefon trebuie să conțină exact 10 cifre" style={{border:"solid 2px black"}}
+                    />
                   </div>
                 </div>
             )}
