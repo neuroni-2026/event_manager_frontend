@@ -1,368 +1,186 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .home-container {
-  max-width: 1470px; 
-  margin: 0 25px 0px 25px;
-  padding: 20px 0px;
+  max-width: 1240px; /* Pagina este acum mai îngustă */
+  margin: 0 auto;
+  padding: 40px 20px;
   font-family: 'Inter', sans-serif;
-  background-color: #f9fafb; 
+  background-color: #f9fafb;
   min-height: 100vh;
 }
 
-
+/* Header */
 .home-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px; 
-  padding-bottom: 0px;
+  margin-bottom: 30px;
 }
 
-.logo-text {
+.welcome-text {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.user-highlight { color: #3b82f6; }
+
+.welcome-sub {
   font-size: 18px;
-  font-weight: 600;
-  color: #111;
-  margin: 0;
-  letter-spacing: -0.5px;
+  color: #6b7280;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-
-.search-container-full {
-  margin-bottom: 15px;
-  width: 100%;
-  
+/* Search Bar */
+.search-section {
+  margin-bottom: 25px;
 }
 
 .search-bar-large {
   display: flex;
   align-items: center;
   background: white;
-  border: 1px solid #000000;
-  border-radius: 30px; 
-  padding: 0px 5px; 
-  width: 100%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  transition: all 0.2s;
-
-}
-
-
-.search-icon { width: 20px; }
-.search-bar-large input {
-  border: none; outline: none; width: 100%; font-size: 16px; color: #202020;
-  font-family: 'Inter', sans-serif;
-}
-
-
-.profile-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 16px 4px 4px;
-  background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: solid 1px black; 
-}
-
-.events-grid-large {
-  display: grid;
-
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
-  gap: 20px; 
-}
-.avatar-circle {
-  width: 40px; height: 40px;
-  background-color: #ff6b6b;
-  color: white; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 600; font-size: 14px;
-  
-}
-
-.user-name { font-size: 14px; font-weight: 500; color: #374151; }
-
-.events-grid-large {
-  display: grid;
-
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
-  gap: 20px; 
-}
-.profile-container { position: relative;}
-.dropdown-menu {
-  position: absolute; top: 52px; right: 0;
-  width: 220px; background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-  border: 3px solid #c2c2c2;
-  z-index: 100;
-  padding: 8px 0;
-  animation: fadeIn 0.2s ease-out;
-}
-.dropdown-header { padding: 12px 16px; }
-.dd-name { font-weight: 400; font-size: 15px; color: #000000; margin: 0; }
-.dd-email { font-weight: 400; font-size: 15px; color: #000000; margin:0; }
-.dropdown-divider { height: 2px; background: #d3d3d3; margin: 0px 0; }
-.dropdown-list { list-style: none; padding: 0; margin: 0; }
-.dropdown-list li {
-  padding: 10px 16px; font-size: 14px; color: #374151; cursor: pointer;
-  display: flex; align-items: center; gap: 10px;
-  transition: background 0.1s;
-}
-.dropdown-list li:hover { background-color: #f9fafb; color: #111; }
-.dropdown-footer {
-  padding: 10px 16px; color: #ef4444; font-size: 14px; font-weight: 500;
-  cursor: pointer; display: flex; align-items: center; gap: 10px;
-}
-.dropdown-footer:hover { background-color: #fef2f2; }
-
-
-.filters-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-
-
-}
-
-.filters-group {
-  display: flex;
+  border-radius: 16px;
+  padding: 14px 20px;
   gap: 15px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.custom-select {
-  appearance: none;
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 35px 10px 15px;
-  font-size: 14px; color: #374151; font-weight: 500;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
-  min-width: 160px;
-  transition: all 0.2s;
-}
-.custom-select:hover { border-color: #d1d5db; }
-.custom-select:focus { border-color: #000; outline: none; }
-
-.calendar-trigger-btn {
-  display: flex; align-items: center; gap: 8px;
-  background: white; border: 1px solid #e5e7eb;
-  padding: 10px 20px; border-radius: 10px;
-  font-size: 14px; font-weight: 600; color: #374151;
-  cursor: pointer; transition: all 0.2s;
-}
-.calendar-wrapper {
-  margin-left: 10px;
-}
-
-.calendar-btn {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 50%; 
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.calendar-btn:hover {
-  background-color: #f0f0f0;
-  border-color: #999;
-}
-
-
-.calendar-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(4px);
-}
-
-
-.calendar-modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+.search-bar-large input {
+  border: none;
+  outline: none;
   width: 100%;
-  max-width: 450px; 
-  position: relative;
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from { transform: translateY(30px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.calendar-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-}
-
-.calendar-header-row h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #333;
-}
-
-.close-calendar-btn {
-  background: transparent;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #888;
-  line-height: 1;
-  transition: color 0.2s;
-}
-.close-calendar-btn:hover { color: #333; }
-
-
-
-
-.custom-calendar-large {
-  width: 100% !important;
-  border: none !important;
-  font-family: 'Poppins', sans-serif !important;
-  background: white !important;
-}
-
-
-.react-calendar__navigation {
-  margin-bottom: 20px !important;
-  display: flex;
-}
-.react-calendar__navigation button {
   font-size: 16px;
-  font-weight: 600;
-  min-width: 44px;
-  background: none;
-  border: none;
-  color: #333;
-}
-.react-calendar__navigation button:enabled:hover,
-.react-calendar__navigation button:enabled:focus {
-  background-color: #f0f0f0;
-  border-radius: 8px;
+  color: #111827;
+  background: transparent;
 }
 
+/* FILTRE MODERNE GRID */
+.filters-section-modern {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 pe rând pe desktop */
+  gap: 16px;
+  margin-bottom: 40px;
+}
 
-.react-calendar__month-view__weekdays {
-  text-align: center;
+.filter-box-modern {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-label-top {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  font-weight: bold;
-  font-size: 12px;
-  color: #999;
-  text-decoration: none !important; 
-}
-.react-calendar__month-view__weekdays__weekday abbr {
-  text-decoration: none !important;
 }
 
-
-.react-calendar__tile {
-  max-width: 100%;
-  height: 50px; 
-  display: flex !important;
+.filter-input-wrapper {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative; 
-  background: none !important;
-  overflow: visible !important;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0 15px;
+  height: 52px;
+  transition: all 0.2s;
+}
+
+.filter-input-wrapper:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.05);
+}
+
+.filter-icon-inline {
+  color: #94a3b8;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.filter-select-actual {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
   font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  appearance: none; /* Ascunde săgeata browserului */
   z-index: 1;
 }
 
-
-.react-calendar__tile abbr {
-  position: relative;
-  z-index: 3; 
-}
-
-
-.react-calendar__tile--now {
-  font-weight: bold;
-  color: #ff6b6b !important; 
-}
-
-
-.react-calendar__tile--active,
-.react-calendar__tile--active:enabled:hover,
-.react-calendar__tile--active:enabled:focus {
-  background: transparent !important;
-  color: black !important;
-}
-
-.react-calendar__tile--active abbr {
-  border-bottom: 2px solid #333;
-}
-
-
-.day-highlight-circle {
+.filter-chevron {
+  color: #94a3b8;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px; 
-  height: 32px;
-  border-radius: 50%;
-  z-index: 2; 
-  opacity: 0.3; 
+  right: 15px;
+  pointer-events: none;
 }
 
-
-.react-calendar__tile:enabled:hover,
-.react-calendar__tile:enabled:focus {
-  background-color: #f7f7f7 !important;
-  border-radius: 8px;
+.filter-display-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
+.pointer { cursor: pointer; }
 
-.calendar-legend {
+/* Grid Evenimente */
+.events-grid-large {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 25px;
+}
+
+.status-text {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px;
+  color: #94a3b8;
+}
+
+/* RESPONSIVITATE */
+
+/* Tablete */
+@media (max-width: 1024px) {
+  .filters-section-modern {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .home-container { padding: 20px 15px; }
+  
+  .welcome-text { font-size: 24px; }
+  
+  .filters-section-modern {
+    grid-template-columns: 1fr; /* Toate filtrele unul sub altul */
+  }
+
+  .events-grid-large {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Calendar Modal */
+.calendar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
-  margin-top: 10px;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
 }
 
-.calendar-legend small {
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.calendar-modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 400px;
 }

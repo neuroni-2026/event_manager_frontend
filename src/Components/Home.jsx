@@ -2,19 +2,22 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EventCard from './EventCard';
 import SearchIcon from '../Icons/icon-search.png';
-import api, { ticketApi } from '../services/api'; 
+import api from '../services/api'; 
 import './Home.css';
-import NotificationBell from '../Components/NotificationBell';
-import Notifications from '../Components/NotificationPage';
-import Settingss from './Settings';
 
 import Calendar from 'react-calendar'; 
 import 'react-calendar/dist/Calendar.css'; 
-import { Calendar as CalendarIcon, Shield, Briefcase, Ticket, Heart, LogOut, Settings } from 'lucide-react'; // Folosim Lucide icons
-
+import { 
+  Calendar as CalendarIcon, 
+  Shield, 
+  Briefcase, 
+  MapPin, 
+  Building2, 
+  ChevronDown,
+  Search
+} from 'lucide-react';
 
 import { toast } from 'react-hot-toast';
-
 
 const CATEGORY_COLORS = {
   SOCIAL: '#ffcc00',    
@@ -26,18 +29,14 @@ const CATEGORY_COLORS = {
 };
 
 const Home = () => {
-  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
-  const [showNotifications, setShowNotifications] = useState(false);
   
   const [user, setUser] = useState(null); 
   const [events, setEvents] = useState([]);       
   const [filteredEvents, setFilteredEvents] = useState([]); 
   const [loading, setLoading] = useState(true);
-  const [purchasingId, setPurchasingId] = useState(null);
   
-  const [showDropdown, setShowDropdown] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [date, setDate] = useState(new Date());
 
@@ -45,11 +44,10 @@ const Home = () => {
   const [filters, setFilters] = useState({
     organizer: '',
     location: '',
-    category: '',
-    faculty: '' 
+    category: ''
   });
 
- 
+  // Încărcare date utilizator
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (!userData) { navigate('/'); return; }
@@ -60,51 +58,16 @@ const Home = () => {
              const r = parsedUser.roles[0];
              displayRole = (typeof r === 'string' ? r : r.name).toUpperCase();
         }
-        const cleanRole = displayRole.replace('ROLE_', '');
         setUser({
           ...parsedUser,
-          firstName: parsedUser.firstName || '',
-          lastName: parsedUser.lastName || '',
-          role: cleanRole 
+          role: displayRole.replace('ROLE_', '') 
         });
     } catch (e) {
         localStorage.removeItem('user'); navigate('/');
     }
   }, [navigate]);
 
-  
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [dropdownRef]);
-
- 
-  const handleBuyTicket = async (eventId, eventTitle) => {
-      const confirm = window.confirm(`Vrei să participi la "${eventTitle}"?`);
-      if (!confirm) return;
-      setPurchasingId(eventId);
-      try {
-          await ticketApi.purchase(eventId);
-          toast.success("Te-ai înscris cu succes!");
-      } catch (error) {
-          if (error.response && error.response.data) toast.error(error.response.data); 
-          else toast.error("Eroare la înscriere.");
-      } finally {
-          setPurchasingId(null);
-      }
-  };
-
-  const handleLogout = () => {
-      localStorage.removeItem('user');
-      navigate('/');
-  };
-
- 
+  // Fetch Evenimente
   useEffect(() => {
     if (!user) return;
     const fetchEvents = async () => {
@@ -121,11 +84,12 @@ const Home = () => {
     fetchEvents();
   }, [user]);
 
-
+  // Generare opțiuni unice pentru filtre
   const uniqueLocations = useMemo(() => [...new Set(events.map(e => e.location))].filter(Boolean), [events]);
   const uniqueCategories = useMemo(() => [...new Set(events.map(e => e.category))].filter(Boolean), [events]);
   const uniqueOrganizers = useMemo(() => [...new Set(events.map(e => e.organizer ? `${e.organizer.firstName} ${e.organizer.lastName}` : ''))].filter(Boolean), [events]);
 
+  // Logica de filtrare
   useEffect(() => {
     const results = events.filter(event => {
       const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -140,7 +104,6 @@ const Home = () => {
 
   const handleFilterChange = (e) => setFilters({ ...filters, [e.target.name]: e.target.value });
 
-
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
         const dayEvent = events.find(evt => {
@@ -149,14 +112,12 @@ const Home = () => {
                    eventDate.getMonth() === date.getMonth() &&
                    eventDate.getFullYear() === date.getFullYear();
         });
-
         if (dayEvent) {
             return (
                 <div 
                     className="day-highlight-circle"
                     style={{ backgroundColor: CATEGORY_COLORS[dayEvent.category] || CATEGORY_COLORS.OTHER }}
-                >
-                </div>
+                ></div>
             );
         }
     }
@@ -167,7 +128,7 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      
+      {/* Modal Calendar */}
       {showCalendar && (
         <div className="calendar-modal-overlay" onClick={() => setShowCalendar(false)}>
             <div className="calendar-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -175,147 +136,102 @@ const Home = () => {
                     <h3>Calendar Evenimente</h3>
                     <button className="close-calendar-btn" onClick={() => setShowCalendar(false)}>×</button>
                 </div>
-                
                 <Calendar 
-                    onChange={setDate} 
+                    onChange={(val) => { setDate(val); setShowCalendar(false); }} 
                     value={date} 
                     tileContent={tileContent}
                     className="custom-calendar-large"
                 />
-
-                <div className="calendar-legend">
-                    <small style={{color: CATEGORY_COLORS.SOCIAL}}>● Social</small>
-                    <small style={{color: CATEGORY_COLORS.SPORT}}>● Sport</small>
-                    <small style={{color: CATEGORY_COLORS.ACADEMIC}}>● Academic</small>
-                    <small style={{color: CATEGORY_COLORS.CAREER}}>● Carieră</small>
-                    <small style={{color: CATEGORY_COLORS.VOLUNTEERING}}>● Voluntariat</small>
-                </div>
             </div>
         </div>
       )}
 
-      
+      {/* Header Bun Venit */}
       <div className="home-header">
-        <div className="header-left">
-            <h1 className="logo-text">Event Manager</h1>
-        </div>
-
-        <div className="header-right">
-            <div className="notification-wrapper">
-                 <NotificationBell /> 
-            </div>
-            
-            <div className="profile-container" ref={dropdownRef}>
-                <div className="profile-pill" onClick={() => setShowDropdown(!showDropdown)}>
-                    <div className="avatar-circle">
-                         {user.firstName.charAt(0)}
-                    </div> 
-                    <span className="user-name">{user.firstName}</span>
-                </div>
-                {showDropdown && (
-                    <div className="dropdown-menu">
-                        <div className="dropdown-header">
-                            <p className="dd-name">{user.firstName} {user.lastName}</p>
-                            <p className="dd-email">{user.email || 'student@usv.ro'}</p>
-                        </div>
-                        <div className="dropdown-divider"></div>
-                        <ul className="dropdown-list">
-                            {user.role === 'ADMIN' && (
-                                <li onClick={() => navigate('/admin')}>
-                                    <Shield size={16} /> Panou Admin
-                                </li>
-                            )}
-                            {user.role === 'ORGANIZER' && (
-                                <li onClick={() => navigate('/organizer')}>
-                                    <Briefcase size={16} /> Gestionează
-                                </li>
-                            )}
-                            {user.role === 'STUDENT' && (
-                                <li onClick={() => navigate('/my-tickets')}>
-                                    <Ticket size={16} /> Biletele mele
-                                </li>
-                            )}
-                            <li onClick={() => navigate('/favorites')}>
-                                <Heart size={16} /> Favorite
-                            </li>
-                            <li onClick={() => navigate('/settings')}>
-                                <Settings size={16} /> Setări
-                            </li>
-                        </ul>
-                        <div className="dropdown-divider"></div>
-                        <div className="dropdown-footer" onClick={handleLogout}>
-                            <LogOut size={16} /> Deconectare
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+        <h1 className="welcome-text">
+          Bine ai venit, <span className="user-highlight">{user.firstName}</span>!
+        </h1>
+        <p className="welcome-sub">Descoperă activitățile tale preferate în campusul USV.</p>
       </div>
 
-      
-      <div className="search-container-full">
-         <div className="search-bar-large">d
-            <img src={SearchIcon} className="search-icon" alt="" />
-            <input style={{border:"none", outline:"none", width:"100%", fontSize:"16px", color:"#000000"}}
+      {/* Search Bar */}
+      <div className="search-section">
+         <div className="search-bar-large" style={{padding:'25px'}}>
+            <Search size={25} color="#e49750"/>
+            <input 
                 type="text" 
-                placeholder="Scrie aici" 
+                placeholder="Caută evenimente..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value) }
+                style={{fontSize:'20px'}}
+                
             />
+            
         </div>
       </div>
 
-     
-      <div className="filters-row">
-        <div className="filters-group">
-            <div className="filter-item">
-                <select name="organizer" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
-                    <option value="">Organizator</option>
-                    {uniqueOrganizers.map(org => (<option key={org} value={org}>{org}</option>))}
-                </select>
-            </div>
-            <div className="filter-item" >
-                <select name="location" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
-                    <option value="" >Locație</option>
-                    {uniqueLocations.map(loc => (<option key={loc} value={loc}>{loc}</option>))}
-                </select>
-            </div>
-            <div className="filter-item">
-                <select name="category" className="custom-select" onChange={handleFilterChange} style={{borderRadius:"50px", border:"1px solid #000000"}}>
-                    <option value="">Tip eveniment</option>
-                    {uniqueCategories.map(cat => (<option key={cat} value={cat}>{cat}</option>)) }
-                </select>
-            </div>
+      {/* FILTRE MODERNE RESPONSIVE */}
+      <div className="filters-section-modern">
+        <div className="filter-box-modern">
+          <label className="filter-label-top">CINE ORGANIZEAZĂ</label>
+          <div className="filter-input-wrapper">
+            <Building2 size={18} className="filter-icon-inline" />
+            <select name="organizer" className="filter-select-actual" onChange={handleFilterChange}>
+              <option value="">Toate facultățile</option>
+              {uniqueOrganizers.map(org => (<option key={org} value={org} >{org}</option>))}
+            </select>
+            <ChevronDown size={16} className="filter-chevron" />
+          </div>
         </div>
 
-        <button className="calendar-trigger-btn" onClick={() => setShowCalendar(true)} style={{borderRadius:"50px", border:"1px solid #000000"}}>
-            <CalendarIcon size={18} /> Calendar
-        </button>
+        <div className="filter-box-modern">
+          <label className="filter-label-top">UNDE SE ȚINE</label>
+          <div className="filter-input-wrapper">
+            <MapPin size={18} className="filter-icon-inline" />
+            <select name="location" className="filter-select-actual" onChange={handleFilterChange}>
+              <option value="" >Toate locațiile</option>
+              {uniqueLocations.map(loc => (<option key={loc} value={loc}>{loc}</option>))}
+            </select>
+            <ChevronDown size={16} className="filter-chevron" />
+          </div>
+        </div>
+
+        <div className="filter-box-modern">
+          <label className="filter-label-top">TIP EVENIMENT</label>
+          <div className="filter-input-wrapper">
+            <Shield size={18} className="filter-icon-inline" />
+            <select name="category" className="filter-select-actual" onChange={handleFilterChange}>
+              <option value="">Toate tipurile</option>
+              {uniqueCategories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
+            </select>
+            <ChevronDown size={16} className="filter-chevron" />
+          </div>
+        </div>
+
+        <div className="filter-box-modern" onClick={() => setShowCalendar(true)}>
+          <label className="filter-label-top">DATA DESFĂȘURĂRII</label>
+          <div className="filter-input-wrapper pointer">
+            <CalendarIcon size={18} className="filter-icon-inline" />
+            <span className="filter-display-text">Alege data</span>
+            <ChevronDown size={16} className="filter-chevron" />
+          </div>
+        </div>
       </div>
 
-     
+      {/* Grid Evenimente */}
       <div className="events-grid-large">
           {loading ? (
-             <p className="loading-text">Se încarcă evenimentele...</p>
+             <p className="status-text">Se încarcă...</p>
           ) : filteredEvents.length > 0 ? (
              filteredEvents.map((event) => (
                 <EventCard 
                     key={event.id}
-                    id={event.id}
-                    title={event.title}
+                    {...event}
                     date={event.startTime}
-                    location={event.location}
-                    description={event.description}
-                    imageUrl={event.imageUrl}
-                    category={event.category}
-                    organizer={event.organizer} 
-                    userRole={user.role}
-                    onBuyTicket={() => handleBuyTicket(event.id, event.title)}
-                    isPurchasing={purchasingId === event.id}
                 />
              ))
           ) : (
-             <p className="no-events-text" >Nu am găsit evenimente.</p>
+             <p className="status-text">Nu am găsit evenimente.</p>
           )}
       </div>
     </div>

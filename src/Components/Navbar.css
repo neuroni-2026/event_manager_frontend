@@ -1,0 +1,342 @@
+.nb-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f1f1;
+  padding: 0 40px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.nb-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.nb-logo {
+  font-size: 24px;
+  font-weight: 850;
+  text-decoration: none;
+  background: linear-gradient(to right, #3b82f6 40%, #ea580c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+
+.nb-center-menu {
+  background: #f8fafc;
+  padding: 6px;
+  border-radius: 40px;
+  display: flex;
+  gap: 4px;
+  border: 1px solid #f1f5f9;
+}
+
+.nb-link {
+  text-decoration: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.nb-link:hover {
+  color: #1e293b;
+}
+
+.nb-link.active {
+  background: #ffffff;
+  color: #1e293b;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+
+.nb-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nb-bell-wrapper {
+  position: relative;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.nb-bell-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+
+.nb-profile-capsule {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px 4px 6px;
+  border-radius: 50px;
+  gap: 10px;
+}
+
+.nb-avatar {
+  width: 36px;
+  height: 36px;
+  background: #2563eb;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.nb-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.nb-username {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.nb-subtitle {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.nb-divider {
+  width: 1px;
+  height: 20px;
+  background: #e2e8f0;
+}
+
+.nb-logout-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.nb-logout-btn:hover {
+  color: #ef4444;
+}
+
+.nb-login-btn {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.nb-bell-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+.nb-profile-capsule {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 4px 12px 4px 6px;
+  border-radius: 50px;
+  gap: 10px;
+  cursor: pointer; 
+  transition: all 0.2s ease;
+}
+
+.nb-profile-capsule:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.nb-bell-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  padding: 0 2px;
+}
+
+
+.nb-overlay-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+.nb-bell-icon {
+  transition: transform 0.2s;
+}
+
+.nb-bell-icon.active {
+  color: #2563eb;
+  transform: scale(1.1);
+}
+
+
+.nb-logout-btn {
+  z-index: 2; 
+}
+
+/* ... Păstrează stilurile tale de bază și adaugă/modifică următoarele: */
+
+.nb-container {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f1f1;
+  padding: 0 20px; /* Redus de la 40px pentru mobil */
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+/* Butonul de toggle mobil */
+.nb-mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  order: 2;
+}
+
+/* Media Query pentru Mobil/Tabletă */
+@media (max-width: 1024px) {
+  .nb-mobile-toggle {
+    display: block;
+    margin-left: 15px;
+  }
+
+  .nb-center-menu {
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    background: white;
+    padding: 20px;
+    gap: 10px;
+    border-radius: 0 0 20px 20px;
+    border-top: 1px solid #f1f5f9;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    
+    /* Ascundere implicită */
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+
+  .nb-center-menu.open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .nb-link {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .nb-right {
+    gap: 12px;
+  }
+}
+
+/* Ajustări pentru ecrane foarte mici (Telefoane) */
+@media (max-width: 600px) {
+  .nb-logo {
+    font-size: 18px; /* Logo mai mic */
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .nb-profile-capsule {
+    padding: 4px;
+    gap: 5px;
+  }
+
+  .nb-right {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .hide-on-small {
+    display: none;
+  }
+}
+
+/* Asigură-te că link-ul activ pe mobil arată bine */
+.nb-link.active {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* Asigură-te că wrapper-ul din dreapta este aliniat */
+.nb-right {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Spațiu între clopoțel și capsula de profil */
+}
+
+/* Stil pentru clopoțel dacă NotificationBell folosește clasa bell-trigger-btn */
+.bell-trigger-btn {
+    color: #4b5563; /* Culoare neutră pentru clopoțel */
+    transition: color 0.2s;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bell-trigger-btn:hover {
+    color: #f05a28; /* Culoarea salmon la hover */
+}

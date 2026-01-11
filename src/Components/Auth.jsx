@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import api from '../services/api';
 import { Mail, Lock, User, Phone, MapPin, Building2, GraduationCap, University, Calendar, Timer, User2 } from 'lucide-react';
 import { CgOrganisation } from 'react-icons/cg';
+import { useLocation } from 'react-router-dom';
 
 const FALLBACK_EVENTS = [
   { id: 101, title: "Concert Rock", desc: "Live music night", date: "DEC 26", location: "Campus", tag: "SOCIAL", img: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=600" },
@@ -29,26 +30,30 @@ const ANIMATION_LANES = [
 ];
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
+ const location = useLocation();
+  const navigate = useNavigate();
+
+  const isLogin = location.pathname === '/auth/signin';
+
   const [isFocused, setIsFocused] = useState(false);
   const [backgroundCards, setBackgroundCards] = useState([]);
-  
+
   const [formData, setFormData] = useState({
-    firstName: '', 
-    lastName: '', 
-    email: '', 
-    password: '', 
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
     confirmPassword: '',
-    phoneNumber: '', 
-    role: 'student', 
-    faculty: '', 
-    studentYear: '', 
+    phoneNumber: '',
+    role: 'student',
+    faculty: '',
+    studentYear: '',
     organizationName: '',
   });
 
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  
 
   
   useEffect(() => {
@@ -243,7 +248,7 @@ const AuthPage = () => {
                   <label>Telefon</label>
                   <div className="input-wrapper">
                     <Phone className="input-icon" size={18} />
-                    <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required maxLength="10" pattern="[0-9]{10}"  title="Numărul de telefon trebuie să conțină exact 10 cifre" style={{border:"solid 2px black"}}
+                    <input type="tel" name="phoneNumber" placeholder="07xx xxx xxx" value={formData.phoneNumber} onChange={handleChange} required maxLength="10" pattern="[0-9]{10}"  title="Numărul de telefon trebuie să conțină exact 10 cifre" style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}
                     />
                   </div>
                 </div>
@@ -253,7 +258,7 @@ const AuthPage = () => {
               <label >Email</label>
               <div className="input-wrapper" >
                 <Mail className="input-icon" size={18} />
-                <input type="email" name="email" placeholder="student@university.edu" value={formData.email} onChange={handleChange} required style={{border:"solid 2px black"}}/>
+                <input type="email" name="email" placeholder="student@university.edu" value={formData.email} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}/>
               </div>
             </div>
 
@@ -266,7 +271,7 @@ const AuthPage = () => {
                       
                       {formData.role === 'admin' ? <User2 className="input-icon" size={18} /> : <User className="input-icon" size={18} />}
                       
-                      <select name="role" value={formData.role} onChange={handleChange} style={{border:"solid 2px black"}}>
+                      <select name="role" value={formData.role} onChange={handleChange} style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}>
                         <option value="student">Student</option>
                         <option value="organizer">Organizator</option>
                         <option value="admin">Admin</option>
@@ -281,7 +286,7 @@ const AuthPage = () => {
                             <label>Facultate</label>
                             <div className="input-wrapper">
                                 <Building2 className="input-icon" size={18} />
-                                <select name="faculty" value={formData.faculty} onChange={handleChange} style={{border:"solid 2px black"}} required={formData.role === 'student'}>
+                                <select name="faculty" value={formData.faculty} onChange={handleChange} style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}} required={formData.role === 'student'} >
                                     <option value="">Selectează facultatea</option>
                                     <option value="FIESC">FIESC</option>
                                     <option value="FEAA">FEAA</option>
@@ -295,7 +300,7 @@ const AuthPage = () => {
                             <label>An de studiu</label>
                             <div className="input-wrapper">
                                 <Timer className="input-icon" size={18} />
-                                <select name="studentYear" value={formData.studentYear} onChange={handleChange} style={{border:"solid 2px black"}} required={formData.role === 'student'}>
+                                <select name="studentYear" value={formData.studentYear} onChange={handleChange} style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}} required={formData.role === 'student'}>
                                     <option value="">Selectează anul</option>
                                     <option value="1">Anul 1</option>
                                     <option value="2">Anul 2</option>
@@ -319,7 +324,7 @@ const AuthPage = () => {
                                 placeholder="Ex: Liga Studenților" 
                                 value={formData.organizationName} 
                                 onChange={handleChange} 
-                                style={{border:"solid 2px black"}}
+                               style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}
                                 required={formData.role === 'organizer'}
                             />
                         </div>
@@ -335,7 +340,7 @@ const AuthPage = () => {
               <label>Parolă</label>
               <div className="input-wrapper">
                 <Lock className="input-icon" size={18} />
-                <input type="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required style={{border:"solid 2px black"}}/>
+                <input type="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}/>
               </div>
             </div>
 
@@ -344,7 +349,7 @@ const AuthPage = () => {
                 <label>Confirmă parola</label>
                 <div className="input-wrapper">
                   <Lock className="input-icon" size={18} />
-                  <input type="password" name="confirmPassword" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required style={{border:"solid 2px black"}}/>
+                  <input type="password" name="confirmPassword" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}/>
                 </div>
               </div>
             )}
@@ -366,7 +371,13 @@ const AuthPage = () => {
           
           <div className="auth-footer">
             {isLogin ? 'Nu ai un cont? ' : 'Ai deja un cont? '}
-            <span className="link-text" onClick={() => { setIsLogin(!isLogin); setError(''); }}>
+           <span
+  className="link-text"
+  onClick={() => {
+    setError('');
+    navigate(isLogin ? '/auth/signup' : '/auth/signin');
+  }}
+>
               {isLogin ? 'Înregistrează-te' : 'Autentifică-te'}
             </span>
           </div>

@@ -1,92 +1,83 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import EventCard from './EventCard';
 import api from '../services/api'; 
 import './OrganizerDashboard.css';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'; 
-
-
-const UploadIcon = () => (
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-);
+import ParticipantsModal from './ParticipantsModal';
+import ReviewsModal from './ReviewsModal';
+import { 
+  Calendar, MapPin, Clock, Users, ImageIcon, Type, 
+  LayoutDashboard, CheckCircle, Hourglass, AlertCircle, 
+  Star, Plus, Search, ArrowRight, Ban, X, Pencil, Trash2, MessageSquare, Upload,
+  TimerIcon,
+  User
+} from 'lucide-react';
 
 const OrganizerDashboard = () => {
   const navigate = useNavigate();
-  const [showForm, setShowForm] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Flag pentru editare
+  const [currentEventId, setCurrentEventId] = useState(null); // ID-ul evenimentului editat
+  
   const [myEvents, setMyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploadingImage, setUploadingImage] = useState(false);
-
-
-
-  const [restriction, setRestriction] = useState({ isRestricted: false, msg: "" });
-
   const [selectedMaterials, setSelectedMaterials] = useState([]);
+  const [selectedEventForParticipants, setSelectedEventForParticipants] = useState(null);
+  const [selectedEventForReviews, setSelectedEventForReviews] = useState(null);
+  const [participants, setParticipants] = useState([]);
+  const [announcement, setAnnouncement] = useState("");
 
+  // Calculăm media rating-urilor pentru toate evenimentele care au recenzii
+const calculateGlobalRating = () => {
+    // Filtrăm doar evenimentele care au primit cel puțin o notă
+    const eventsWithRatings = myEvents.filter(e => e.averageRating && e.averageRating > 0);
+    
+    if (eventsWithRatings.length === 0) return "N/A";
 
- 
+    const sum = eventsWithRatings.reduce((acc, curr) => acc + curr.averageRating, 0);
+    const average = sum / eventsWithRatings.length;
+    
+    return average.toFixed(1); // Returnăm cu o singură zecimală (ex: 4.8)
+};
 
-
+const globalRating = calculateGlobalRating();
   const [formData, setFormData] = useState({
     title: '', description: '', location: '', 
     startTime: '', endTime: '', 
-    maxCapacity: '', imageUrl: '', category: 'SOCIAL'
+    maxCapacity: '100', imageUrl: '', category: 'ACADEMIC'
   });
 
-  
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentEventId, setCurrentEventId] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    title: '', description: '', location: '', startTime: '',
-    endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL', materials:[]
-  });
-const checkStatus = useCallback(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      const now = new Date();
-      
-      let restricted = false;
-      let message = "";
-
-      if (parsedUser.isEnabled === false) {
-        restricted = true;
-        message = "CONT BLOCAT (BAN). Nu poți crea sau edita evenimente.";
-      } else if (parsedUser.suspendedUntil && new Date(parsedUser.suspendedUntil) > now) {
-        restricted = true;
-        message = `CONT SUSPENDAT până la ${new Date(parsedUser.suspendedUntil).toLocaleDateString()}.`;
-      }
-
-      setRestriction({ isRestricted: restricted, msg: message });
-      return restricted;
-    }
-    return false;
-  }, []);
+  const removeSelectedFile = (index) => {
+    setSelectedMaterials(prevFiles => prevFiles.filter((_, i) => i !== index));
+};
   const fetchMyEvents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/events/my-events'); 
       setMyEvents(response.data);
     } catch (error) {
-      console.error(error);
-      toast.error("Eroare la incarcarea evenimentelor.");
+      toast.error("Eroare la încărcarea evenimentelor.");
     } finally {
       setLoading(false);
     }
   }, []);
 
-
-
-useEffect(() => {
+ useEffect(() => {
   const checkStatusAndFetch = async () => {
+    // 1. Verificăm dacă există utilizator logat
     const userData = localStorage.getItem('user');
-    if (!userData) return navigate('/');
+    if (!userData) {
+      navigate('/auth/signin');
+      return;
+    }
 
     try {
-  
       const userObj = JSON.parse(userData);
+      
+      // 2. Opțional: Re-verificăm statusul de la server pentru siguranță (Banned/Suspended)
+      // Dacă backend-ul tău nu permite /admin/users pentru organizatori, 
+      // poți folosi doar datele din localStorage sau un endpoint de /me.
       const res = await api.get(`/admin/users`); 
       const currentUser = res.data.find(u => u.id === userObj.id);
 
@@ -98,12 +89,19 @@ useEffect(() => {
         if (isBanned || isSuspended) {
           setRestriction({
             isRestricted: true,
-            msg: isBanned ? "Contul tău este BLOCAT (BAN)." : "Activitatea ta este SUSPENDATĂ."
+            msg: isBanned 
+              ? "Contul tău este BLOCAT (BAN). Nu poți crea evenimente noi." 
+              : `Activitatea ta este SUSPENDATĂ până la ${new Date(currentUser.suspendedUntil).toLocaleDateString()}.`
           });
         }
       }
-      fetchMyEvents();
+
+      // 3. Dacă totul e ok, încărcăm evenimentele
+      await fetchMyEvents();
+
     } catch (e) {
+      console.error("Eroare la verificarea statusului:", e);
+      // În caz de eroare la verificarea ban-ului, încercăm totuși să aducem evenimentele
       fetchMyEvents(); 
     }
   };
@@ -111,512 +109,460 @@ useEffect(() => {
   checkStatusAndFetch();
 }, [fetchMyEvents, navigate]);
 
-  const handleDeleteEvent = async (eventId) => {
-    if (!window.confirm('Esti sigur ca vrei sa stergi acest eveniment?')) return;
-    try {
-      await api.delete(`/events/${eventId}`);
-      setMyEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
-      toast.success('Eveniment sters cu succes!');
-    } catch (error) {
-      console.error(error);
-      toast.error('A aparut o eroare la stergere.');
-    }
-  };
-
   const handleCreateChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData({ ...editFormData, [name]: value });
-  };
-
-  
-  const handleImageUpload = async (e, isEditMode = false) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 10 * 1024 * 1024; 
-    if (file.size > maxSize) {
-        toast.error('Imaginea este prea mare! (< 10MB)');
-        e.target.value = null; 
-        return;
-    }
-
-    const data = new FormData();
-    data.append("file", file);
-
-    try {
-      setUploadingImage(true);
-      const response = await api.post('/images/upload', data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      const uploadedUrl = response.data.url;
-      
-      if (isEditMode) {
-        setEditFormData(prev => ({ ...prev, imageUrl: uploadedUrl }));
-      } else {
-        setFormData(prev => ({ ...prev, imageUrl: uploadedUrl }));
-      }
-      toast.success("Imagine încărcată!");
-    } catch (error) {
-      console.error(error);
-      toast.error('Nu am putut incarca imaginea.');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-  const handleDeleteImage = async (isEdit = false) => {
-    const urlToDelete = isEdit ? editFormData.imageUrl : formData.imageUrl;
-    if (!urlToDelete) return;
-
-    try {
-  
-      await api.delete(`/images/delete?url=${encodeURIComponent(urlToDelete)}`);
-      
-      if (isEdit) {
-        setEditFormData(prev => ({ ...prev, imageUrl: '' }));
-      } else {
-        setFormData(prev => ({ ...prev, imageUrl: '' }));
-      }
-      toast.success("Imaginea a fost ștearsă de pe server.");
-    } catch (error) {
-      console.error(error);
-      toast.error("Eroare la ștergerea imaginii.");
-    }
-  };
-  const handleDeleteSavedMaterial = async (materialId) => {
-    if (!window.confirm("Ștergi definitiv acest fișier atașat?")) return;
-    try {
     
-      await api.delete(`/api/materials/${materialId}`);
-      
-      
-      setEditFormData(prev => ({
-        ...prev,
-        materials: prev.materials.filter(m => m.id !== materialId)
-      }));
-      toast.success("Fișier șters!");
-    } catch (error) {
-      toast.error("Nu s-a putut șterge fișierul.");
-    }
   };
 
-
-  const handleMaterialSelect = (e) => {
-      const files = Array.from(e.target.files);
-      setSelectedMaterials(prev => [...prev, ...files]);
-  };
-
-  const removeMaterial = (index) => {
-      setSelectedMaterials(prev => prev.filter((_, i) => i !== index));
-  };
-
-  
-  const uploadMaterialsToServer = async (eventId, files) => {
-      if (files.length === 0) return;
-      
-      const formData = new FormData();
-      files.forEach(file => formData.append("files", file));
-
-      try {
-          await api.post(`/materials/event/${eventId}`, formData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          toast.success("Materiale adăugate!");
-      } catch (error) {
-          console.error("Eroare upload materiale:", error);
-          toast.error("Eroare la adăugarea materialelor.");
-      }
-  };
-
-
-  const handleCreateSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title || !formData.startTime || !formData.endTime) {
-       toast.error('Titlul si datele sunt obligatorii!');
-       return;
-    }
-
-    let safeCapacity = null;
-    if (formData.maxCapacity !== '' && formData.maxCapacity !== null) {
-        const parsed = parseInt(formData.maxCapacity, 10);
-        if (!isNaN(parsed)) safeCapacity = parsed;
-    }
-
-    try {
-      
-      const eventPayload = {
-        title: formData.title,
-        description: formData.description,
-        location: formData.location,
-        startTime: formData.startTime.length === 16 ? formData.startTime + ":00" : formData.startTime,
-        endTime: formData.endTime.length === 16 ? formData.endTime + ":00" : formData.endTime,
-        maxCapacity: safeCapacity,
-        imageUrl: formData.imageUrl, 
-        category: formData.category
-      };
-
-      
-      const submissionData = new FormData();
-      
-    
-      submissionData.append('event', JSON.stringify(eventPayload));
-
-    
-      if (selectedMaterials.length > 0) {
-          selectedMaterials.forEach(file => {
-              submissionData.append('files', file);
-          });
-      }
-
-      console.log("Se trimite Multipart Request...");
-
-      await api.post('/events', submissionData, {
-          headers: {
-              'Content-Type': 'multipart/form-data'
-          }
-      });
-
-     
-      setFormData({
-        title: '', description: '', location: '', startTime: '',
-        endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL'
-      });
-      setSelectedMaterials([]);
-      setShowForm(false);
-      await fetchMyEvents();
-      toast.success('Eveniment creat cu succes!');
-
-    } catch (error) {
-      console.error("Eroare creare:", error);
-      const errMsg = error.response?.data?.message || error.response?.data || error.message || 'Eroare necunoscută';
-      toast.error(`Eroare: ${errMsg}`);
-    }
-  };
-
-  
-  const handleUpdateSubmit = async (e) => {
-      e.preventDefault();
-      
-      let safeCapacity = null;
-      if (editFormData.maxCapacity !== '' && editFormData.maxCapacity !== null) {
-          const parsed = parseInt(editFormData.maxCapacity, 10);
-          if (!isNaN(parsed)) safeCapacity = parsed;
-      }
-
-      try {
-          const payload = {
-            ...editFormData,
-            startTime: editFormData.startTime.length === 16 ? editFormData.startTime + ":00" : editFormData.startTime,
-            endTime: editFormData.endTime.length === 16 ? editFormData.endTime + ":00" : editFormData.endTime,
-            maxCapacity: safeCapacity,
-          };
-
-          await api.put(`/events/${currentEventId}`, payload);
-          
-         
-          if (selectedMaterials.length > 0) {
-              await uploadMaterialsToServer(currentEventId, selectedMaterials);
-              setSelectedMaterials([]); 
-          }
-          
-          setMyEvents(prev => prev.map(ev => 
-            ev.id === currentEventId ? { ...ev, ...payload, id: currentEventId } : ev
-          ));
-
-          toast.success("Eveniment actualizat!");
-          setIsEditing(false);
-      } catch (error) {
-          console.error("Eroare actualizare:", error);
-          const errMsg = error.response?.data?.message || error.message || "Eroare la actualizare";
-          toast.error(errMsg);
-      }
-  };
-
-  const openEditModal = (event) => {
+  // Funcție pentru a deschide formularul în mod EDITARE
+  const handleEditClick = (event) => {
     setCurrentEventId(event.id);
-    const formatForInput = (dateString) => {
-        if(!dateString) return '';
-        return new Date(dateString).toISOString().slice(0, 16);
+    setIsEditing(true);
+    setIsCreating(true); // Deschide vizualizarea formularului
+
+    // Formatăm datele pentru input-ul datetime-local (YYYY-MM-DDTHH:mm)
+    const formatDateTime = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().slice(0, 16);
     };
 
-    setEditFormData({
-        title: event.title,
-        description: event.description || '',
-        location: event.location,
-        category: event.category || 'SOCIAL',
-        maxCapacity: (event.maxCapacity !== null && event.maxCapacity !== undefined) ? event.maxCapacity : '',
-        startTime: formatForInput(event.startTime),
-        endTime: formatForInput(event.endTime),
-        imageUrl: event.imageUrl || ''
+    setFormData({
+      title: event.title,
+      description: event.description || '',
+      location: event.location,
+      category: event.category || 'ACADEMIC',
+      maxCapacity: event.maxCapacity || '100',
+      startTime: formatDateTime(event.startTime),
+      endTime: formatDateTime(event.endTime),
+      imageUrl: event.imageUrl || ''
     });
-    setSelectedMaterials([]); 
-    setIsEditing(true);
+  };
+  const handleMaterialSelect = (e) => {
+    const files = Array.from(e.target.files);
+    // Adăugăm fișierele noi la cele pe care le avem deja în listă
+    setSelectedMaterials(prevMaterials => [...prevMaterials, ...files]);
+    
+    // Resetăm input-ul pentru a permite selectarea aceluiași fișier dacă este șters și adăugat iar
+    e.target.value = null; 
+};
+
+  const handleCancel = () => {
+    setIsCreating(false);
+    setIsEditing(false);
+    setCurrentEventId(null);
+    setFormData({
+      title: '', description: '', location: '', 
+      startTime: '', endTime: '', 
+      maxCapacity: '100', imageUrl: '', category: 'ACADEMIC'
+    });
+    setSelectedMaterials([]);
   };
 
- return (
-    <div className="organizer-container">
-      <div className="top-nav-header">
-        <button className="back-arrow-btn" onClick={() => navigate(-1)}>←</button>
-      </div>
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const data = new FormData();
+    data.append("file", file);
+    try {
+      setUploadingImage(true);
+      const response = await api.post('/images/upload', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setFormData(prev => ({ ...prev, imageUrl: response.data.url }));
+      toast.success("Imagine încărcată!");
+    } catch (error) { toast.error('Eroare upload.'); } 
+    finally { setUploadingImage(false); }
+  };
 
-      <div className="content-wrapper">
-        {restriction.isRestricted ? (
-          <div className="info-box-red" style={{ textAlign: 'center', padding: '50px', margin: '20px', background: '#ffe5e5', borderRadius: '15px', color: '#b30000' }}>
-            <FaBan size={50} />
-            <h2>Acces Restricționat</h2>
-            <p>{restriction.msg}</p>
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const eventPayload = {
+      ...formData,
+      startTime: formData.startTime.length === 16 ? formData.startTime + ":00" : formData.startTime,
+      endTime: formData.endTime.length === 16 ? formData.endTime + ":00" : formData.endTime,
+    };
+
+    try {
+      if (isEditing) {
+        // LOGICA DE UPDATE
+        await api.put(`/events/${currentEventId}`, eventPayload);
+        
+        // Dacă avem materiale noi de adăugat în timpul editării
+        if (selectedMaterials.length > 0) {
+            const matData = new FormData();
+            selectedMaterials.forEach(file => matData.append('files', file));
+            await api.post(`/materials/event/${currentEventId}`, matData);
+        }
+        
+        toast.success('Eveniment actualizat cu succes!');
+      } else {
+        // LOGICA DE CREARE (Multipart)
+        const submissionData = new FormData();
+        submissionData.append('event', JSON.stringify(eventPayload));
+        selectedMaterials.forEach(file => submissionData.append('files', file));
+
+        await api.post('/events', submissionData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        toast.success('Eveniment trimis spre aprobare!');
+      }
+
+      handleCancel(); // Reset state și închidere formular
+      fetchMyEvents();
+    } catch (error) { 
+        console.error(error);
+        toast.error(isEditing ? 'Eroare la actualizare.' : 'Eroare la creare.'); 
+    }
+  };
+
+  const handleDeleteEvent = async (id) => {
+    if(window.confirm("Sigur vrei să ștergi acest eveniment?")) {
+        try {
+            await api.delete(`/events/${id}`);
+            fetchMyEvents();
+            toast.success("Eveniment șters.");
+        } catch(e) { toast.error("Eroare la ștergere."); }
+    }
+  };
+
+  return (
+    <div className="org-dashboard">
+      {!isCreating ? (
+        /* --- VIZUALIZARE LISTA --- */
+        <div className="org-list-view">
+          <div className="view-header">
+            <div className="header-text">
+                <h1>Evenimentele Mele</h1>
+                <p>Gestionează și monitorizează activitatea experiențelor create de tine.</p>
+            </div>
+            <button className="create-main-btn" onClick={() => setIsCreating(true)}>
+              <Plus size={20} /> CREEAZĂ EVENIMENT
+            </button>
           </div>
-        ) : (
-          <>
-            <div className="page-header-simple">
-              <h1>Crează eveniment nou</h1>
-              <p>Completează detaliile pentru a crea evenimentul tău</p>
+
+          {/* ... Secțiunea Stats rămâne la fel ... */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon-bg blue"><LayoutDashboard size={20}/></div>
+              <label>TOTAL</label>
+              <strong>{myEvents.length}</strong>
             </div>
-
-            <div className="controls-section">
-              <form className="event-form-clean" onSubmit={handleCreateSubmit}>
-                <div className="form-group">
-                  <label>Titlu eveniment *</label>
-                  <input type="text" name="title" placeholder="Introdu titlul evenimentului" value={formData.title} onChange={handleCreateChange} required style={{ border: "1px solid black" }} />
-                </div>
-
-                <div className="form-group">
-                  <label>Descriere *</label>
-                  <textarea name="description" rows="4" placeholder="Descriere detaliată a evenimentului" value={formData.description} onChange={handleCreateChange} style={{ border: "1px solid black" }} />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Facultate / Categorie *</label>
-                    <select name="category" value={formData.category} onChange={handleCreateChange} style={{ border: "1px solid black" }}>
-                      <option value="SOCIAL">Social</option>
-                      <option value="ACADEMIC">Academic</option>
-                      <option value="CAREER">Career</option>
-                      <option value="SPORT">Sport</option>
-                      <option value="VOLUNTEERING">Volunteering</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Capacitate (Locuri) *</label>
-                    <input type="number" name="maxCapacity" placeholder="Ex: 100" value={formData.maxCapacity} onChange={handleCreateChange} min="1" style={{ border: "1px solid black" }} />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Locație *</label>
-                  <input type="text" name="location" placeholder="Introdu locația evenimentului" value={formData.location} onChange={handleCreateChange} required style={{ border: "1px solid black" }} />
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group"><label>Start *</label><input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleCreateChange} required style={{ border: "1px solid black" }} /></div>
-                  <div className="form-group"><label>End *</label><input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleCreateChange} required style={{ border: "1px solid black" }} /></div>
-                </div>
-
-                <div className="form-group" style={{ marginTop: '20px', color: "black" }}>
-                  <label style={{ fontSize: "14px" }}>Imagine Principală</label>
-                  
-                  {!formData.imageUrl ? (
-                    <div className="custom-dropzone" style={{ position: 'relative' }}>
-                      <div className="upload-icon-large"><UploadIcon /></div>
-                      <p className="upload-text">
-                        {uploadingImage ? 'Se încarcă...' : (
-                          <><span>Click pentru a încărca</span> sau trage imaginea aici</>
-                        )}
-                      </p>
-                      <p className="upload-hint">PNG, JPG până la 10MB</p>
-                      <input
-                        type="file"
-                        className="file-input-hidden"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, false)}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="preview-container" style={{ position: 'relative', width: 'fit-content' }}>
-                      <div className="img-preview-box">
-                        <img src={formData.imageUrl} alt="Preview" style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #ccc' }} />
-                        <button 
-                          type="button" 
-                          onClick={() => handleDeleteImage(false)} 
-                          style={{ position: 'absolute', top: '0px', right: '0px', background: '#ff4757', color: 'white', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 'bold', fontSize: '18px', padding: '0', lineHeight: '0' }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <h4 className="materials-title" style={{ fontSize: "14px", fontWeight: "500" }}>Materiale și Atașamente</h4>
-                <div className="materials-section">
-                  <div className="custom-dropzone" style={{ borderStyle: 'dotted', minHeight: '80px', position: 'relative' }}>
-                    <div className="upload-icon-large" style={{ fontSize: '24px' }}>📎</div>
-                    <p className="upload-text"><span>Adaugă fișiere</span> (PDF, Imagini, Docx)</p>
-                    <input
-                      type="file"
-                      className="file-input-hidden"
-                      multiple
-                      onChange={handleMaterialSelect}
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                    />
-                  </div>
-
-                  {selectedMaterials.length > 0 && (
-                    <div className="preview-container">
-                      {selectedMaterials.map((file, idx) => (
-                        <div key={idx} className="file-preview-item">
-                          <span>{file.name}</span>
-                          <button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="info-box-green" style={{ marginTop: '20px', fontWeight: "500", fontSize: "20px", border: "2px solid #aceed8ff" }}>
-                  Evenimentul va fi trimis spre aprobare. Materialele vor fi încărcate automat.
-                </div>
-
-                <div className="form-actions-row">
-                  <button 
-                    type="button" 
-                    className="btn-cancel" 
-                    onClick={() => {
-                      setFormData({ title: '', description: '', location: '', startTime: '', endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL' });
-                      setSelectedMaterials([]);
-                      toast.success("Câmpurile au fost resetate");
-                    }} 
-                    disabled={uploadingImage}
-                  >
-                    Anulează
-                  </button>
-                  <button type="submit" className="btn-submit" disabled={uploadingImage}>{uploadingImage ? 'Se procesează...' : 'Trimite Evenimentul'}</button>
-                </div>
-              </form>
+            <div className="stat-card">
+              <div className="stat-icon-bg green"><CheckCircle size={20}/></div>
+              <label>PUBLICATE</label>
+              <strong>{myEvents.filter(e => e.status === 'PUBLISHED').length}</strong>
             </div>
-          </>
-        )}
-
-        <hr className="divider" />
-
-        <div className="my-events-section">
-          <h2>Evenimentele Mele</h2>
-          {loading ? <p>Se incarca...</p> : (
-            <div className="events-grid">
-              {myEvents.length > 0 ? (
-                myEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    id={event.id}
-                    title={event.title}
-                    date={event.startTime}
-                    location={event.location}
-                    description={event.description}
-                    imageUrl={event.imageUrl}
-                    category={event.category}
-                    maxCapacity={event.maxCapacity}
-                    onDelete={() => handleDeleteEvent(event.id)}
-                    onEdit={() => openEditModal(event)}
-                  />
-                ))
-              ) : (
-                <p style={{ color: '#888' }}>Nu ai creat niciun eveniment inca.</p>
-              )}
+            <div className="stat-card">
+              <div className="stat-icon-bg orange"><Hourglass size={20}/></div>
+              <label>PENDING</label>
+              <strong>{myEvents.filter(e => e.status === 'PENDING').length}</strong>
             </div>
-          )}
+            <div className="stat-card">
+              <div className="stat-icon-bg red"><AlertCircle size={20}/></div>
+              <label>RESPINSE</label>
+              <strong>{myEvents.filter(e => e.status === 'REJECTED').length}</strong>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-bg purple"><Users size={20}/></div>
+              <label>PARTICIPANȚI</label>
+              <strong>{myEvents.reduce((acc, curr) => acc + (curr.participantCount || 0), 0)}</strong>
+            </div>
+            <div className="stat-card">
+          <div className="stat-icon-bg yellow"><Star size={20}/></div>
+          <label>RATING MEDIU</label>
+          <strong style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+            {globalRating}
+            {globalRating !== "N/A" && <Star size={18} fill="#eab308" color="#eab308" style={{ marginBottom: '2px' }}/>}
+          </strong>
         </div>
+          </div>
 
-        {isEditing && (
-          <div className="modal-overlay">
-            <div className="modal-content-clean">
-              <h3>Editează Eveniment</h3>
-              <form onSubmit={handleUpdateSubmit} className="edit-form-clean">
-                <div className="form-group"><label>Titlu</label><input type="text" name="title" value={editFormData.title} onChange={handleEditChange} required /></div>
-                <div className="form-row">
-                  <div className="form-group"><label>Categorie</label><select name="category" value={editFormData.category} onChange={handleEditChange}><option value="SOCIAL">Social</option><option value="VOLUNTEERING">Volunteering</option><option value="CAREER">Carrer</option><option value="ACADEMIC">Academic</option><option value="SPORT">Sport</option></select></div>
-                  <div className="form-group"><label>Capacitate</label><input type="number" name="maxCapacity" value={editFormData.maxCapacity} onChange={handleEditChange} /></div>
-                </div>
-                <div className="form-group"><label>Locație</label><input type="text" name="location" value={editFormData.location} onChange={handleEditChange} required /></div>
-                <div className="form-row">
-                  <div className="form-group"><label>Start</label><input type="datetime-local" name="startTime" value={editFormData.startTime} onChange={handleEditChange} required /></div>
-                  <div className="form-group"><label>End</label><input type="datetime-local" name="endTime" value={editFormData.endTime} onChange={handleEditChange} required /></div>
-                </div>
-                <div className="form-group"><label>Descriere</label><textarea name="description" rows="3" value={editFormData.description} onChange={handleEditChange} /></div>
-
-                <div className="form-group">
-                  <label>Imagine Eveniment</label>
-                  {!editFormData.imageUrl ? (
-                    <div className="custom-dropzone" style={{ padding: '15px', position: 'relative' }}>
-                      <div className="upload-text">Click sau Drag & Drop</div>
-                      <input
-                        type="file"
-                        className="file-input-hidden"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, true)}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="preview-container" style={{ position: 'relative', width: 'fit-content' }}>
-                      <div className="img-preview-box">
-                        <img src={editFormData.imageUrl} alt="Preview" style={{ maxWidth: '150px', borderRadius: '8px' }} />
-                        <button 
-                          type="button" 
-                          onClick={() => handleDeleteImage(true)}
-                          style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#ff4757', color: 'white', border: 'none', borderRadius: '50%', cursor: 'pointer', width: '25px', height: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="materials-section">
-                  <h4 className="materials-title">Adaugă Materiale Noi</h4>
-                  <div className="custom-dropzone" style={{ padding: '15px', borderStyle: 'dotted', marginBottom: "20px", position: 'relative' }}>
-                    <div className="upload-text">📎 Adaugă fișiere</div>
-                    <input
-                      type="file"
-                      className="file-input-hidden"
-                      multiple
-                      onChange={handleMaterialSelect}
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', zIndex: 100, display: 'block' }}
-                    />
-                  </div>
-                  {selectedMaterials.length > 0 && (
-                    <div className="preview-container">
-                      {selectedMaterials.map((file, idx) => (
-                        <div style={{marginBottom:'15px'}} key={idx} className="file-preview-item"><span>{file.name}</span><button type="button" className="remove-file-btn" onClick={() => removeMaterial(idx)}>×</button></div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="form-actions-row">
-                  <button 
-                    type="button" 
-                    className="btn-cancel" 
-                    onClick={() => {
-                      setIsEditing(false);
-                      setSelectedMaterials([]);
-                      setEditFormData({ title: '', description: '', location: '', startTime: '', endTime: '', maxCapacity: '', imageUrl: '', category: 'SOCIAL' });
-                    }}
-                  >
-                    Anulează
-                  </button>                  
-                  <button type="submit" className="btn-submit">Salvează</button>
-                </div>
-              </form>
+          <div className="search-row" style={{boxShadow:'0 4px 20px rgba(0,0,0,0.06)',borderRadius:'20px'}}>
+            <div className="search-bar" style={{border:'none'}}>
+                <Search size={25} color="#e49750"/>
+                <input type="text" placeholder="Caută în evenimentele tale..." style={{padding:'10px', background:'none', fontSize:'20px'}}/>
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="org-cards-container">
+            {myEvents.map(event => (
+              <div key={event.id} className="organizer-event-card">
+                <div className="card-image-box">
+                  <img src={event.imageUrl || '/default.jpg'} alt="" />
+                  <div className="card-top-badges">
+                    <span className={`status-pill ${event.status}`}>● {event.status === 'PUBLISHED' ? 'PUBLICAT' : 'PENDING'}</span>
+                    <span className="category-pill">{event.category}</span>
+                  </div>
+                </div>
+                <div className="card-body">
+                  <h2 className="card-title">{event.title}</h2>
+                  <div className="card-meta">
+                    <span><Calendar size={16}/> {new Date(event.startTime).toLocaleDateString('ro-RO', {day:'numeric', month:'long', year:'numeric'})}</span>
+                    <span><Clock size={16}/> {new Date(event.startTime).toLocaleTimeString('ro-RO', {hour:'2-digit', minute:'2-digit'})}</span>
+                    <span><MapPin size={16}/> {event.location}</span>
+                  </div>
+                  
+                  {/* ... Metrics Row ... */}
+                  <div className="card-metrics-row">
+                    <div className="metric-item">
+                        <label>OCUPARE</label>
+                        <div className="metric-val">{event.participantCount || 0} / {event.maxCapacity}</div>
+                        <div className="mini-progress-bg"><div className="mini-progress-fill" style={{width: `${(event.participantCount/event.maxCapacity)*100}%`}}></div></div>
+                    </div>
+                    <div className="metric-divider"></div>
+                    <div className="metric-item">
+                        <label>RATING</label>
+                        <div className="metric-val rating-val"><Star size={16} fill="#eab308" color="#eab308"/> {event.averageRating?.toFixed(1) || 'N/A'} <span>({event.reviewCount || 0})</span></div>
+                    </div>
+                  </div>
+
+                  <div className="card-action-btns">
+                    <button className="btn-action participants" onClick={() => setSelectedEventForParticipants(event)}>
+                      <Users size={16}/> PARTICIPANȚI
+                    </button>
+                    <button className="btn-action reviews" onClick={() => setSelectedEventForReviews(event)}>
+                      <MessageSquare size={16}/> RECENZII
+                    </button>
+                  </div>
+                  
+
+                  <div className="card-footer-btns">
+                    {/* TRIGGER EDITARE LOCALĂ */}
+                    <button className="btn-edit-main" onClick={() => handleEditClick(event)}>
+                      <Pencil size={16}/> Editează
+                    </button>
+                    <button className="btn-delete-icon" onClick={() => handleDeleteEvent(event.id)}>
+                      <Trash2 size={18}/>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+            ))}
+          </div>
+          {selectedEventForParticipants && (
+      <ParticipantsModal 
+        event={selectedEventForParticipants} 
+        onClose={() => setSelectedEventForParticipants(null)} 
+      />
+    )}
+
+    {selectedEventForReviews && (
+      <ReviewsModal 
+        event={selectedEventForReviews} 
+        onClose={() => setSelectedEventForReviews(null)} 
+      />
+    )}
+
+        </div>
+        
+      ) : (
+        /* --- VIZUALIZARE FORMULAR (CREARE SAU EDITARE) --- */
+        <div className="create-view">
+            <div className="create-hero">
+              <button className="back-link-btn" onClick={handleCancel} style={{marginTop:'10px', background:'none', border:'none', color:'gray', cursor:'pointer'}}>
+                  ← Anulează și revino la listă
+                </button>
+                <h1>{isEditing ? 'Editează' : 'Creează un'} <span>Eveniment {isEditing ? '' : 'Nou'}</span></h1>
+                <p style={{ fontSize:'20px'}}>{isEditing ? 'Actualizează detaliile și conținutul experienței tale.' : 'Împărtășește experiențe și oportunități cu întreaga comunitate.'}</p>
+                
+            </div>
+
+            <div className="create-layout">
+                <div className="form-sections">
+                    <form onSubmit={handleFormSubmit}>
+                        <div className="form-block">
+                            <div className="block-header">
+                                <div className="block-icon blue"><Type size={18}/></div>
+                                <h3 style={{color:'black'}}>Informații Generale</h3>
+                            </div>
+                            <div className="field-group">
+                                <label >TITLU EVENIMENT</label>
+                                <input  style={{color:'black'}} name="title" value={formData.title} onChange={handleCreateChange} placeholder="Ex: Workshop Design Thinking" required />
+                            </div>
+                            <div className="field-row">
+                                <div className="field-group">
+                                    <label>CATEGORIE</label>
+                                    <select name="category" value={formData.category} onChange={handleCreateChange} style={{color:'black'}}>
+                                        <option value="ACADEMIC">Academic</option>
+                                        <option value="SOCIAL">Social</option>
+                                        <option value="CAREER">Carieră</option>
+                                        <option value="SPORT">Sport</option>
+                                        <option value="VOLUNTEERING">Voluntariat</option>
+                                    </select>
+                                </div>
+                                <div className="field-group">
+                                    <label>LOCAȚIE</label>
+                                    <input style={{color:'black'}} name="location" value={formData.location} onChange={handleCreateChange} placeholder="Ex: Aula Corp A" />
+                                </div>
+                            </div>
+                            <div className="field-group">
+                                <label>DESCRIERE DETALIATĂ</label>
+                                <textarea  style={{color:'black'}} name="description" value={formData.description} onChange={handleCreateChange} placeholder="Povestește-ne mai multe..." rows="5" />
+                            </div>
+                        </div>
+
+                        <div className="form-block">
+                            <div className="block-header">
+                                <div className="block-icon orange"><Clock size={18}/></div>
+                                <h3 style={{color:'black'}}>Logistică & Acces</h3>
+                            </div>
+                            <div className="field-row">
+                                <div className="field-group" >
+                                    <label>DATA ȘI ORA START</label>
+                                    <input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleCreateChange} style={{color:'black'}}/>
+                                </div>
+                                <div className="field-group">
+                                    <label>DATA ȘI ORA FINAL</label>
+                                    <input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleCreateChange} style={{color:'black'}}/>
+                                </div>
+                            </div>
+                            <div className="field-group">
+                                <label>CAPACITATE MAXIMĂ LOCURI</label>
+                                <input type="number" name="maxCapacity" value={formData.maxCapacity} onChange={handleCreateChange} style={{color:'black'}}/>
+                            </div>
+                        </div>
+
+                                          <div className="form-block">
+                        <div className="block-header">
+                            <div className="block-icon red"><ImageIcon size={18}/></div>
+                            <h3 style={{color:'black'}}>Media și Documente</h3>
+                        </div>
+
+                      <label className="input-sub-label" style={{ color: 'black' }}>IMAGINE DE COPERTĂ</label>
+                      <div className="image-dropzone" style={{backgroundColor:'#da93933d',padding:'80px'}}>
+                          {formData.imageUrl ? (
+                              <div className="img-up-preview">
+                                  <img src={formData.imageUrl} alt="Preview" />
+                                  <button type="button" onClick={() => setFormData({ ...formData, imageUrl: '' })} style={{color:"red", backgroundColor:'#eec5c544', border:'1px solid #949393', width:'50%', padding:'5px', margin:'10px'}}>
+                                      Sterge imaginea
+                                  </button>
+                              </div>
+                          ) : (
+                              <div className="drop-placeholder">
+                                  <div className="up-icon-circle"><Upload size={26} color="#3b82f6" /></div>
+                                  <p>Alege o imagine</p>
+                                  <span>Recomandat: 16:9, max 5MB</span>
+                                  <input type="file" accept="image/*" onChange={handleImageUpload} />
+                              </div>
+                          )}
+                      </div>
+
+                        <label className="input-sub-label" style={{color:'black'}}>MATERIALE SUPORT (PDF, DOCX)</label>
+                        
+                        <div className="file-input-custom">
+                            <label className="choose-btn">
+                                Choose Files
+                                <input 
+                                    type="file" 
+                                    multiple 
+                                    onChange={handleMaterialSelect} 
+                                />
+                            </label>
+                            <span className="file-count">
+                                {selectedMaterials.length} fișiere pregătite pentru încărcare
+                            </span>
+                        </div>
+
+                        {/* LISTA DE FIȘIERE SELECTATE */}
+                        {selectedMaterials.length > 0 && (
+                            <div className="materials-preview-list" style={{ marginTop: '15px' }}>
+                                {selectedMaterials.map((file, index) => (
+                                    <div key={index} className="file-preview-item" style={{
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        background: '#f8fafc', 
+                                        padding: '10px', 
+                                        borderRadius: '10px',
+                                        marginBottom: '8px',
+                                        border: '1px solid #e2e8f0'
+                                    }}>
+                                        <span style={{ fontSize: '14px', color: '#1e293b' }}>{file.name}</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setSelectedMaterials(prev => prev.filter((_, i) => i !== index))}
+                                            style={{ background: 'none', border: 'none', color: '#ff5959', cursor: 'pointer', fontWeight: 'bold' }}
+                                        >
+                                            Elimină
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                        <button type="submit" className="btn-publish-final">
+                            {isEditing ? 'SALVEAZĂ MODIFICĂRILE' : 'PUBLICĂ EVENIMENTUL'} <ArrowRight size={20}/>
+                        </button>
+                    </form>
+                </div>
+
+                {/* LIVE PREVIEW RĂMÂNE FUNCȚIONAL */}
+                <div className="preview-sticky-col">
+                    <div className="preview-tag"><ImageIcon size={14}/> LIVE PREVIEW</div>
+                    <div className="preview-card-mock">
+                        <div className="mock-img">
+                            {formData.imageUrl ? <img src={formData.imageUrl} alt=""/> : <div className="no-img"><ImageIcon size={40}/><p>NICIO IMAGINE</p></div>}
+                            <div className="mock-badge-cat">{formData.category}</div>
+                        </div>
+                        <div className="mock-content">
+                            <h2 style={{color:'black'}}>{formData.title || "Titlul Evenimentului"}</h2>
+                            <p className="mock-desc">{formData.description || "Descrierea ta va apărea aici..."}</p>
+                            <div className="mock-details">
+                               <span>
+                                  <Calendar size={14} />
+                                  {" "}
+                                  {formData.startTime
+                                    ? new Date(formData.startTime).toLocaleDateString("ro-RO")
+                                    : new Date().toLocaleDateString("ro-RO")}
+                                </span>
+                                <span><TimerIcon size={14}/> {formData.location || "--:----:--"}</span>
+                                <span><MapPin size={14}/> {formData.location || "Locația evenimentului"}</span>
+                                <span></span>
+                                <span></span>
+                                 {/* LIVE PREVIEW - SECȚIUNEA LOCURI */}
+                                <div className="mock-footer">
+                                  <div className="mock-locuri-header">
+                                    <div className="mock-locuri-label">
+                                      
+                                      <Users size={14} /> <span>LOCURI</span>
+                                      
+                                    </div>
+                                  
+                                  </div>
+                                  
+                                 
+                                  <div className="mock-progress-container">
+                                      
+                                    <div 
+                                      className="mock-progress-fill" 
+                                      style={{ width: '0%' }} // Fiind un eveniment nou, ocuparea este 0%
+                                      
+                                    ></div>
+                                    <span className="blue-count">0 / {formData.maxCapacity || 0}</span>
+                                  </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                    <div style={{border:'1px solid #a8d5f3', borderRadius:'10px', padding:'10px', background:'#e7eef1', margin:'10px'}}>
+                              <p style={{color:'blue', lineHeight:'0.05px'}}>Sfat pentru organizatori</p>
+                    <p style={{color:'#538fdf'}}>Folosește o imagine de înaltă calitate (16:9) și un titlu scurt, dar descriptiv (sub 50 de caractere) pentru a atrage mai mulți studenți.</p>
+                              </div>
+                </div>
+                
+            </div>
+            
+        </div>
+      )}
+
+      {/* Modals */}
+      {selectedEventForParticipants && (
+        <ParticipantsModal event={selectedEventForParticipants} onClose={() => setSelectedEventForParticipants(null)} />
+      )}
+      {selectedEventForReviews && (
+        <ReviewsModal event={selectedEventForReviews} onClose={() => setSelectedEventForReviews(null)} />
+      )}
     </div>
   );
 };

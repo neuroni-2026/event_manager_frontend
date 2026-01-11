@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import './AdminDashboard.css';
 import Swal from 'sweetalert2';
 import EventCard from './EventCard';
-
+import { Star, Trash2, Layers } from 'lucide-react'; // Folosim Lucide pentru consistență
 import { 
   FaArrowLeft, FaCheck, FaTimes, FaTrash, 
   FaUsers, FaChartBar, FaStar, FaDownload, FaBan, FaHistory, 
@@ -400,34 +400,53 @@ const renderOrganizers = () => (
   </div>
 );
   // 2. CERERI 
-  const renderRequests = () => (
-    <div className="section-container">
-      <h3>Cereri de organizator</h3>
-      {orgRequests.length === 0 ? <p className="empty-msg">Fără cereri noi.</p> : 
-        <div className="requests-flex">
-          {orgRequests.map(req => (
-            <div key={req.id} className="request-card-large">
-                <div className="req-header">
-                  <div className="req-avatar">{req.firstName?.charAt(0)}</div>
-                  <div>
-                    <h4>{req.firstName} {req.lastName}</h4>
-                    <span className="req-faculty">{req.studentFaculty}</span>
-                  </div>
+ const renderRequests = () => (
+  <div className="section-container">
+    <h3 className="section-title">Cereri de organizator</h3>
+    {orgRequests.length === 0 ? (
+      <p className="empty-msg">Fără cereri noi.</p>
+    ) : (
+      <div className="requests-stack">
+        {orgRequests.map((req) => (
+          <div key={req.id} className="request-card-modern">
+            {/* Rândul de Sus: Info Utilizator + Butoane */}
+            <div className="req-top-row">
+              <div className="req-user-info">
+                <div className="req-avatar-gradient">
+                  {req.firstName?.charAt(0)}
                 </div>
-                <div className="req-reason">
-                  <strong>MOTIV SOLICITARE:</strong>
-                  <p>"{req.pendingReason || 'Vreau să organizez evenimente'}"</p>
+                <div className="req-user-details">
+                  <h4>{req.firstName} {req.lastName}</h4>
+                  <span className="req-badge-org">{req.organizationName || "STUDENT"}</span>
                 </div>
-                <div className="req-footer-actions">
-                  <button className="btn-approve-full" onClick={() => handleApproveOrg(req.id)}>Aprobă</button>
-                  <button className="btn-reject-lite">Respinge</button>
-                </div>
+              </div>
+
+              <div className="req-actions">
+                <button className="btn-approve-modern" onClick={() => handleApproveOrg(req.id)}>
+                  APROBĂ
+                </button>
+                <button className="btn-reject-modern">
+                  RESPINGE
+                </button>
+              </div>
             </div>
-          ))}
-        </div>
-      }
-    </div>
-  );
+
+            {/* Secțiunea Motiv Solicitare */}
+            <div className="req-reason-container">
+              <div className="req-reason-icon">
+             
+              </div>
+              <div className="req-reason-content">
+                <span className="req-label">MOTIV SOLICITARE:</span>
+                <p className="req-text">"{req.pendingReason || 'ca vreau eu'}"</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 
   // 3. EVENIMENTE
   const renderEvents = () => (
@@ -448,34 +467,63 @@ const renderOrganizers = () => (
   );
 
   // 4. RECENZII 
- const renderReviews = () => (
-    <div className="section-container">
-      <h3>Recenzii Evenimente</h3>
-      <div className="reviews-list">
-        {reviews.map(rev => (
-          <div key={rev.id} className="review-card-admin">
-            <div className="rev-header">
-              <div className="stars">
-                {[...Array(5)].map((_, i) => <FaStar key={i} color={i < rev.rating ? "#ffc107" : "#e4e5e9"} />)}
+
+
+const renderReviews = () => (
+  <div className="section-container">
+    <h3 className="section-title">Recenzii Evenimente</h3>
+    <div className="reviews-grid-modern">
+      {reviews.map((rev) => (
+        <div key={rev.id} className="review-card-modern">
+          
+          {/* Partea de sus: Avatar, Nume, Stele și Ștergere */}
+          <div className="rev-header-row">
+            <div className="rev-user-section">
+              <div className="rev-avatar-circle">
+                {rev.user?.firstName?.charAt(0).toLowerCase()}
               </div>
-              <div className="rev-actions">
-                <span className="rev-date">{new Date(rev.createdAt).toLocaleDateString()}</span>
-             
-                <button className="tool-btn delete" onClick={() => handleDeleteReview(rev.id)} style={{marginLeft: '10px', border:'none', background:'none', cursor:'pointer', color:'#ff4757'}}>
-                  <FaTrash />
-                </button>
+              <div className="rev-user-details">
+                <h4 className="rev-user-name">
+                  {rev.user?.firstName} {rev.user?.lastName}
+                </h4>
+                <div className="rev-stars-row">
+                  {[...Array(5)].map((_, i) => (
+                    <Star 
+                      key={i} 
+                      size={14} 
+                      fill={i < rev.rating ? "#ffc107" : "transparent"} 
+                      color={i < rev.rating ? "#ffc107" : "#e4e5e9"} 
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-            <p className="rev-text">"{rev.comment}"</p>
-            <div className="rev-info">
-               <strong>{rev.user?.firstName} {rev.user?.lastName}</strong>
-               <span>Eveniment: {rev.event?.title}</span>
-            </div>
+            <button className="rev-delete-icon-btn" onClick={() => handleDeleteReview(rev.id)}>
+              <Trash2 size={20} />
+            </button>
           </div>
-        ))}
-      </div>
+
+          {/* Corpul recenziei: Citatul cu bordură roz/roșie */}
+          <div className="rev-quote-container">
+            <p className="rev-comment-text">"{rev.comment}"</p>
+          </div>
+
+          {/* Footer: Evenimentul și Data */}
+          <div className="rev-footer-row">
+            <div className="rev-event-info">
+              <Layers size={16} className="rev-event-icon" />
+              <span className="rev-event-title">{rev.event?.title || "Eveniment indisponibil"}</span>
+            </div>
+            <span className="rev-date-text">
+              {new Date(rev.createdAt).toLocaleDateString('ro-RO')}
+            </span>
+          </div>
+
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
 
   // 5. UTILIZATORI 
  const renderUsers = () => (

@@ -4,15 +4,15 @@ import api from '../services/api';
 import EventCard from './EventCard'; 
 import './Favorites.css'; 
 import { toast } from 'react-hot-toast';
+import { Heart, ArrowRight } from 'lucide-react';
 
 const Favorites = () => {
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
-  
- 
   const [userRole, setUserRole] = useState('USER');
 
+  // Logica rămâne neschimbată
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -40,32 +40,36 @@ const Favorites = () => {
     fetchFavorites();
   }, []);
 
-  
   const handleToggle = () => {
       fetchFavorites();
   };
 
   return (
-    <div className="favorites-page-container">
+    <div className="fav-page-wrapper">
       
-      <div className="fav-header-simple">
-          <button className="back-arrow-btn" onClick={() => navigate('/home')}>←</button>
-          <div className="fav-header-text">
-              <h1>Favoritele mele</h1>
-              <p>Evenimente pe care le-ai salvat pentru mai târziu</p>
+      {/* Header Modern (Conform image_b9d1a7.png) */}
+      <div className="fav-header-modern">
+          <div className="fav-header-icon-box">
+              <Heart size={28} fill="#ff6b6b" color="#ff6b6b" />
+          </div>
+          <div className="fav-header-info">
+              <h1>Evenimente Favorite</h1>
+              <p>Evenimentele pe care le-ai salvat pentru mai târziu.</p>
           </div>
       </div>
 
-    
-      <div className="fav-grid-section">
+      {/* Containerul Alb Principal */}
+      <div className="fav-main-content-card">
           {loading ? (
-             <p className="loading-text">Se încarcă lista...</p>
+              <div className="fav-loader-container">
+                  <div className="fav-spinner"></div>
+                  <p>Se încarcă lista...</p>
+              </div>
           ) : favorites.length > 0 ? (
-             <div className="favorites-grid">
-                 {favorites.map((favItem) => (
+              <div className="favorites-grid-modern">
+                  {favorites.map((favItem) => (
                     <EventCard 
                         key={favItem.id} 
-                        
                         id={favItem.eventId} 
                         title={favItem.eventTitle}
                         location={favItem.eventLocation}
@@ -74,21 +78,24 @@ const Favorites = () => {
                         description={favItem.eventDescription || ""} 
                         category={favItem.category || "EVENT"}
                         organizer={favItem.organizer} 
-
-                       
                         userRole={userRole} 
                         isFavoriteProp={true} 
                         onToggle={handleToggle} 
                     />
-                 ))}
-             </div>
+                  ))}
+              </div>
           ) : (
-             <div className="empty-state">
-                <p>Nu ai niciun eveniment favorit. ❤️</p>
-                <button className="explore-btn" onClick={() => navigate('/home')}>
-                    Explorează Evenimente
-                </button>
-             </div>
+              /* Empty State (Conform image_b9d1a7.png) */
+              <div className="fav-empty-state">
+                  <div className="fav-empty-icon-circle">
+                      <Heart size={42} color="#ff6b6b" strokeWidth={1.5} />
+                  </div>
+                  <h2>Niciun eveniment salvat</h2>
+                  <p>Explorează evenimentele disponibile și salvează-le pe cele care te interesează.</p>
+                  <button className="fav-explore-btn" onClick={() => navigate('/home')}>
+                      Explorează Evenimente <ArrowRight size={18} />
+                  </button>
+              </div>
           )}
       </div>
     </div>

@@ -20,7 +20,8 @@
 
 .back-btn {
     font-size: 18px;
-    border: 1px solid black;
+    border: 1px solid rgb(255, 255, 255);
+    background-color: white;
     cursor: pointer;
     color: black;
 }
@@ -514,4 +515,265 @@
 .cell-stats {
     display: flex;
     align-items: center;
+}
+/* Containerul de carduri */
+.requests-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+/* Cardul Modern */
+.request-card-modern {
+  background: white;
+  border-radius: 30px;
+  border: 1px solid #e2e8f0;
+  padding: 35px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
+}
+
+/* Antetul (Avatar, Nume, Butoane) */
+.req-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.req-user-info {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+/* Avatarul cu gradient portocaliu */
+.req-avatar-gradient {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 126, 95, 0.3);
+}
+
+.req-user-details h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  color: #1e293b;
+}
+
+/* Badge-ul ASUS/Facultate */
+.req-badge-org {
+  background: #eff6ff;
+  color: #3b82f6;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Zona de Butoane */
+.req-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.btn-approve-modern {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 14px 35px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2);
+  transition: all 0.2s;
+}
+
+.btn-reject-modern {
+  background: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 14px 35px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* Caseta de motivare */
+.req-reason-container {
+  display: flex;
+  gap: 12px;
+  background: #fcfcfc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px;
+  position: relative;
+  margin-left: 80px; /* Aliniat sub nume, nu sub avatar */
+}
+
+.req-reason-icon {
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.req-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.req-text {
+  margin: 0;
+  color: #334155;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Ajustare pentru mobil */
+@media (max-width: 768px) {
+  .req-top-row { flex-direction: column; gap: 20px; }
+  .req-reason-container { margin-left: 0; }
+  .req-actions { width: 100%; }
+  .req-actions button { flex: 1; }
+}
+/* Containerul general */
+.reviews-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 25px;
+  padding-top: 20px;
+}
+
+/* Cardul de recenzie */
+.review-card-modern {
+  background: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 40px; /* Colțuri foarte rotunjite ca în imagine */
+  padding: 30px;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.review-card-modern:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* Header: Avatar + Info */
+.rev-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.rev-user-section {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Avatarul cu fundal albastru deschis/alb */
+.rev-avatar-circle {
+  width: 55px;
+  height: 55px;
+  background: #f0f4ff; /* Albastru pal */
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.rev-user-name {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  color: #1e293b;
+  font-weight: 800;
+}
+
+.rev-stars-row {
+  display: flex;
+  gap: 2px;
+}
+
+/* Butonul de ștergere */
+.rev-delete-icon-btn {
+  background: none;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px;
+}
+
+.rev-delete-icon-btn:hover {
+  color: #ef4444;
+}
+
+/* Containerul comentariului cu linia roz */
+.rev-quote-container {
+  border-left: 4px solid #fee2e2; /* Linia verticală roz/roșie */
+  padding-left: 20px;
+  margin: 20px 0 30px 10px;
+}
+
+.rev-comment-text {
+  font-style: italic;
+  font-size: 1.1rem;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Footer: Iconiță stack + Data */
+.rev-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f8fafc;
+  padding-top: 20px;
+}
+
+.rev-event-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.rev-event-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.rev-date-text {
+  font-size: 13px;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* Responsivitate */
+@media (max-width: 500px) {
+  .reviews-grid-modern { grid-template-columns: 1fr; }
+  .review-card-modern { border-radius: 25px; padding: 20px; }
 }
