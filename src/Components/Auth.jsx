@@ -265,19 +265,7 @@ const AuthPage = () => {
           
             {!isLogin && (
               <>
-                <div className="input-group">
-                   <label>Tip de cont</label>
-                   <div className="input-wrapper">
-                      
-                      {formData.role === 'admin' ? <User2 className="input-icon" size={18} /> : <User className="input-icon" size={18} />}
-                      
-                      <select name="role" value={formData.role} onChange={handleChange} style={{border:"solid 2px black", borderRadius:"10px", padding:"0 16px 0 44px", backgroundColor:" #f3f3f3"}}>
-                        <option value="student">Student</option>
-                        <option value="organizer">Organizator</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                   </div>
-                </div>
+                
 
                 {formData.role === 'student' && (
                 
@@ -357,15 +345,6 @@ const AuthPage = () => {
             <button type="submit" className="auth-btn">
                 {isLogin ? 'Autentificare' : 'Creează cont'}
             </button>
-
-            {!isLogin && (
-                <>
-                    <div className="separator"><span>Sau continuă cu</span></div>
-                    <button type="button" className="idp-btn" style={{border:"solid 2px black"}}>
-                        <University size={18}/> idp.usv.ro
-                    </button>
-                </>
-            )}
 
           </form>
           

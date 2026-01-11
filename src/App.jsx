@@ -9,6 +9,7 @@ import NotificationPage from './Components/NotificationPage';
 import MyTickets from './Components/MyTickets';
 import Favorites from './Components/Favorites';
 import Settingss from './Components/Settings';
+import Navbar from './Components/Navbar';
 import { Toaster,toast } from 'react-hot-toast';
 
 function App() {
@@ -25,8 +26,11 @@ function App() {
             },
          }}
        />
+       <Navbar/>
     <Routes>
       <Route path="/" element={<AuthPage />} />
+      <Route path="/auth/signin" element={<AuthPage />} />
+      <Route path="/auth/signup" element={<AuthPage />} />
       <Route path="/event_detalii/:id" element={<EventCardDetails />} />
       <Route path="/home" element={<Home />} />
       <Route path="/organizer" element={<OrganizerDashboard />} />
