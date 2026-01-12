@@ -1,137 +1,110 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, ArrowRight, Pencil, Trash2 } from 'lucide-react';
-import DefaultImage from '../Images/usv.jpg'; 
-import './EventCard.css';
+import { Calendar, MapPin, ArrowRight, Clock, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-const EventCard = ({ 
-    id, 
-    title, 
-    description, 
-    location, 
-    date, 
-    imageUrl, 
-    category, 
-    occupiedSeats,    // Primim prop-ul
-    participantCount, // Verificăm și varianta din DTO-ul de backend
-    maxCapacity,
-    onEdit,    
-    onDelete   
-}) => {
-    const navigate = useNavigate();
+const categoryColors = {
+  ACADEMIC: 'bg-blue-50 text-blue-700 border-blue-100',
+  SOCIAL: 'bg-orange-50 text-orange-700 border-orange-100',
+  CAREER: 'bg-purple-50 text-purple-700 border-purple-100',
+  SPORT: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  VOLUNTEERING: 'bg-amber-50 text-amber-700 border-amber-100',
+  OTHER: 'bg-gray-50 text-gray-700 border-gray-100'
+};
 
-    // --- LOGICA ACTUALIZARE LOCURI ---
-    // Verificăm care dintre câmpuri este populat de la părinte/API
-    const displayOccupied = occupiedSeats ?? participantCount ?? 0;
-    // ---------------------------------
-
-    const categoryStyles = {
-        ACADEMIC: { bg: '#eff6ff', color: '#3b82f6' },
-        SOCIAL: { bg: '#fff7ed', color: '#f97316' },
-        SPORT: { bg: '#f0fdf4', color: '#16a34a' },
-        VOLUNTEERING: { bg: '#fff1f2', color: '#e11d48' },
-        CAREER: { bg: '#faf5ff', color: '#9333ea' },
-        OTHER: { bg: '#f3f4f6', color: '#6b7280' }
+const formatDate = (dateString) => {
+    if (!dateString) return { date: 'TBA', time: '--:--' };
+    const date = new Date(dateString);
+    return {
+        date: new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }).format(date),
+        time: new Intl.DateTimeFormat('ro-RO', { hour: '2-digit', minute: '2-digit' }).format(date)
     };
-    
-    const currentStyle = categoryStyles[category?.toUpperCase()] || categoryStyles.OTHER;
-    const d = new Date(date);
-    const formattedDate = d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' });
-    const formattedTime = d.toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit' });
+};
 
-    const handleClick = () => { if (id) navigate(`/event_detalii/${id}`); };
+const EventCard = ({ event }) => {
+  const { id, title, startTime, location, imageUrl, category, description, participantCount, maxCapacity } = event;
+  const { date, time } = formatDate(startTime);
+  const categoryStyle = categoryColors[category] || categoryColors.OTHER;
+  
+  const occupancyPercentage = Math.min(((participantCount || 0) / (maxCapacity || 1)) * 100, 100);
 
-    const safeMaxCapacity = maxCapacity && maxCapacity > 0 ? maxCapacity : 1; 
-    // Folosim displayOccupied pentru progres
-    const progressPercentage = Math.min((displayOccupied / safeMaxCapacity) * 100, 100);
+  return (
+    <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 flex flex-col h-full hover:-translate-y-1">
+      {/* Image Container */}
+      <div className="relative h-56 overflow-hidden bg-gray-100">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <img 
+          src={imageUrl || "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000&auto=format&fit=crop"} 
+          alt={title} 
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        
+        <div className="absolute top-5 left-5 z-20">
+          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${categoryStyle}`}>
+            {category}
+          </span>
+        </div>
+      </div>
 
-    return (
-        <div className="ec-container" onClick={handleClick} style={{borderRadius:'20px'}}>
-            <div className="ec-media">
-                <img 
-                    src={imageUrl || DefaultImage} 
-                    alt={title} 
-                    className="ec-img" 
-                    onError={(e) => {e.target.src = DefaultImage}} 
-                />
-                
-                <div 
-                    className="ec-badge-category" 
-                    style={{ backgroundColor: currentStyle.bg, color: currentStyle.color}}
-                >
-                    {category || 'Event'}
+      {/* Content */}
+      <div className="p-8 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+          {title}
+        </h3>
+
+        <p className="text-gray-500 text-sm font-normal line-clamp-2 mb-6 leading-relaxed font-medium">
+          {description}
+        </p>
+
+        <div className="space-y-3 mb-8 text-sm text-gray-600">
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-primary/70 rounded-lg">
+                    <Calendar className="w-4 h-4" />
                 </div>
-
-                {(onEdit || onDelete) && (
-                    <div className="ec-admin-overlay" onClick={(e) => e.stopPropagation()}>
-                        {onEdit && (
-                            <button className="ec-admin-btn edit" onClick={onEdit} title="Editează">
-                                <Pencil size={16} />
-                            </button>
-                        )}
-                        {onDelete && (
-                            <button className="ec-admin-btn delete" onClick={() => onDelete(id)} title="Șterge">
-                                <Trash2 size={16} />
-                            </button>
-                        )}
-                    </div>
-                )}
+                <span className="font-semibold">{date}</span>
             </div>
-            
-            <div className="ec-body">
-                <h2 className="ec-title">{title || "Titlu Eveniment"}</h2>
-                
-                <p className="ec-description">
-                    {description 
-                        ? (description.length > 120 ? description.substring(0, 120) + "..." : description)
-                        : "Fără descriere disponibilă."}
-                </p>
-
-                <div className="ec-info-list">
-                    <div className="ec-info-item">
-                        <div className="ec-icon-circle blue-light">
-                            <Calendar size={16} color="#4a90e2" />
-                        </div>
-                        <span>{formattedDate}</span>
-                    </div>
-                    
-                    <div className="ec-info-item">
-                        <div className="ec-icon-circle red-light">
-                            <Clock size={16} color="#ff6b6b" />
-                        </div>
-                        <span>{formattedTime}</span>
-                    </div>
-                    
-                    <div className="ec-info-item">
-                        <div className="ec-icon-circle blue-light">
-                            <MapPin size={16} color="#4a90e2" />
-                        </div>
-                        <span>{location || 'Online'}</span>
-                    </div>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-primary/70 rounded-lg">
+                    <Clock className="w-4 h-4" />
                 </div>
-
-                <div className="ec-capacity-section">
-                    <div className="ec-capacity-header">
-                        <span className="ec-capacity-label">LOCURI OCUPATE</span>
-                        <span className="ec-capacity-value">
-                            {/* Afișăm valoarea calculată */}
-                            {displayOccupied} / {maxCapacity || '∞'} 
-                        </span>
-                    </div>
-                    <div className="ec-progress-bar">
-                        <div 
-                            className="ec-progress-fill" 
-                            style={{ width: `${progressPercentage}%` }}
-                        ></div>
-                    </div>
+                <span className="font-semibold">{time}</span>
+            </div>
+            <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-primary/70 rounded-lg">
+                    <MapPin className="w-4 h-4" />
                 </div>
-
-                <button className="ec-details-btn">
-                    VEZI DETALII <ArrowRight size={18} />
-                </button>
+                <span className="font-semibold truncate">{location}</span>
             </div>
         </div>
-    );
+
+        {/* Occupancy & Progress Bar */}
+        <div className="mt-auto">
+            <div className="flex justify-between items-end mb-2.5">
+                <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-400" />
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Locuri Ocupate</span>
+                </div>
+                <span className="text-xs font-bold text-primary">{participantCount || 0} / {maxCapacity}</span>
+            </div>
+            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${occupancyPercentage}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-orange-400 to-primary rounded-full"
+                />
+            </div>
+        </div>
+
+        <Link to={`/events/${id}`} className="mt-8 block no-underline">
+            <button className="w-full py-4 rounded-2xl bg-gray-900 text-white font-bold text-xs uppercase tracking-widest hover:bg-primary transition-all duration-300 flex items-center justify-center gap-2 shadow-xl shadow-gray-900/10 hover:shadow-primary/20 active:scale-95 border-none cursor-pointer">
+                <span className="no-underline">Vezi Detalii</span>
+                <ArrowRight className="w-4 h-4" />
+            </button>
+        </Link>
+      </div>
+    </div>
+  );
 };
 
 export default EventCard;
