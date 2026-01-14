@@ -13,7 +13,7 @@ const EditEvent = () => {
     const [materials, setMaterials] = useState([]);
     const [uploading, setUploading] = useState(false);
     
-    // Modal State
+   
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalConfig, setModalConfig] = useState({
         title: '',

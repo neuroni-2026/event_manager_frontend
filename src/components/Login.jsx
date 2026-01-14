@@ -163,7 +163,7 @@ const Login = () => {
             >
                 <div className="auth-card bg-white rounded-[30px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-black p-10">
                     <div className="auth-header mb-8 text-left">
-                        <h2 className="text-[36px] font-extrabold text-slate-900 mb-2 tracking-tight">Bine ai venit!</h2>
+                        <h2 className="text-[36px] font-extrabold text-slate-900 mb-2 tracking-tight font-light">Bine ai venit!</h2>
                         <p className="text-[16px] text-slate-500 leading-relaxed font-medium">
                             Autentifică-te în contul tău Event Manager
                         </p>

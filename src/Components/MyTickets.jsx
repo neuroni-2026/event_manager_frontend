@@ -4,11 +4,13 @@ import QRCode from 'react-qr-code';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Ticket as TicketIcon, Calendar, MapPin, User, ArrowRight, Loader2, Plane, QrCode } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import TicketView from './TicketView';
 
 const MyTickets = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedTicket, setSelectedTicket] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,9 +92,9 @@ const MyTickets = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <Link 
-                                    to={`/tickets/${ticket.id}`} 
-                                    className="group flex flex-col sm:flex-row bg-white rounded-[2rem] shadow-md hover:shadow-2xl hover:shadow-primary/10 border border-gray-100 overflow-hidden transition-all duration-300 h-full transform hover:-translate-y-1 no-underline"
+                                <div 
+                                    onClick={() => setSelectedTicket(ticket)}
+                                    className="cursor-pointer group flex flex-col sm:flex-row bg-white rounded-[2rem] shadow-md hover:shadow-2xl hover:shadow-primary/10 border border-gray-100 overflow-hidden transition-all duration-300 h-full transform hover:-translate-y-1"
                                 >
                                     {/* LEFT SIDE: Event Info */}
                                     <div className="flex-grow p-7 sm:p-8 relative bg-white">
@@ -164,12 +166,21 @@ const MyTickets = () => {
                                             Detalii <ArrowRight className="w-3 h-3" />
                                         </div>
                                     </div>
-                                </Link>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
                 )}
             </div>
+            
+            <AnimatePresence>
+                {selectedTicket && (
+                    <TicketView 
+                        ticket={selectedTicket} 
+                        onClose={() => setSelectedTicket(null)} 
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 };

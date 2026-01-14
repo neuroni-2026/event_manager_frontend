@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all'); // 'all' or 'unread'
+    const [filter, setFilter] = useState('all'); 
 
     useEffect(() => {
         fetchNotifications();

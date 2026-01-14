@@ -23,7 +23,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
 
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start week on Monday
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); 
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
     const calendarDays = eachDayOfInterval({
@@ -33,7 +33,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
 
     const weekDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-    // Helper to check if a date has events
+   
     const hasEvent = (date) => {
         if (!events || !Array.isArray(events)) return false;
         return events.some(event => {
@@ -104,7 +104,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
                         >
                             {format(day, 'd')}
                             
-                            {/* Event Dot */}
+                           
                             {dayHasEvent && (
                                 <div className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-primary'}`}></div>
                             )}

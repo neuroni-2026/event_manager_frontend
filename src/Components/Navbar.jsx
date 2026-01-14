@@ -132,9 +132,9 @@ const Navbar = () => {
         <div className="flex justify-between h-20 items-center">
           {/* Logo */}
           <Link to="/" className="group no-underline">
-            <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent hover:to-primary transition-all duration-300">
-              EventManager
-            </span>
+            <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent hover:to-blue-600 transition-all duration-300">
+  EventManager
+</span>
           </Link>
 
           {/* Desktop Navigation - Absolute Center */}
@@ -170,7 +170,7 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            {/* Notification Bell with Dropdown - Hidden for Admins */}
+            {/* Notification Dropdown */}
             {(isStudent || isOrganizer) && (
                <div className="relative">
                    <button

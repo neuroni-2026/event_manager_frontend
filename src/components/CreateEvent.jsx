@@ -12,7 +12,7 @@ const CreateEvent = () => {
     const [uploading, setUploading] = useState(false);
     const [materials, setMaterials] = useState([]); 
     
-    // Modal State
+   
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalConfig, setModalConfig] = useState({
         title: '',

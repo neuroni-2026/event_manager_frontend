@@ -105,10 +105,10 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
             className="absolute top-[4.5rem] right-0 w-[26rem] max-h-[85vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-white/20 ring-1 ring-black/5 z-50 overflow-hidden flex flex-col font-sans"
         >
             {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-100/50 flex justify-between items-center bg-white/50 sticky top-0 z-10">
+            <div className="px-6 py-4 pb-0 border-b border-gray-100/50 flex justify-between items-center bg-white/50 sticky top-0 z-10">
                 <div>
-                    <h3 className="font-bold text-gray-900 text-lg">Notificări</h3>
-                    <p className="text-xs text-gray-500 font-medium mt-0.5">
+                    <h3 className="font-bold text-gray-900 text-lg leading-tight">Notificări</h3>
+                    <p className="text-[11px] text-gray-500 font-medium mt-0.5">
                         Ai {notifications.filter(n => !n.isRead).length} mesaje necitite
                     </p>
                 </div>

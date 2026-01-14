@@ -16,7 +16,7 @@ const EventDetails = () => {
     const [error, setError] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
 
-    // Modal State
+  
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalConfig, setModalConfig] = useState({
         title: '',

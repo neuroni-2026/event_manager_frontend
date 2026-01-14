@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { PlusCircle, Calendar, Edit2, Trash2, Eye, MapPin, Users, Clock, CheckCircle2, Hourglass, BarChart3, Search, AlertCircle, MessageSquare, Download, Send, Star, X, Info, Scan } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmationModal from './ui/ConfirmationModal';
+import ParticipantsModal from './ParticipantsModal';
 
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000&auto=format&fit=crop";
 
@@ -16,12 +17,9 @@ const MyEvents = () => {
 
     // Modals State
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [participants, setParticipants] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [isParticipantsModalOpen, setParticipantsModalOpen] = useState(false);
     const [isReviewsModalOpen, setReviewsModalOpen] = useState(false);
-    const [notificationMessage, setNotificationMessage] = useState('');
-    const [sendingNotification, setSendingNotification] = useState(false);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,16 +35,6 @@ const MyEvents = () => {
         setIsModalOpen(true);
     };
 
-    const fetchParticipants = async (eventId) => {
-        try {
-            const response = await api.get(`/events/${eventId}/participants`);
-            setParticipants(response.data);
-            setParticipantsModalOpen(true);
-        } catch (error) {
-            toast.error("Could not load participants.");
-        }
-    };
-
     const fetchReviews = async (eventId) => {
         try {
             const response = await api.get(`/reviews/event/${eventId}`);
@@ -55,43 +43,6 @@ const MyEvents = () => {
         } catch (error) {
             toast.error("Could not load reviews.");
         }
-    };
-
-    const handleSendNotification = async () => {
-        if (!notificationMessage.trim()) return;
-        setSendingNotification(true);
-        try {
-            await api.post(`/events/${selectedEvent.id}/notify`, { message: notificationMessage });
-            toast.success("Notificare trimisă cu succes!");
-            setNotificationMessage('');
-        } catch (error) {
-            toast.error("Eroare la trimiterea notificării.");
-        } finally {
-            setSendingNotification(false);
-        }
-    };
-
-    const exportParticipantsCSV = () => {
-        if (participants.length === 0) return;
-        
-        const headers = ["Nume", "Prenume", "Email", "Facultate", "An Studiu"];
-        const csvContent = [
-            headers.join(','),
-            ...participants.map(p => [
-                `"${p.lastName}"`,
-                `"${p.firstName}"`,
-                `"${p.email}"`,
-                `"${p.studentFaculty || 'N/A'}"`,
-                `"${p.studentYear || 'N/A'}"`
-            ].join(','))
-        ].join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `participanti_${selectedEvent.title.replace(/\s+/g, '_')}.csv`);
-        link.click();
     };
 
     useEffect(() => {
@@ -339,7 +290,7 @@ const MyEvents = () => {
                                     {/* Action Buttons */}
                                     <div className="grid grid-cols-2 gap-3 mb-6">
                                         <button 
-                                            onClick={() => { setSelectedEvent(event); fetchParticipants(event.id); }}
+                                            onClick={() => { setSelectedEvent(event); setParticipantsModalOpen(true); }}
                                             className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all border border-blue-100"
                                         >
                                             <Users size={14} /> Participanți
@@ -376,113 +327,11 @@ const MyEvents = () => {
             </div>
             {/* Participants Modal */}
             <AnimatePresence>
-                {isParticipantsModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }} 
-                            animate={{ opacity: 1, scale: 1 }} 
-                            exit={{ opacity: 0, scale: 0.95 }} 
-                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden border border-white/20"
-                        >
-                            <div className="p-8 border-b border-gray-50 flex items-center justify-between bg-white sticky top-0 z-10">
-                                <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 leading-tight">{selectedEvent?.title}</h3>
-                                    <p className="text-gray-500 font-medium text-sm mt-1">Management Participanți ({participants.length})</p>
-                                </div>
-                                <button onClick={() => setParticipantsModalOpen(false)} className="p-2.5 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600">
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
-
-                            <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                                    {/* Table Column */}
-                                    <div className="lg:col-span-2 space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Listă Studenți</h4>
-                                            <button 
-                                                onClick={exportParticipantsCSV}
-                                                className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:underline bg-primary/5 px-3 py-1.5 rounded-lg transition-colors"
-                                            >
-                                                <Download className="w-3.5 h-3.5" /> Export CSV
-                                            </button>
-                                        </div>
-                                        
-                                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                                            <table className="w-full text-left border-collapse">
-                                                <thead>
-                                                    <tr className="bg-gray-50/50 border-b border-gray-50">
-                                                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Student</th>
-                                                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Facultate</th>
-                                                        <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">An</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-50">
-                                                    {participants.length === 0 ? (
-                                                        <tr><td colSpan="3" className="px-6 py-12 text-center text-gray-400 italic text-sm">Niciun student înscris momentan.</td></tr>
-                                                    ) : (
-                                                        participants.map(p => (
-                                                            <tr key={p.id} className="hover:bg-gray-50/50 transition-colors group">
-                                                                <td className="px-6 py-4">
-                                                                    <div className="flex flex-col">
-                                                                        <span className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors">{p.firstName} {p.lastName}</span>
-                                                                        <span className="text-xs text-gray-400">{p.email}</span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-6 py-4">
-                                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
-                                                                        {p.studentFaculty || 'N/A'}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-6 py-4 text-right">
-                                                                    <span className="text-sm font-bold text-gray-500">{p.studentYear || '-'}</span>
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    {/* Action Column */}
-                                    <div className="space-y-6">
-                                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-[60px] group-hover:bg-primary/30 transition-all duration-500"></div>
-                                            
-                                            <h4 className="text-xs font-bold uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10">
-                                                <Send className="w-4 h-4 text-primary" /> Anunț Rapid
-                                            </h4>
-                                            
-                                            <textarea 
-                                                value={notificationMessage}
-                                                onChange={(e) => setNotificationMessage(e.target.value)}
-                                                placeholder="Scrie un mesaj important pentru toți participanții..."
-                                                className="w-full bg-white/10 border border-white/10 rounded-2xl p-4 text-sm placeholder:text-gray-400 focus:bg-white/15 focus:ring-0 outline-none transition-all min-h-[140px] resize-none mb-6 relative z-10"
-                                            />
-                                            
-                                            <button 
-                                                onClick={handleSendNotification}
-                                                disabled={sendingNotification || !notificationMessage.trim()}
-                                                className="w-full bg-white text-gray-900 font-bold text-xs uppercase tracking-[0.2em] py-4 rounded-xl hover:bg-primary hover:text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative z-10"
-                                            >
-                                                {sendingNotification ? 'Se trimite...' : 'Trimite Notificare'}
-                                            </button>
-                                        </div>
-                                        
-                                        <div className="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
-                                            <h5 className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-2 flex items-center gap-2">
-                                                <Info className="w-4 h-4" /> Info
-                                            </h5>
-                                            <p className="text-xs text-blue-600/80 leading-relaxed">
-                                                Notificările sunt trimise instantaneu pe site și apar în meniul de notificări al fiecărui student înscris.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
+                {isParticipantsModalOpen && selectedEvent && (
+                    <ParticipantsModal 
+                        event={selectedEvent} 
+                        onClose={() => setParticipantsModalOpen(false)} 
+                    />
                 )}
             </AnimatePresence>
 

@@ -1,20 +1,21 @@
 import axios from 'axios';
 
-// Cream o instanta Axios cu adresa de baza a serverului tau Java
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Configurația inițială
+  baseURL: `${BASE_URL}/api`, 
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 
-// Interceptor: Adauga automat Token-ul la fiecare cerere (daca suntem logati)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); // Luam cheia din buzunarul browserului
+    const token = localStorage.getItem('token'); 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // O atasam la cerere
+      config.headers.Authorization = `Bearer ${token}`; 
     }
     return config;
   },
@@ -22,5 +23,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 
 export default api;

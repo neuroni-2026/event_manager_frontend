@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Componenta de dialog locala
+
 const ConfirmDialog = ({ isOpen, onConfirm, onCancel, title, message }) => {
     return (
         <AnimatePresence>
@@ -87,13 +87,13 @@ const PreviewModal = ({ event, onClose }) => {
                                 className="w-full h-full object-cover" 
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-8 flex flex-col justify-end">
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/10">
+                                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                                    <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white text-[12px] font-black uppercase tracking-widest rounded-xl border border-white/10 shadow-sm">
                                         {event.category}
                                     </span>
                                     {event.maxCapacity && (
-                                        <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/10 flex items-center gap-1.5">
-                                            <User className="w-3 h-3" /> {event.maxCapacity} locuri
+                                        <span className="px-4 py-1.5 bg-white/20 backdrop-blur-md text-white text-[12px] font-black uppercase tracking-widest rounded-xl border border-white/10 flex items-center gap-1.5 shadow-sm">
+                                            <User className="w-3.5 h-3.5" /> {event.maxCapacity} locuri
                                         </span>
                                     )}
                                 </div>
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
     const [dialog, setDialog] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
     const [previewEvent, setPreviewEvent] = useState(null);
 
-    // Utilitare Export CSV
+
     const downloadCSV = (data, filename) => {
         if (!data || data.length === 0) return;
         
@@ -672,120 +672,138 @@ const AdminDashboard = () => {
                 {loading ? <div className="text-center py-20"><Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" /></div> : (
                     <AnimatePresence mode="wait">
                         {activeTab === 'events' && (
-                             <motion.div key="events-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="grid grid-cols-1 gap-6">
-                                {events.length === 0 ? <p className="text-center text-gray-400 py-10 font-medium">Niciun eveniment în așteptare.</p> :
-                                events.map(evt => (
-                                    <div key={evt.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-shadow">
-                                        <div className="w-full md:w-48 h-32 bg-gray-100 rounded-2xl overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setPreviewEvent(evt)}>
-                                            <img src={evt.imageUrl || PLACEHOLDER_IMAGE} alt={evt.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <Eye className="text-white w-8 h-8 drop-shadow-lg" />
+                             <motion.div key="events-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-6">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                    <h2 className="text-2xl  text-gray-400  mb-8">Evenimente în așteptarea aprobării</h2>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        {events.length === 0 ? <p className="text-center text-gray-400 py-10 font-medium">Niciun eveniment în așteptare.</p> :
+                                        events.map(evt => (
+                                            <div key={evt.id} className="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-shadow">
+                                                <div className="w-full md:w-48 h-32 bg-gray-100 rounded-2xl overflow-hidden shrink-0 relative group cursor-pointer" onClick={() => setPreviewEvent(evt)}>
+                                                    <img src={evt.imageUrl || PLACEHOLDER_IMAGE} alt={evt.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                        <Eye className="text-white w-8 h-8 drop-shadow-lg" />
+                                                    </div>
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="font-bold text-lg text-gray-900">{evt.title}</h3>
+                                                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-2 font-medium">
+                                                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5"/> {new Date(evt.date).toLocaleDateString()}</span>
+                                                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> {evt.location}</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500 line-clamp-2 mt-3 leading-relaxed">{evt.description}</p>
+                                                </div>
+                                                <div className="flex gap-3 w-full md:w-auto shrink-0 flex-wrap md:flex-nowrap">
+                                                    <button onClick={() => setPreviewEvent(evt)} disabled={processingId === evt.id} className="flex-1 bg-black text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 hover:bg-black transition-all active:scale-95">Detalii</button>
+                                                    <button onClick={() => handleEventAction(evt.id, 'approve')} disabled={processingId === evt.id} className="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95">Aprobă</button>
+                                                    <button onClick={() => handleEventAction(evt.id, 'reject')} disabled={processingId === evt.id} className="flex-1 bg-red-500 border border-gray-200  hover:bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors">Respinge</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex-grow">
-                                            <h3 className="font-bold text-lg text-gray-900">{evt.title}</h3>
-                                            <div className="flex items-center gap-4 text-xs text-gray-500 mt-2 font-medium">
-                                                <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5"/> {new Date(evt.date).toLocaleDateString()}</span>
-                                                <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> {evt.location}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 line-clamp-2 mt-3 leading-relaxed">{evt.description}</p>
-                                        </div>
-                                        <div className="flex gap-3 w-full md:w-auto shrink-0 flex-wrap md:flex-nowrap">
-                                            <button onClick={() => handleEventAction(evt.id, 'approve')} disabled={processingId === evt.id} className="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95">Aprobă</button>
-                                            <button onClick={() => handleEventAction(evt.id, 'reject')} disabled={processingId === evt.id} className="flex-1 bg-white border border-gray-200 text-gray-600 px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors">Respinge</button>
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </motion.div>
                         )}
                         {activeTab === 'requests' && (
-                            <motion.div key="requests-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="grid grid-cols-1 gap-6">
-                                {organizerRequests.length === 0 ? <p className="text-center text-gray-400 py-10 font-medium">Nicio cerere nouă.</p> :
-                                organizerRequests.map(req => (
-                                    <div key={req.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-start justify-between hover:shadow-md transition-shadow">
-                                        <div className="flex gap-5 items-start flex-grow min-w-0">
-                                            <div className="w-14 h-14 bg-gradient-to-br from-primary to-orange-600 text-white rounded-2xl flex items-center justify-center font-bold text-2xl shadow-lg shadow-orange-500/20 shrink-0">
-                                                {req.firstName[0].toUpperCase()}
-                                            </div>
-                                            <div className="min-w-0 flex-grow">
-                                                <div className="mb-3">
-                                                    <p className="font-bold text-gray-900 text-lg">{req.firstName} {req.lastName}</p>
-                                                    <p className="text-xs font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md inline-block mt-1">{req.pendingOrganizationName}</p>
-                                                </div>
-                                                
-                                                {req.pendingReason && (
-                                                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 relative">
-                                                        <div className="absolute -top-2 -left-2 w-6 h-6 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm">
-                                                            <MessageSquare className="w-3 h-3 text-gray-400" />
+                            <motion.div key="requests-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-6">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                    <h2 className="text-2xl  text-gray-400 mb-8 ">Cereri de organizator</h2>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        {organizerRequests.length === 0 ? (
+                                            <p className="text-center text-gray-400 py-10 font-medium">Nicio cerere nouă.</p>
+                                        ) : (
+                                            organizerRequests.map(req => (
+                                                <div key={req.id} className="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-start justify-between hover:shadow-md transition-shadow">
+                                                    <div className="flex gap-5 items-start flex-grow min-w-0">
+                                                        <div className="w-14 h-14 bg-gradient-to-br from-primary to-orange-600 text-white rounded-2xl flex items-center justify-center font-bold text-2xl shadow-lg shadow-orange-500/20 shrink-0">
+                                                            {req.firstName[0].toUpperCase()}
                                                         </div>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Motiv solicitare:</p>
-                                                        <p className="text-sm text-gray-600 font-medium leading-relaxed italic">"{req.pendingReason}"</p>
+                                                        <div className="min-w-0 flex-grow">
+                                                            <div className="mb-3">
+                                                                <p className="font-bold text-gray-900 text-lg">{req.firstName} {req.lastName}</p>
+                                                                <p className="text-xs font-bold text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md inline-block mt-1">{req.pendingOrganizationName}</p>
+                                                            </div>
+                                                            
+                                                            {req.pendingReason && (
+                                                                <div className="p-4 bg-white rounded-2xl border border-gray-100 relative">
+                                                                    <div className="absolute -top-2 -left-2 w-6 h-6 bg-white rounded-full border border-gray-100 flex items-center justify-center shadow-sm">
+                                                                        <MessageSquare className="w-3 h-3 text-gray-400" />
+                                                                    </div>
+                                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Motiv solicitare:</p>
+                                                                    <p className="text-sm text-gray-600 font-medium leading-relaxed italic">"{req.pendingReason}"</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-3 w-full md:w-auto shrink-0 pt-2 md:pt-0">
-                                            <button onClick={() => handleRequestAction(req.id, 'approve')} disabled={processingId === req.id} className="flex-1 md:flex-none bg-green-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95">Aprobă</button>
-                                            <button onClick={() => handleRequestAction(req.id, 'reject')} disabled={processingId === req.id} className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 px-8 py-3 rounded-xl font-bold text-xs uppercase hover:bg-gray-50 transition-colors">Respinge</button>
-                                        </div>
+                                                    <div className="flex gap-3 w-full md:w-auto shrink-0 pt-2 md:pt-0">
+                                                        <button onClick={() => handleRequestAction(req.id, 'approve')} disabled={processingId === req.id} className="flex-1 md:flex-none bg-green-600 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95">Aprobă</button>
+                                                        <button onClick={() => handleRequestAction(req.id, 'reject')} disabled={processingId === req.id} className="flex-1 md:flex-none bg-red-500 border border-gray-200 text-gray-600 text-white hover:bg-red-600 px-8 py-3 rounded-xl font-bold text-xs uppercase hover:bg-gray-50 transition-colors">Respinge</button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
-                                ))}
+                                </div>
                             </motion.div>
                         )}
                         {activeTab === 'manage' && (
                              <motion.div key="manage-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                                <div className="px-8 py-5 border-b border-gray-50 bg-white flex justify-between items-center">
+                                <div className="px-8 py-3 border-b border-gray-50 bg-white flex justify-between items-center">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight italic">Moderare Organizatori</h3>
+                                        <h3 className="text-xl text-gray-400  tracking-tight">Moderare Organizatori</h3>
                                     </div>
                                     <button 
                                         onClick={exportOrganizers}
-                                        className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95"
+                                        className=" flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95"
                                     >
-                                        <Download className="w-3.5 h-3.5" /> Export
+                                        <Download className="p-2 text-center"  /> Export
                                     </button>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left">
+                                <div className="overflow-x-auto ">
+                                    <table className="w-full text-left ">
                                         <thead>
-                                            <tr className="bg-gray-50/50">
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Organizator</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Status</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Activitate</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Acțiuni</th>
+                                            <tr className="bg-gray-50/50 ">
+                                                <th className="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Organizator</th>
+                                                <th className="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase text-center">Status</th>
+                                                <th className="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase text-center">Evenimente/Rating</th>
+                                                <th className="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase text-center">Ultima Activitate</th>
+                                                <th className="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase text-right">Acțiuni</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {organizersStats.map(org => (
                                                 <tr key={org.id} className="group hover:bg-gray-50/50 transition-colors">
                                                     <td className="px-8 py-5 whitespace-nowrap">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-gray-900">{org.firstName} {org.lastName}</span>
-                                                            <span className="text-xs text-primary font-bold uppercase tracking-tight mt-0.5">{org.organizationName}</span>
+                                                        <div className="flex flex-col justify-center pt-1">
+                                                            <span className="font-bold text-gray-900 text-[16px]">{org.firstName} {org.lastName}</span>
+                                                            <span className="text-xs text-primary font-bold uppercase tracking-tight">{org.organizationName}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-5">
                                                         <div className="flex justify-center">
                                                             {!org.isEnabled ? (
-                                                                <span className="px-3 py-1 bg-red-50 text-red-600 font-bold rounded-full text-[9px] uppercase tracking-wider border border-red-100">Banned</span>
+                                                                <span className="px-5 py-2 bg-red-50 text-red-600 font-bold rounded-full text-[13px] uppercase tracking-wider border border-red-100 shadow-sm">Banned</span>
                                                             ) : org.suspendedUntil && new Date(org.suspendedUntil) > new Date() ? (
-                                                                <span className="px-3 py-1 bg-orange-50 text-orange-600 font-bold rounded-full text-[9px] uppercase tracking-wider border border-orange-100">Suspended</span>
+                                                                <span className="px-5 py-2 bg-orange-50 text-orange-600 font-bold rounded-full text-[13px] uppercase tracking-wider border border-orange-100 shadow-sm">Suspended</span>
                                                             ) : (
-                                                                <span className="px-3 py-1 bg-green-50 text-green-600 font-bold rounded-full text-[9px] uppercase tracking-wider border border-green-100">Active</span>
+                                                                <span className="px-5 py-2 bg-green-50 text-green-600 font-bold rounded-full text-[13px] uppercase tracking-wider border border-green-100 shadow-sm">Active</span>
                                                             )}
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-5 text-center">
-                                                        <div className="flex flex-col items-center">
-                                                            <div className="flex items-center gap-1.5 text-gray-900 font-bold">
-                                                                <Layers className="w-3 h-3 text-gray-400" />
-                                                                <span>{org.eventCount}</span>
+                                                        <div className="flex items-center justify-center gap-5">
+                                                            <div className="flex items-center gap-2 text-gray-900 font-bold">
+                                                                <Layers className="w-5 h-5 text-gray-400" />
+                                                                <span className="text-[15px]">{org.eventCount}</span>
                                                             </div>
-                                                            <div className="flex items-center gap-1 text-yellow-500 mt-1">
-                                                                <Star className="w-2.5 h-2.5 fill-current" />
-                                                                <span className="text-[10px] font-bold">{org.averageRating ? org.averageRating.toFixed(1) : 'N/A'}</span>
+                                                            <div className="flex items-center gap-1.5 text-yellow-500">
+                                                                <Star className="w-5 h-5 fill-current" />
+                                                                <span className="text-[14px] font-black">{org.averageRating ? org.averageRating.toFixed(1) : 'N/A'}</span>
                                                             </div>
                                                         </div>
+                                                    </td>
+                                                    <td className="px-8 py-5 text-center text-xs font-medium text-gray-500">
+                                                        {org.lastEventDate ? new Date(org.lastEventDate).toLocaleDateString('ro-RO') : 'N/A'}
                                                     </td>
                                                     <td className="px-8 py-5">
                                                         <div className="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
@@ -816,95 +834,111 @@ const AdminDashboard = () => {
                             </motion.div>
                         )}
                         {activeTab === 'all-events' && (
-                            <motion.div key="all-events-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="grid grid-cols-1 gap-5">
-                                {allEvents.length === 0 ? <p className="text-center text-gray-400 py-10 font-medium">Niciun eveniment publicat.</p> :
-                                allEvents.map(evt => (
-                                    <div key={evt.id} className="bg-white p-4 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-shadow group">
-                                        <div className="w-full md:w-40 h-28 bg-gray-100 rounded-2xl overflow-hidden shrink-0">
-                                            <img src={evt.imageUrl || PLACEHOLDER_IMAGE} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                        </div>
-                                        <div className="flex-grow min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${ 
-                                                    evt.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 
-                                                    evt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                                                }`}>{evt.status}</span>
-                                                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{evt.category}</span>
-                                            </div>
-                                            <h3 className="font-bold text-gray-900 truncate text-lg">{evt.title}</h3>
-                                            <p className="text-xs text-gray-500 truncate mt-1">{evt.location} • {new Date(evt.startTime).toLocaleDateString()}</p>
-                                        </div>
-                                        <div className="flex gap-2 w-full md:w-auto shrink-0">
-                                            <button 
-                                                onClick={() => setPreviewEvent(evt)}
-                                                className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors"
-                                                title="Vezi Detalii"
-                                            >
-                                                <Eye className="w-5 h-5" />
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDeleteEvent(evt.id)}
-                                                className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
-                                                title="Șterge Eveniment"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </div>
+                            <motion.div key="all-events-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-6">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-8">Evenimente</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        {allEvents.length === 0 ? (
+                                            <p className="text-center text-gray-400 py-10 font-medium col-span-full">Niciun eveniment publicat.</p>
+                                        ) : (
+                                            allEvents.map(evt => (
+                                                <div key={evt.id} className="bg-gray-50/50 p-4 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 items-center hover:shadow-md transition-shadow group">
+                                                    <div className="w-full md:w-40 h-28 bg-gray-100 rounded-2xl overflow-hidden shrink-0">
+                                                        <img src={evt.imageUrl || PLACEHOLDER_IMAGE} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                    </div>
+                                                    <div className="flex-grow min-w-0">
+                                                        <div className="flex items-center gap-1.5 mb-1">
+                                                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${ 
+                                                                evt.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 
+                                                                evt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                                            }`}>{evt.status}</span>
+                                                            <span className="px-2 py-0.5 bg-gray-50 text-gray-400 border border-gray-100 rounded text-[11px] font-bold uppercase tracking-tight">{evt.category}</span>
+                                                        </div>
+                                                        <h3 className="font-bold text-gray-900 truncate text-lg">{evt.title}</h3>
+                                                        <p className="text-xs text-gray-500 truncate mt-1">{evt.location} • {new Date(evt.startTime).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <div className="flex gap-2 w-full md:w-auto shrink-0">
+                                                        <button 
+                                                            onClick={() => setPreviewEvent(evt)}
+                                                            className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors"
+                                                            title="Vezi Detalii"
+                                                        >
+                                                            <Eye className="w-5 h-5" />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteEvent(evt.id)}
+                                                            className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
+                                                            title="Șterge Eveniment"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
-                                ))}
+                                </div>
                             </motion.div>
                         )}
                         {activeTab === 'reviews' && (
-                            <motion.div key="reviews-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {allReviews.length === 0 ? <p className="col-span-full text-center text-gray-400 py-10 font-medium">Nicio recenzie pe platformă.</p> :
-                                allReviews.map(rev => (
-                                    <div key={rev.id} className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-blue-600/10 rounded-2xl flex items-center justify-center text-primary font-bold shadow-inner border border-primary/5 shrink-0">
-                                                    {rev.user?.firstName?.[0] || 'U'}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-gray-900 leading-tight truncate">{rev.user?.firstName} {rev.user?.lastName}</p>
-                                                    <div className="flex items-center gap-1 text-yellow-500 mt-1">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star key={i} className={`w-3 h-3 ${i < rev.rating ? 'fill-current' : 'text-gray-200'}`} />
-                                                        ))}
+                            <motion.div key="reviews-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="space-y-6">
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                                    <h2 className="text-2xl text-gray-400  mb-8">Recenzii Evenimente</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {allReviews.length === 0 ? (
+                                            <p className="col-span-full text-center text-gray-400 py-10 font-medium">Nicio recenzie pe platformă.</p>
+                                        ) : (
+                                            allReviews.map(rev => (
+                                                <div key={rev.id} className="bg-gray-50/50 p-7 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col h-full group">
+                                                    <div className="flex justify-between items-start mb-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-blue-600/10 rounded-2xl flex items-center justify-center text-primary font-bold shadow-inner border border-primary/5 shrink-0">
+                                                                {rev.user?.firstName?.[0] || 'U'}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold text-gray-900 leading-tight truncate">{rev.user?.firstName} {rev.user?.lastName}</p>
+                                                                <div className="flex items-center gap-1 text-yellow-500 mt-1">
+                                                                    {[...Array(5)].map((_, i) => (
+                                                                        <Star key={i} className={`w-3 h-3 ${i < rev.rating ? 'fill-current' : 'text-gray-200'}`} />
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleDeleteReview(rev.id)}
+                                                            className="p-2.5 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all active:scale-90"
+                                                            title="Șterge Recenzie"
+                                                        >
+                                                            <Trash2 className="w-5 h-5" />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="flex-grow">
+                                                        <div className="relative">
+                                                            <div className="absolute -left-3 top-0 bottom-0 w-1 bg-primary/10 rounded-full"></div>
+                                                            <p className="text-gray-600 leading-relaxed italic font-normal pl-4">"{rev.comment}"</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            <Layers className="w-3.5 h-3.5 text-gray-400" />
+                                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate max-w-[150px]">{rev.event?.title}</span>
+                                                        </div>
+                                                        <span className="text-[10px] font-medium text-gray-400">{new Date(rev.createdAt).toLocaleDateString('ro-RO')}</span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <button 
-                                                onClick={() => handleDeleteReview(rev.id)}
-                                                className="p-2.5 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all active:scale-90"
-                                                title="Șterge Recenzie"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </div>
-
-                                        <div className="flex-grow">
-                                            <div className="relative">
-                                                <div className="absolute -left-3 top-0 bottom-0 w-1 bg-primary/10 rounded-full"></div>
-                                                <p className="text-gray-600 leading-relaxed italic font-normal pl-4">"{rev.comment}"</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="mt-8 pt-5 border-t border-gray-50 flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Layers className="w-3.5 h-3.5 text-gray-400" />
-                                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate max-w-[150px]">{rev.event?.title}</span>
-                                            </div>
-                                            <span className="text-[10px] font-medium text-gray-400">{new Date(rev.createdAt).toLocaleDateString('ro-RO')}</span>
-                                        </div>
+                                            ))
+                                        )}
                                     </div>
-                                ))}
+                                </div>
                             </motion.div>
                         )}
                         {activeTab === 'users' && (
                             <motion.div key="users-tab" initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                                <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-white">
+                                <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between bg-white ">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight italic">Director Utilizatori</h3>
+                                        <h3 className="text-xl text-gray-400 tracking-tight">LISTĂ UTILIZATORI & ORGANIZATORI</h3>
                                     </div>
                                     <button 
                                         onClick={exportUsers}
@@ -913,52 +947,51 @@ const AdminDashboard = () => {
                                         <Download className="w-3.5 h-3.5" /> Export
                                     </button>
                                 </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left border-collapse">
+                                <div className="overflow-x-auto pr-5 pl-5">
+                                    <table className="w-full textleft border-collapse">
                                         <thead>
                                             <tr className="bg-gray-50/50">
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase">ID</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase">Utilizator / Date Contact</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Rol Sistem</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-center">Status</th>
-                                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase text-right">Data Înscrierii</th>
+                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase">Utilizator</th>
+                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase text-center">Rol</th>
+                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase">Email</th>
+                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase text-center">Status</th>
+                                                <th className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase text-center">Data Înscrierii</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50">
                                             {allUsers.map((u) => (
                                                 <tr key={u.id} className="group hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-8 py-5 text-sm font-black text-gray-200 group-hover:text-primary transition-colors">#{u.id}</td>
-                                                    <td className="px-8 py-5 whitespace-nowrap">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-sm font-semibold text-gray-900">{u.firstName} {u.lastName}</span>
-                                                            <span className="text-xs text-gray-400 font-medium">{u.email}</span>
-                                                        </div>
+                                                    <td className="px-4 py-3 whitespace-nowrap">
+                                                        <span className="text-sm font-bold text-gray-900">{u.firstName} {u.lastName}</span>
                                                     </td>
-                                                    <td className="px-8 py-5">
+                                                    <td className="px-4 py-3">
                                                         <div className="flex justify-center">
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-sm ${ 
-                                                                u.role === 'ADMIN' ? 'bg-gray-900 text-white shadow-gray-200' :
-                                                                u.role === 'ORGANIZER' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 
-                                                                'bg-blue-50 text-blue-600 border border-blue-100'
+                                                            <span className={`w-50 inline-flex items-center px-5 py-2 rounded-full text-[12px] font-bold uppercase tracking-widest shadow-sm border ${ 
+                                                                u.role === 'ADMIN' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+                                                                u.role === 'ORGANIZER' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+                                                                'bg-red-50 text-red-600 border-red-100'
                                                             }`}>
                                                                 {u.role}
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-5">
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-500">
+                                                        {u.email}
+                                                    </td>
+                                                    <td className="px-4 py-3">
                                                         <div className="flex justify-center">
                                                             {u.isEnabled !== false ? (
-                                                                <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-[10px] uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                                                                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]" /> Activ
-                                                                </div>
+                                                                <span className="inline-flex items-center px-4 py-1.5 bg-green-50 text-green-600 font-bold rounded-full text-[12px] uppercase tracking-wider border border-green-100">
+                                                                    Activ
+                                                                </span>
                                                             ) : (
-                                                                <div className="flex items-center gap-1.5 text-red-600 font-bold text-[10px] uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full border border-red-100">
-                                                                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full" /> Blocat
-                                                                </div>
+                                                                <span className="inline-flex items-center px-4 py-1.5 bg-red-50 text-red-600 font-bold rounded-full text-[12px] uppercase tracking-wider border border-red-100">
+                                                                    Blocat
+                                                                </span>
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="px-8 py-5 text-right">
+                                                    <td className="px-4 py-3 text-center">
                                                         <span className="text-xs font-semibold text-gray-500">
                                                             {u.createdAt ? new Date(u.createdAt).toLocaleDateString('ro-RO', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                                                         </span>
@@ -975,7 +1008,7 @@ const AdminDashboard = () => {
                                 {/* Header Rapoarte */}
                                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900 tracking-tight">Performanță Sistem</h3>
+                                        <h3 className="text-xl text-gray-400 tracking-tight">Performanță Sistem</h3>
                                         <p className="text-sm text-gray-500 font-medium">Statistici live</p>
                                     </div>
                                     <button 

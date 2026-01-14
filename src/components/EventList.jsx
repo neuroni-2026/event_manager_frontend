@@ -7,7 +7,7 @@ import { Search, Filter, Calendar as CalendarIcon, MapPin, Building2, User, Chev
 import { motion, AnimatePresence } from 'framer-motion';
 import { isSameDay, parseISO } from 'date-fns';
 
-// Skeleton Component
+
 const EventSkeleton = () => (
     <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm h-full flex flex-col">
         <div className="h-56 bg-gray-100 animate-pulse"></div>
@@ -61,7 +61,7 @@ const EventList = () => {
             if (Array.isArray(response.data)) {
                 setEvents(response.data);
                 
-                // Extract unique values for filters
+               
                 const locs = [...new Set(response.data.map(e => e.location).filter(Boolean))].sort();
                 const orgs = [...new Set(response.data.map(e => e.organizer?.organizationName || "Unknown").filter(Boolean))].sort();
                 const cats = [...new Set(response.data.map(e => e.category).filter(Boolean))].sort();
