@@ -15,6 +15,7 @@ const EventDetails = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
+    const [hasTicket, setHasTicket] = useState(false);
 
   
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,6 +48,20 @@ const EventDetails = () => {
                     } catch (e) {
                         console.warn("Could not check favorite status.");
                     }
+
+                    try {
+                        const ticketsRes = await api.get('/tickets/my-tickets');
+                        console.log("My Tickets:", ticketsRes.data); // Debugging
+                        const ticketExists = ticketsRes.data.some(t => 
+                            (t.eventId === parseInt(id)) || 
+                            (t.event && t.event.id === parseInt(id)) ||
+                            (t.event_id === parseInt(id)) ||
+                            (t.eventTitle === response.data.title) // Fallback check by title
+                        );
+                        setHasTicket(ticketExists);
+                    } catch (e) {
+                        console.warn("Could not check ticket status.", e);
+                    }
                 }
 
             } catch (err) {
@@ -59,6 +74,11 @@ const EventDetails = () => {
     }, [id, isStudent]);
 
     const handleBuyTicket = () => {
+        if (hasTicket) {
+            navigate('/my-tickets');
+            return;
+        }
+
         openConfirmModal(
             "Rezervare Bilet",
             `Ești sigur că vrei să rezervi un loc la evenimentul "${event.title}"?`,
@@ -66,6 +86,7 @@ const EventDetails = () => {
                 try {
                     await api.post('/tickets', { eventId: event.id });
                     toast.success("Bilet rezervat cu succes! Verifică portofelul.");
+                    setHasTicket(true);
                     navigate('/my-tickets'); 
                 } catch (err) {
                     toast.error(err.response?.data?.message || "Eroare la rezervare.");
@@ -274,10 +295,18 @@ const EventDetails = () => {
                                 {isStudent ? (
                                     <button 
                                         onClick={handleBuyTicket}
-                                        className="w-full bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90 text-white font-bold py-4 rounded-2xl shadow-xl shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group active:scale-95"
+                                        className={`w-full font-bold py-4 rounded-2xl shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group active:scale-95 ${
+                                            hasTicket 
+                                            ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-200'
+                                            : 'bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90 text-white shadow-primary/20 hover:shadow-primary/30'
+                                        }`}
                                     >
-                                        <span>Rezervă Locul</span>
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        <span>{hasTicket ? "Vezi Biletul" : "Rezervă Locul"}</span>
+                                        {hasTicket ? (
+                                            <Ticket className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                        ) : (
+                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                        )}
                                     </button>
                                 ) : (
                                     <div className="bg-gray-100 p-4 rounded-xl text-center text-sm text-gray-500 font-medium border border-gray-200">

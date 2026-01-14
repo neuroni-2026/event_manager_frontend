@@ -116,7 +116,7 @@ const ScanTicket = () => {
                             className="w-full space-y-8"
                         >
                             {/* Camera Box */}
-                            <div className={`relative w-full aspect-square ${commonGradient} rounded-[2.5rem] overflow-hidden border-2 border-blue-200 shadow-xl shadow-blue-900/5`}>
+                            <div className={`relative w-full rounded-[2.5rem] overflow-hidden border-2 border-blue-200 shadow-xl shadow-blue-900/5 ${!isScannerStarted ? 'min-h-[350px] bg-white' : 'bg-black'}`}>
                                 <div id={qrRegionId} className="w-full h-full"></div>
                                 
                                 {!isScannerStarted && (

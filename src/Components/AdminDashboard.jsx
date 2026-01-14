@@ -952,7 +952,7 @@ const AdminDashboard = () => {
                                         <thead>
                                             <tr className="bg-gray-50/50">
                                                 <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase">Utilizator</th>
-                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase text-center">Rol</th>
+                                                <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase ">Rol</th>
                                                 <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase">Email</th>
                                                 <th className="px-4 py-2 text-[15px] font-bold text-gray-400 uppercase text-center">Status</th>
                                                 <th className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase text-center">Data Înscrierii</th>
@@ -964,12 +964,12 @@ const AdminDashboard = () => {
                                                     <td className="px-4 py-3 whitespace-nowrap">
                                                         <span className="text-sm font-bold text-gray-900">{u.firstName} {u.lastName}</span>
                                                     </td>
-                                                    <td className="px-4 py-3">
+                                                    <td className="px-4 py-3 whitespace-nowrap text-center">
                                                         <div className="flex justify-center">
-                                                            <span className={`w-50 inline-flex items-center px-5 py-2 rounded-full text-[12px] font-bold uppercase tracking-widest shadow-sm border ${ 
-                                                                u.role === 'ADMIN' ? 'bg-purple-50 text-purple-600 border-purple-100' :
-                                                                u.role === 'ORGANIZER' ? 'bg-blue-50 text-blue-600 border-blue-100' : 
-                                                                'bg-red-50 text-red-600 border-red-100'
+                                                            <span className={`inline-flex items-center justify-center min-w-[110px] px-3 py-1.5 rounded-full text-[12px] font-black uppercase tracking-tight border shadow-sm whitespace-nowrap ${ 
+                                                                u.role === 'ADMIN' ? 'bg-purple-50 text-purple-400 border-purple-100' :
+                                                                u.role === 'ORGANIZER' ? 'bg-blue-50 text-blue-400 border-blue-100' : 
+                                                                'bg-red-50 text-red-400 border-red-100'
                                                             }`}>
                                                                 {u.role}
                                                             </span>
