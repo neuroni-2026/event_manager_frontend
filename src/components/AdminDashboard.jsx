@@ -144,18 +144,6 @@ const PreviewModal = ({ event, onClose }) => {
                                             )}
                                         </div>
                                     </div>
-
-                                    <div className="flex items-start gap-4 group">
-                                        <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-green-100 dark:border-green-900/30 group-hover:scale-105 transition-transform">
-                                            <DollarSign className="w-6 h-6" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Acces</p>
-                                            <p className="font-semibold text-gray-900 dark:text-white text-xl leading-tight">
-                                                {event.ticketPrice > 0 ? `${event.ticketPrice} RON` : 'LIBER'}
-                                            </p>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -697,9 +685,27 @@ const AdminDashboard = () => {
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-3 leading-relaxed">{evt.description}</p>
                                                 </div>
                                                 <div className="flex gap-3 w-full md:w-auto shrink-0 flex-wrap md:flex-nowrap">
-                                                    <button onClick={() => setPreviewEvent(evt)} disabled={processingId === evt.id} className="flex-1 bg-black dark:bg-gray-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-gray-800 dark:hover:bg-black transition-all active:scale-95">Detalii</button>
-                                                    <button onClick={() => handleEventAction(evt.id, 'approve')} disabled={processingId === evt.id} className="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-green-200 dark:shadow-green-900/20 hover:bg-green-700 transition-all active:scale-95">Aprobă</button>
-                                                    <button onClick={() => handleEventAction(evt.id, 'reject')} disabled={processingId === evt.id} className="flex-1 bg-red-500 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-600 transition-colors shadow-lg shadow-red-200 dark:shadow-red-900/20">Respinge</button>
+                                                    <button 
+                                                        onClick={() => setPreviewEvent(evt)} 
+                                                        disabled={processingId === evt.id} 
+                                                        className="flex-1 bg-muted hover:bg-muted/80 text-foreground px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest border border-border transition-all active:scale-95"
+                                                    >
+                                                        Detalii
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleEventAction(evt.id, 'approve')} 
+                                                        disabled={processingId === evt.id} 
+                                                        className="flex-1 bg-emerald-600 dark:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-emerald-500/20 dark:shadow-emerald-900/20 hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-all active:scale-95"
+                                                    >
+                                                        Aprobă
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleEventAction(evt.id, 'reject')} 
+                                                        disabled={processingId === evt.id} 
+                                                        className="flex-1 bg-red-600 dark:bg-red-500 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-700 dark:hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 dark:shadow-red-900/20 active:scale-95"
+                                                    >
+                                                        Respinge
+                                                    </button>
                                                 </div>
                                             </div>
                                         ))}

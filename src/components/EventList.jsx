@@ -324,21 +324,21 @@ const EventList = () => {
                             ))}
                         </div>
                     ) : filteredEvents.length === 0 ? (
-                        <div className="text-center py-24 bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
-                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                <Filter className="h-8 w-8 text-gray-300" />
+                        <div className="text-center py-24 bg-card rounded-[2rem] border border-dashed border-border shadow-sm">
+                            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                <Filter className="h-8 w-8 text-muted-foreground/50" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900">Nu am găsit evenimente</h3>
-                            <p className="text-gray-500 text-sm mt-2">Încearcă să modifici filtrele sau termenii de căutare.</p>
+                            <h3 className="text-xl font-bold text-foreground">Nu am găsit evenimente</h3>
+                            <p className="text-muted-foreground text-sm mt-2 font-medium">Încearcă să modifici filtrele sau termenii de căutare.</p>
                             <button 
                                 onClick={() => {
                                     setSearchTerm('');
                                     setSelectedOrganizer('');
                                     setSelectedLocation('');
                                     setSelectedCategory('');
-                                    setSelectedDate('');
+                                    setSelectedDate(null);
                                 }}
-                                className="mt-6 px-6 py-2 bg-white border border-gray-200 text-gray-600 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                                className="mt-6 px-8 py-2.5 bg-muted/50 hover:bg-muted text-foreground font-bold rounded-xl border border-border transition-all active:scale-95 text-xs uppercase tracking-widest"
                             >
                                 Resetează Filtrele
                             </button>

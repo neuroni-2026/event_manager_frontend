@@ -219,22 +219,16 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                     </div>
 
                     {/* Footer Buttons */}
-                    <div className="p-8 pt-4 pb-8 bg-card">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <button 
-                                className="bg-gradient-to-r from-primary to-orange-600 hover:to-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
-                            >
-                                <Download className="w-4 h-4" />
-                                PDF
-                            </button>
-                            <button 
-                                onClick={handlePrint}
-                                className="bg-card border-2 border-primary text-primary hover:bg-primary/10 font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
-                            >
-                                <Printer className="w-4 h-4" />
-                                Print
-                            </button>
-                        </div>
+                    <div className="p-8 pt-0 pb-8 bg-card">
+                    <div className="flex w-full mb-4"> {/* Am adăugat w-full și aici pentru siguranță */}
+                        <button 
+                            onClick={handlePrint}
+                            className="w-full bg-card border-2 border-primary text-primary hover:bg-primary/10 font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+                        >
+                            <Printer className="w-4 h-4" />
+                            Print
+                        </button>
+                    </div>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">Arată codul la intrare</p>
                     </div>
                 </div>
