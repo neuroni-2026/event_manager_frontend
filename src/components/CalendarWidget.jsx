@@ -48,25 +48,25 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5 text-primary" />
-                    <span className="font-bold text-gray-900 capitalize">
+                    <span className="font-bold text-gray-900 dark:text-white capitalize">
                         {format(currentMonth, 'MMMM yyyy')}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
                     <button 
                         onClick={prevMonth}
-                        className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button 
                         onClick={nextMonth}
-                        className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </button>
@@ -76,7 +76,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
             {/* Week Days Header */}
             <div className="grid grid-cols-7 mb-2">
                 {weekDays.map(day => (
-                    <div key={day} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    <div key={day} className="h-8 flex items-center justify-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                         {day}
                     </div>
                 ))}
@@ -96,9 +96,9 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
                             onClick={() => onDateSelect(day)}
                             className={`
                                 relative h-9 w-full rounded-lg text-sm flex items-center justify-center transition-all duration-200
-                                ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-50'}
+                                ${!isCurrentMonth ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}
                                 ${isSelected ? '!bg-primary !text-white shadow-md shadow-primary/30 font-bold' : ''}
-                                ${isDayToday && !isSelected ? 'text-primary font-bold bg-primary/5' : ''}
+                                ${isDayToday && !isSelected ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : ''}
                                 ${dayHasEvent && !isSelected ? 'font-semibold' : ''}
                             `}
                         >
@@ -115,10 +115,10 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
 
             {/* Footer / Clear Action */}
             {selectedDate && (
-                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-center">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-center">
                     <button 
                         onClick={() => onDateSelect(null)}
-                        className="text-xs font-medium text-red-500 hover:text-red-700 flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-red-50 transition-colors"
+                        className="text-xs font-medium text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                         <X className="w-3 h-3" />
                         Clear Date Filter
@@ -127,8 +127,8 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
             )}
             
             {!selectedDate && (
-                <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-                    <p className="text-xs text-gray-400">Select a date to filter events</p>
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Select a date to filter events</p>
                 </div>
             )}
         </div>

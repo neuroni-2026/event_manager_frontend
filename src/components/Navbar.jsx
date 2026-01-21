@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, GraduationCap, LogIn, LogOut, User, Ticket, PlusCircle, Heart, Bell, Settings, Scan } from 'lucide-react';
+import { Menu, X, GraduationCap, LogIn, LogOut, User, Ticket, PlusCircle, Heart, Bell, Settings, Scan, Moon, Sun } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import NotificationDropdown from './ui/NotificationDropdown';
@@ -12,11 +12,25 @@ const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingAdminCount, setPendingAdminCount] = useState(0);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Function to check auth state
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
   const checkAuth = () => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -67,7 +81,6 @@ const Navbar = () => {
             fetchPendingAdminCount();
         }
 
-        // Polling every minute
         const interval = setInterval(() => {
             if (user.roles?.includes('ROLE_ADMIN')) {
                 fetchPendingAdminCount();
@@ -91,7 +104,6 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  // Helper for Nav Links to ensure consistency
   const NavLink = ({ to, children, icon: Icon }) => {
     const active = isActive(to);
     return (
@@ -118,9 +130,8 @@ const Navbar = () => {
   const isStudent = user && user.roles && user.roles.includes('ROLE_STUDENT');
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm transition-all duration-300 supports-[backdrop-filter]:bg-white/60">
+    <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800 shadow-sm transition-all duration-300 supports-[backdrop-filter]:bg-background/60">
       
-      {/* Backdrop for closing notifications */}
       {showNotifications && (
           <div 
             className="fixed inset-0 z-40 bg-transparent cursor-default" 
@@ -132,13 +143,12 @@ const Navbar = () => {
         <div className="flex justify-between h-20 items-center">
           {/* Logo */}
           <Link to="/" className="group no-underline">
-            <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent hover:to-blue-600 transition-all duration-300">
-  EventManager
-</span>
+            <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-orange-600 dark:from-blue-400 dark:to-orange-400 bg-clip-text text-transparent hover:to-blue-600 dark:hover:to-blue-400 transition-all duration-300 dark:drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+              EventManager
+            </span>
           </Link>
 
-          {/* Desktop Navigation - Absolute Center */}
-          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-gray-50/50 p-1.5 rounded-full border border-gray-100/50 backdrop-blur-sm">
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-gray-50/50 dark:bg-gray-900/50 p-1.5 rounded-full border border-gray-100/50 dark:border-gray-800 backdrop-blur-sm">
             <NavLink to="/events">Evenimente</NavLink>
 
             {/* Role Based Links */}
@@ -170,6 +180,15 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all focus:outline-none dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
+              title={theme === 'light' ? "Mod Întunecat" : "Mod Luminos"}
+            >
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+
             {/* Notification Dropdown */}
             {(isStudent || isOrganizer) && (
                <div className="relative">
@@ -178,8 +197,8 @@ const Navbar = () => {
                     className={`
                         relative p-2.5 rounded-full transition-all duration-300 group
                         ${showNotifications 
-                            ? 'bg-white text-primary shadow-md ring-1 ring-gray-100' 
-                            : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-md hover:ring-1 hover:ring-gray-100'
+                            ? 'bg-white dark:bg-gray-800 text-primary shadow-md ring-1 ring-gray-100 dark:ring-gray-700' 
+                            : 'text-gray-500 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white hover:shadow-md hover:ring-1 hover:ring-gray-100 dark:hover:ring-gray-700 dark:text-gray-300'
                         }
                     `}
                   >
@@ -189,7 +208,7 @@ const Navbar = () => {
                     {unreadCount > 0 && (
                         <span className="absolute top-2 right-2.5 flex h-2.5 w-2.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 ring-2 ring-white"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
                         </span>
                     )}
                   </button>
@@ -207,13 +226,13 @@ const Navbar = () => {
             
             {/* User Profile Capsule */}
             {user ? (
-                <div className="flex items-center p-1 pl-1.5 pr-2 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all ml-2 gap-2">
+                <div className="flex items-center p-1 pl-1.5 pr-2 bg-white dark:bg-card border border-gray-200 dark:border-gray-800 rounded-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all ml-2 gap-2">
                     <Link to="/settings" className="flex items-center gap-2.5 group cursor-pointer no-underline">
                         <div className="w-9 h-9 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform">
                             {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
                         </div>
                         <div className="flex flex-col leading-none pr-1">
-                            <span className="text-xs font-bold text-gray-700 group-hover:text-primary transition-colors">
+                            <span className="text-xs font-bold text-gray-900 group-hover:text-primary transition-colors">
                                 {user.firstName}
                             </span>
                             <span className="text-[10px] text-gray-400 font-medium">Contul meu</span>
@@ -254,20 +273,12 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-4">
-             {/* Notification Bell for Mobile */}
-             {(isStudent || isOrganizer) && (
-               <div className="relative">
-                 <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="p-2 text-gray-600"
-                  >
-                    <Bell className="w-6 h-6" />
-                    {unreadCount > 0 && (
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
-                    )}
-                  </button>
-               </div>
-            )}
+             <button
+                onClick={toggleTheme}
+                className="p-2 text-gray-600 hover:text-primary focus:outline-none dark:text-gray-300 dark:hover:text-white"
+              >
+                {theme === 'light' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+              </button>
 
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -286,22 +297,22 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 overflow-hidden"
+            className="md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 overflow-hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-2 shadow-inner">
-              <Link to="/events" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600 font-medium">Evenimente</Link>
+              <Link to="/events" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium">Evenimente</Link>
               
               {isStudent && (
                  <>
-                    <Link to="/my-tickets" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600 font-medium">Biletele Mele</Link>
-                    <Link to="/favorites" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600 font-medium">Favorite</Link>
+                    <Link to="/my-tickets" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium">Biletele Mele</Link>
+                    <Link to="/favorites" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium">Favorite</Link>
                  </>
               )}
               
               {isOrganizer && (
                   <>
-                    <Link to="/my-events" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600 font-medium">Evenimentele Mele</Link>
-                    <Link to="/scan" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600 font-medium flex items-center gap-2">
+                    <Link to="/my-events" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium">Evenimentele Mele</Link>
+                    <Link to="/scan" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium flex items-center gap-2">
                         <Scan className="w-4 h-4" />
                         <span>Scanare</span>
                     </Link>
@@ -309,7 +320,7 @@ const Navbar = () => {
               )}
 
               {isAdmin && (
-                  <Link to="/admin" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-primary font-bold flex justify-between items-center">
+                  <Link to="/admin" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-primary font-bold flex justify-between items-center">
                       <span>Admin Panel</span>
                       {pendingAdminCount > 0 && (
                         <span className="flex h-3 w-3 relative mr-2">
@@ -322,14 +333,14 @@ const Navbar = () => {
 
               {user && (
                  <>
-                     <Link to="/notifications" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600">Notificări</Link>
-                     <Link to="/settings" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 text-gray-600">Setări Cont</Link>
+                     <Link to="/notifications" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300">Notificări</Link>
+                     <Link to="/settings" onClick={() => setIsOpen(false)} className="block py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300">Setări Cont</Link>
                  </>
               )}
 
-              <div className="pt-4 border-t border-gray-100 mt-2 px-4">
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-800 mt-2 px-4">
                   {user ? (
-                      <button onClick={() => {handleLogout(); setIsOpen(false);}} className="flex items-center justify-center gap-2 text-red-600 w-full py-3 bg-red-50 rounded-xl font-semibold">
+                      <button onClick={() => {handleLogout(); setIsOpen(false);}} className="flex items-center justify-center gap-2 text-red-600 w-full py-3 bg-red-50 dark:bg-red-900/20 rounded-xl font-semibold">
                           <LogOut className="w-5 h-5" />
                           <span>Delogare</span>
                       </button>

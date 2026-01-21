@@ -58,23 +58,23 @@ const Notifications = () => {
             case 'ALERT': 
             case 'EVENT_REJECTED':
                 return { 
-                    bg: 'bg-red-50 text-red-500', 
+                    bg: 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400', 
                     icon: <AlertCircle className="w-6 h-6" /> 
                 };
             case 'SUCCESS': 
             case 'EVENT_APPROVED':
                 return { 
-                    bg: 'bg-emerald-50 text-emerald-600', 
+                    bg: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400', 
                     icon: <CheckCircle2 className="w-6 h-6" /> 
                 };
             case 'REMINDER':
                 return {
-                    bg: 'bg-orange-50 text-orange-500',
+                    bg: 'bg-orange-50 dark:bg-orange-900/20 text-orange-500 dark:text-orange-400',
                     icon: <Clock className="w-6 h-6" />
                 };
             default: 
                 return { 
-                    bg: 'bg-primary/10 text-primary', 
+                    bg: 'bg-primary/10 dark:bg-primary/20 text-primary', 
                     icon: <Info className="w-6 h-6" /> 
                 };
         }
@@ -87,13 +87,13 @@ const Notifications = () => {
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-12 font-['Inter',_sans-serif]">
+        <div className="min-h-screen bg-background pt-24 pb-12 font-['Inter',_sans-serif] transition-colors duration-300">
             <div className="max-w-3xl mx-auto px-4">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
                     <div>
-                        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Notificări</h1>
-                        <p className="text-gray-500 mt-2 font-medium">
+                        <h1 className="text-4xl font-extrabold text-foreground tracking-tight">Notificări</h1>
+                        <p className="text-muted-foreground mt-2 font-medium">
                             Gestionează alertele și actualizările contului tău.
                         </p>
                     </div>
@@ -104,7 +104,7 @@ const Notifications = () => {
                                 variant="outline" 
                                 size="sm" 
                                 onClick={markAllAsRead}
-                                className="bg-white hover:bg-orange-50 hover:text-primary hover:border-orange-200 transition-all gap-2 border-gray-200 text-gray-600 font-semibold"
+                                className="bg-card hover:bg-muted hover:text-primary hover:border-primary/30 transition-all gap-2 border-border text-muted-foreground font-semibold"
                             >
                                 <CheckCheck className="w-4 h-4" />
                                 Marchează tot ca citit
@@ -114,14 +114,14 @@ const Notifications = () => {
                 </div>
 
                 {/* Filters & Stats */}
-                <div className="bg-white rounded-2xl p-2 mb-6 shadow-sm border border-gray-100 flex items-center justify-between">
+                <div className="bg-card rounded-2xl p-2 mb-6 shadow-sm border border-border flex items-center justify-between">
                     <div className="flex gap-1">
                         <button
                             onClick={() => setFilter('all')}
                             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                                 filter === 'all' 
                                     ? 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-md shadow-primary/20 scale-105' 
-                                    : 'text-gray-500 hover:bg-gray-50'
+                                    : 'text-muted-foreground hover:bg-muted'
                             }`}
                         >
                             Toate
@@ -131,7 +131,7 @@ const Notifications = () => {
                             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                                 filter === 'unread' 
                                     ? 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-md shadow-primary/20 scale-105' 
-                                    : 'text-gray-500 hover:bg-gray-50'
+                                    : 'text-muted-foreground hover:bg-muted'
                             }`}
                         >
                             Necitite
@@ -145,7 +145,7 @@ const Notifications = () => {
                         </button>
                     </div>
 
-                    <div className="pr-4 hidden sm:flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-wider">
+                    <div className="pr-4 hidden sm:flex items-center gap-2 text-xs text-muted-foreground font-bold uppercase tracking-wider">
                         <Filter className="w-3 h-3" />
                         Filtrează
                     </div>
@@ -155,12 +155,12 @@ const Notifications = () => {
                 {loading ? (
                     <div className="space-y-4">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="bg-white rounded-3xl p-6 border border-gray-100 animate-pulse">
+                            <div key={i} className="bg-card rounded-3xl p-6 border border-border animate-pulse">
                                 <div className="flex gap-4">
-                                    <div className="w-14 h-14 bg-gray-100 rounded-2xl"></div>
+                                    <div className="w-14 h-14 bg-muted rounded-2xl"></div>
                                     <div className="flex-grow space-y-3 py-1">
-                                        <div className="h-4 bg-gray-100 rounded w-1/4"></div>
-                                        <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+                                        <div className="h-4 bg-muted rounded w-1/4"></div>
+                                        <div className="h-4 bg-muted rounded w-3/4"></div>
                                     </div>
                                 </div>
                             </div>
@@ -170,13 +170,13 @@ const Notifications = () => {
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-sm"
+                        className="text-center py-24 bg-card rounded-[2rem] border border-border shadow-sm"
                     >
-                        <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Bell className="w-10 h-10 text-primary/40" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900">Nicio notificare</h3>
-                        <p className="text-gray-500 mt-2 max-w-xs mx-auto font-medium">
+                        <h3 className="text-xl font-bold text-foreground">Nicio notificare</h3>
+                        <p className="text-muted-foreground mt-2 max-w-xs mx-auto font-medium">
                             {filter === 'unread' 
                                 ? 'Ai citit toate mesajele! Te vom anunța când apare ceva nou.' 
                                 : 'Nu ai nicio notificare în istoric momentan.'}
@@ -196,8 +196,8 @@ const Notifications = () => {
                                         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                                         className={`group relative p-6 rounded-[1.5rem] border transition-all duration-300 ${
                                             !notif.isRead 
-                                                ? 'bg-white border-orange-100 shadow-[0_8px_30px_-6px_rgba(255,107,107,0.15)] ring-1 ring-primary/5' 
-                                                : 'bg-white border-gray-100 hover:border-gray-200 shadow-sm opacity-90'
+                                                ? 'bg-card border-primary/20 shadow-[0_8px_30px_-6px_rgba(255,107,107,0.15)] ring-1 ring-primary/5' 
+                                                : 'bg-card border-border hover:border-muted-foreground/20 shadow-sm opacity-90'
                                         }`}
                                     >
                                         <div className="flex gap-6">
@@ -209,16 +209,16 @@ const Notifications = () => {
                                             {/* Content */}
                                             <div className="flex-grow min-w-0 py-0.5">
                                                 <div className="flex justify-between items-start mb-1.5">
-                                                    <span className={`text-[11px] font-bold uppercase tracking-widest ${!notif.isRead ? 'text-primary' : 'text-gray-400'}`}>
+                                                    <span className={`text-[11px] font-bold uppercase tracking-widest ${!notif.isRead ? 'text-primary' : 'text-muted-foreground'}`}>
                                                         {notif.type?.replace('_', ' ') || 'Sistem'}
                                                     </span>
-                                                    <span className="text-xs text-gray-400 font-medium flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full">
+                                                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 bg-muted px-2 py-1 rounded-full">
                                                         <Clock className="w-3 h-3" />
                                                         {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: ro })}
                                                     </span>
                                                 </div>
                                                 
-                                                <p className={`text-[16px] leading-relaxed mb-4 ${!notif.isRead ? 'text-gray-900 font-bold' : 'text-gray-600 font-medium'}`}>
+                                                <p className={`text-[16px] leading-relaxed mb-4 ${!notif.isRead ? 'text-foreground font-bold' : 'text-muted-foreground font-medium'}`}>
                                                     {notif.message}
                                                 </p>
 
@@ -232,7 +232,7 @@ const Notifications = () => {
                                                             Marchează ca citit
                                                         </button>
                                                     ) : (
-                                                        <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+                                                        <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-900/50">
                                                             <CheckCheck className="w-3.5 h-3.5" />
                                                             Citit
                                                         </div>

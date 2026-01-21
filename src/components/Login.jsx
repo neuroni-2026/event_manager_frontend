@@ -33,11 +33,6 @@ const Login = () => {
     const [backgroundCards, setBackgroundCards] = useState([]);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // Optional: Clear token on visit to ensure fresh login
-        // localStorage.removeItem('token'); 
-        // localStorage.removeItem('user');
-    }, []);
 
     useEffect(() => {
         const fetchBackgroundEvents = async () => {
@@ -101,7 +96,7 @@ const Login = () => {
     };
 
     return (
-        <div className="auth-wrapper relative min-h-[calc(100vh-80px)] w-full overflow-hidden flex justify-center items-center bg-white font-['Inter',_sans-serif] py-12">
+        <div className="auth-wrapper relative min-h-[calc(100vh-80px)] w-full overflow-hidden flex justify-center items-center bg-background font-['Inter',_sans-serif] py-12">
             <style>{`
                 @keyframes flow-up-right { 
                     0% { transform: translate(-400px, 120vh); } 
@@ -115,6 +110,15 @@ const Login = () => {
                     filter: blur(8px) brightness(0.95);
                     transform: scale(1.02);
                 }
+                /* Dark mode autofill fix */
+                .dark input:-webkit-autofill,
+                .dark input:-webkit-autofill:hover, 
+                .dark input:-webkit-autofill:focus, 
+                .dark input:-webkit-autofill:active{
+                    -webkit-box-shadow: 0 0 0 30px hsl(var(--muted)) inset !important;
+                    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+                    caret-color: hsl(var(--foreground)) !important;
+                }
             `}</style>
 
             {/* Background Animation */}
@@ -127,25 +131,25 @@ const Login = () => {
                             animationDelay: card.delay
                         }}>
                         
-                        <div className="visual-card bg-white w-[360px] rounded-[20px] shadow-lg overflow-hidden flex flex-col border border-slate-100 opacity-85 text-left rotate-[-12deg]">
-                            <div className="relative w-full h-[200px] bg-slate-100">
+                        <div className="visual-card bg-card w-[360px] rounded-[20px] shadow-lg overflow-hidden flex flex-col border border-border opacity-85 text-left rotate-[-12deg]">
+                            <div className="relative w-full h-[200px] bg-muted">
                                 <img src={card.event.img} alt={card.event.title} className="w-full h-full object-cover" />
                                 <div className="absolute top-4 left-4 bg-yellow-400 text-black font-bold text-[10px] px-3 py-1 rounded-md uppercase">
                                     {card.event.tag}
                                 </div>
-                                <div className="absolute top-4 right-4 bg-white text-slate-900 font-bold text-[11px] px-3 py-1 rounded-md shadow-sm">
+                                <div className="absolute top-4 right-4 bg-card text-foreground font-bold text-[11px] px-3 py-1 rounded-md shadow-sm">
                                     {card.event.date}
                                 </div>
                             </div>
-                            <div className="p-6 bg-white flex flex-col flex-grow">
-                                <h3 className="text-[18px] font-bold text-slate-900 mb-2 truncate">{card.event.title}</h3>
-                                <p className="text-[14px] text-slate-500 mb-4 line-clamp-2 leading-relaxed">{card.event.desc}</p>
+                            <div className="p-6 bg-card flex flex-col flex-grow">
+                                <h3 className="text-[18px] font-bold text-foreground mb-2 truncate">{card.event.title}</h3>
+                                <p className="text-[14px] text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{card.event.desc}</p>
                                 <div className="mt-auto flex justify-between items-center">
-                                    <div className="flex items-center gap-1.5 text-[13px] text-slate-500 font-medium">
-                                        <MapPin size={12} className="text-slate-400" /> 
+                                    <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground font-medium">
+                                        <MapPin size={12} className="text-muted-foreground" /> 
                                         <span className="truncate max-w-[150px]">{card.event.location}</span>
                                     </div>
-                                    <button className="bg-slate-50 text-slate-900 px-4 py-2 rounded-lg font-semibold text-[13px] border border-slate-100">
+                                    <button className="bg-muted text-foreground px-4 py-2 rounded-lg font-semibold text-[13px] border border-border">
                                         Detalii
                                     </button>
                                 </div>
@@ -161,19 +165,19 @@ const Login = () => {
                 onMouseEnter={() => setIsFocused(true)}
                 onMouseLeave={() => setIsFocused(false)}
             >
-                <div className="auth-card bg-white rounded-[30px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-2 border-black p-10">
+                <div className="auth-card bg-card rounded-[30px] shadow-2xl border-2 border-border p-10">
                     <div className="auth-header mb-8 text-left">
-                        <h2 className="text-[36px] font-extrabold text-slate-900 mb-2 tracking-tight font-light">Bine ai venit!</h2>
-                        <p className="text-[16px] text-slate-500 leading-relaxed font-medium">
+                        <h2 className="text-[36px] font-extrabold text-foreground mb-2 tracking-tight font-light">Bine ai venit!</h2>
+                        <p className="text-[16px] text-muted-foreground leading-relaxed font-medium">
                             Autentifică-te în contul tău Event Manager
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="input-group">
-                            <label className="block text-[15px] font-bold text-slate-900 mb-2">Email</label>
+                            <label className="block text-[15px] font-bold text-foreground mb-2">Email</label>
                             <div className="input-wrapper relative w-full">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 z-10" size={18} />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10" size={18} />
                                 <input 
                                     type="email" 
                                     name="email" 
@@ -181,15 +185,15 @@ const Login = () => {
                                     value={formData.email} 
                                     onChange={handleChange} 
                                     required 
-                                    className="w-full h-[52px] pl-12 pr-4 border-2 border-black rounded-[12px] bg-[#dfe6e9] text-[15px] text-slate-900 outline-none focus:ring-0 transition-all placeholder-slate-500 font-medium"
+                                    className="w-full h-[52px] pl-12 pr-4 border-2 border-input rounded-[12px] bg-muted/50 text-[15px] text-foreground outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-muted-foreground/70 font-medium"
                                 />
                             </div>
                         </div>
 
                         <div className="input-group">
-                            <label className="block text-[15px] font-bold text-slate-900 mb-2">Parolă</label>
+                            <label className="block text-[15px] font-bold text-foreground mb-2">Parolă</label>
                             <div className="input-wrapper relative w-full">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 z-10" size={18} />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10" size={18} />
                                 <input 
                                     type="password" 
                                     name="password" 
@@ -197,7 +201,7 @@ const Login = () => {
                                     value={formData.password} 
                                     onChange={handleChange} 
                                     required 
-                                    className="w-full h-[52px] pl-12 pr-4 border-2 border-black rounded-[12px] bg-[#dfe6e9] text-[15px] text-slate-900 outline-none focus:ring-0 transition-all placeholder-slate-500 font-medium"
+                                    className="w-full h-[52px] pl-12 pr-4 border-2 border-input rounded-[12px] bg-muted/50 text-[15px] text-foreground outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-muted-foreground/70 font-medium"
                                 />
                             </div>
                         </div>
@@ -211,7 +215,7 @@ const Login = () => {
                         </button>
                     </form>
 
-                    <div className="auth-footer mt-8 text-center text-[14px] text-slate-500 font-medium">
+                    <div className="auth-footer mt-8 text-center text-[14px] text-muted-foreground font-medium">
                         Nu ai un cont? 
                         <Link to="/register" className="ml-1 text-[#ff7675] font-bold hover:underline">
                             Înregistrează-te

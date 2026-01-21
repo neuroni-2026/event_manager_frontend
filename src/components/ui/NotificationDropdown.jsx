@@ -54,7 +54,6 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
             const unread = notifications.filter(n => !n.isRead);
             if (unread.length === 0) return;
 
-            // In a real scenario, use a bulk endpoint if available
             await Promise.all(unread.map(n => api.put(`/notifications/${n.id}/read`)));
             
             const updated = notifications.map(n => ({ ...n, isRead: true }));
@@ -70,26 +69,26 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
             case 'ALERT': 
             case 'EVENT_REJECTED':
                 return { 
-                    bg: 'bg-red-50', 
-                    text: 'text-red-500', 
+                    bg: 'bg-red-50 dark:bg-red-900/20', 
+                    text: 'text-red-500 dark:text-red-400', 
                     icon: <AlertCircle className="w-5 h-5" /> 
                 };
             case 'SUCCESS': 
             case 'EVENT_APPROVED':
                 return { 
-                    bg: 'bg-emerald-50', 
-                    text: 'text-emerald-600', 
+                    bg: 'bg-emerald-50 dark:bg-emerald-900/20', 
+                    text: 'text-emerald-600 dark:text-emerald-400', 
                     icon: <CheckCircle2 className="w-5 h-5" /> 
                 };
             case 'REMINDER':
                 return {
-                    bg: 'bg-orange-50',
-                    text: 'text-orange-500',
+                    bg: 'bg-orange-50 dark:bg-orange-900/20',
+                    text: 'text-orange-500 dark:text-orange-400',
                     icon: <Clock className="w-5 h-5" />
                 };
             default: 
                 return { 
-                    bg: 'bg-primary/10', 
+                    bg: 'bg-primary/10 dark:bg-primary/20', 
                     text: 'text-primary', 
                     icon: <Info className="w-5 h-5" /> 
                 };
@@ -102,13 +101,13 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
             animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(10px)' }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute top-[4.5rem] right-0 w-[26rem] max-h-[85vh] bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-white/20 ring-1 ring-black/5 z-50 overflow-hidden flex flex-col font-sans"
+            className="absolute top-[4.5rem] right-0 w-[26rem] max-h-[85vh] bg-card/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] border border-border ring-1 ring-black/5 z-50 overflow-hidden flex flex-col font-sans"
         >
             {/* Header */}
-            <div className="px-6 py-4 pb-0 border-b border-gray-100/50 flex justify-between items-center bg-white/50 sticky top-0 z-10">
+            <div className="px-6 py-4 pb-0 border-b border-border flex justify-between items-center bg-card/50 sticky top-0 z-10">
                 <div>
-                    <h3 className="font-bold text-gray-900 text-lg leading-tight">Notificări</h3>
-                    <p className="text-[11px] text-gray-500 font-medium mt-0.5">
+                    <h3 className="font-bold text-foreground text-lg leading-tight">Notificări</h3>
+                    <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
                         Ai {notifications.filter(n => !n.isRead).length} mesaje necitite
                     </p>
                 </div>
@@ -126,7 +125,7 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
                     )}
                     <button 
                         onClick={onClose} 
-                        className="p-2 hover:bg-gray-100/80 rounded-full transition-all text-gray-400 hover:text-gray-600"
+                        className="p-2 hover:bg-muted rounded-full transition-all text-muted-foreground hover:text-foreground"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -138,15 +137,15 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center gap-3">
                         <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                        <span className="text-sm text-gray-400 font-medium">Se încarcă...</span>
+                        <span className="text-sm text-muted-foreground font-medium">Se încarcă...</span>
                     </div>
                 ) : notifications.length === 0 ? (
                     <div className="py-24 px-8 text-center flex flex-col items-center">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4 text-muted-foreground">
                             <Bell className="w-8 h-8" />
                         </div>
-                        <h4 className="text-gray-900 font-semibold mb-1">Ești la zi!</h4>
-                        <p className="text-sm text-gray-500 max-w-[200px] leading-relaxed">
+                        <h4 className="text-foreground font-semibold mb-1">Ești la zi!</h4>
+                        <p className="text-sm text-muted-foreground max-w-[200px] leading-relaxed">
                             Nu ai nicio notificare nouă momentan.
                         </p>
                     </div>
@@ -163,8 +162,8 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
                                     className={`
                                         mx-3 my-1 p-4 rounded-2xl transition-all duration-200 cursor-default group relative
                                         ${!notif.isRead 
-                                            ? 'bg-gradient-to-r from-orange-50/50 to-transparent hover:from-orange-50' 
-                                            : 'hover:bg-gray-50'
+                                            ? 'bg-gradient-to-r from-orange-50/50 dark:from-orange-900/10 to-transparent hover:from-orange-50 dark:hover:from-orange-900/20' 
+                                            : 'hover:bg-muted'
                                         }
                                     `}
                                 >
@@ -179,12 +178,12 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
 
                                         {/* Content */}
                                         <div className="flex-grow min-w-0 pt-0.5 pr-8">
-                                            <p className={`text-sm leading-relaxed ${!notif.isRead ? 'font-semibold text-gray-900' : 'text-gray-600'}`}>
+                                            <p className={`text-sm leading-relaxed ${!notif.isRead ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
                                                 {notif.message}
                                             </p>
                                             
                                             <div className="flex items-center gap-3 mt-2">
-                                                <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
+                                                <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
                                                     <Clock className="w-3 h-3" />
                                                     {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: ro })}
                                                 </span>
@@ -196,7 +195,7 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
                                             <div className="absolute top-1/2 -translate-y-1/2 right-4 flex flex-col items-center gap-1">
                                                  <button 
                                                     onClick={(e) => markAsRead(notif.id, e)}
-                                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 shadow-sm transition-all"
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-green-600 hover:border-green-200 dark:hover:border-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 shadow-sm transition-all"
                                                     title="Marchează ca citit"
                                                 >
                                                     <Check className="w-4 h-4" />
@@ -213,10 +212,10 @@ const NotificationDropdown = ({ onClose, onUpdateUnreadCount }) => {
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+            <div className="p-4 border-t border-border bg-card/50 backdrop-blur-sm">
                 <button 
                     onClick={() => { onClose(); navigate('/notifications'); }}
-                    className="w-full py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2 group"
+                    className="w-full py-2.5 rounded-xl bg-card border border-border text-sm font-semibold text-foreground shadow-sm hover:bg-muted hover:border-muted-foreground/20 transition-all flex items-center justify-center gap-2 group"
                 >
                     <span>Vezi tot istoricul</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

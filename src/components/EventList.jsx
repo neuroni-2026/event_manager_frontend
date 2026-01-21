@@ -102,27 +102,31 @@ const EventList = () => {
         })());
 
         return matchesSearch && matchesOrganizer && matchesLocation && matchesCategory && matchesDate;
+    }).sort((a, b) => {
+        const dateA = new Date(a.startTime);
+        const dateB = new Date(b.startTime);
+        return dateA - dateB;
     });
 
     return (
-        <div className="min-h-screen bg-transparent pb-20">
+        <div className="min-h-screen bg-background text-foreground pb-20 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
                 
                 {/* Header Section */}
                 <div className="mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 tracking-tight">
                         Bine ai venit, <span className="text-blue-600">{user ? user.firstName : "Oaspete"}!</span>
                     </h1>
 
-                    <p className="text-gray-500 text-lg font-medium max-w-2xl leading-relaxed">
+                    <p className="text-muted-foreground text-lg font-medium max-w-2xl leading-relaxed">
                         Descoperă evenimente interesante și înscrie-te la activitățile tale preferate.
                     </p>
                 </div>
 
                 {/* Step 1: Clean Search Bar */}
                 <div className="mb-10 max-w-4xl">
-                    <div className="flex items-center bg-white border border-gray-200 rounded-2xl px-4 py-1 focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-200 transition-all">
-                        <Search className="text-gray-400 h-5 w-5 mr-3" />
+                    <div className="flex items-center bg-card border border-border rounded-2xl px-4 py-1 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                        <Search className="text-muted-foreground h-5 w-5 mr-3" />
                         <input 
                             type="text" 
                             placeholder="Caută evenimente, locații sau organizatori..." 
@@ -133,7 +137,7 @@ const EventList = () => {
                                 setSearchTerm(e.target.value);
                                 setSearchParams({ search: e.target.value });
                             }}
-                            className="w-full py-3 bg-transparent text-gray-800 placeholder:text-gray-400 outline-none border-none focus:ring-0 text-base font-medium"
+                            className="w-full py-3 bg-transparent text-foreground placeholder:text-muted-foreground outline-none border-none focus:ring-0 text-base font-medium"
                         />
                     </div>
                 </div>
@@ -147,15 +151,15 @@ const EventList = () => {
                 >
                     {/* Organizer Filter */}
                     <div className="space-y-2 relative">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Cine organizează</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Cine organizează</label>
                         <div className="relative group">
-                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
+                            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
                             <button 
                                 onClick={() => { setShowOrganizer(!showOrganizer); setShowLocation(false); setShowCategory(false); setShowCalendar(false); }}
-                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-white text-gray-700 text-sm font-medium transition-all hover:border-gray-300 hover:shadow-sm shadow-gray-100 flex items-center justify-between ${showOrganizer ? 'border-primary ring-4 ring-primary/5' : 'border-gray-200'}`}
+                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-card text-foreground text-sm font-medium transition-all hover:border-border hover:shadow-sm flex items-center justify-between ${showOrganizer ? 'border-primary ring-4 ring-primary/5' : 'border-border'}`}
                             >
                                 <span className="truncate">{selectedOrganizer || "Toate facultățile"}</span>
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform flex-shrink-0 ${showOrganizer ? 'rotate-180' : ''}`} />
+                                <ChevronDown size={16} className={`text-muted-foreground transition-transform flex-shrink-0 ${showOrganizer ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
                         <AnimatePresence>
@@ -164,12 +168,12 @@ const EventList = () => {
                                     initial={{ opacity: 0, y: 5, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-card rounded-2xl shadow-xl border border-border overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
                                 >
                                     <div className="p-1">
                                         <button 
                                             onClick={() => { setSelectedOrganizer(""); setShowOrganizer(false); }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedOrganizer ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedOrganizer ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                         >
                                             Toate facultățile
                                         </button>
@@ -177,7 +181,7 @@ const EventList = () => {
                                             <button 
                                                 key={org}
                                                 onClick={() => { setSelectedOrganizer(org); setShowOrganizer(false); }}
-                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedOrganizer === org ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedOrganizer === org ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                             >
                                                 {org}
                                             </button>
@@ -190,15 +194,15 @@ const EventList = () => {
 
                     {/* Location Filter */}
                     <div className="space-y-2 relative">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Unde se ține</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Unde se ține</label>
                         <div className="relative group">
-                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
+                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
                             <button 
                                 onClick={() => { setShowLocation(!showLocation); setShowOrganizer(false); setShowCategory(false); setShowCalendar(false); }}
-                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-white text-gray-700 text-sm font-medium transition-all hover:border-gray-300 hover:shadow-sm shadow-gray-100 flex items-center justify-between ${showLocation ? 'border-primary ring-4 ring-primary/5' : 'border-gray-200'}`}
+                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-card text-foreground text-sm font-medium transition-all hover:border-border hover:shadow-sm flex items-center justify-between ${showLocation ? 'border-primary ring-4 ring-primary/5' : 'border-border'}`}
                             >
                                 <span className="truncate">{selectedLocation || "Toate locațiile"}</span>
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform flex-shrink-0 ${showLocation ? 'rotate-180' : ''}`} />
+                                <ChevronDown size={16} className={`text-muted-foreground transition-transform flex-shrink-0 ${showLocation ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
                         <AnimatePresence>
@@ -207,12 +211,12 @@ const EventList = () => {
                                     initial={{ opacity: 0, y: 5, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-card rounded-2xl shadow-xl border border-border overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
                                 >
                                     <div className="p-1">
                                         <button 
                                             onClick={() => { setSelectedLocation(""); setShowLocation(false); }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedLocation ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedLocation ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                         >
                                             Toate locațiile
                                         </button>
@@ -220,7 +224,7 @@ const EventList = () => {
                                             <button 
                                                 key={loc}
                                                 onClick={() => { setSelectedLocation(loc); setShowLocation(false); }}
-                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedLocation === loc ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedLocation === loc ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                             >
                                                 {loc}
                                             </button>
@@ -233,15 +237,15 @@ const EventList = () => {
 
                     {/* Category Filter */}
                     <div className="space-y-2 relative">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Tip eveniment</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Tip eveniment</label>
                         <div className="relative group">
-                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
+                            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
                             <button 
                                 onClick={() => { setShowCategory(!showCategory); setShowOrganizer(false); setShowLocation(false); setShowCalendar(false); }}
-                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-white text-gray-700 text-sm font-medium transition-all hover:border-gray-300 hover:shadow-sm shadow-gray-100 flex items-center justify-between ${showCategory ? 'border-primary ring-4 ring-primary/5' : 'border-gray-200'}`}
+                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-card text-foreground text-sm font-medium transition-all hover:border-border hover:shadow-sm flex items-center justify-between ${showCategory ? 'border-primary ring-4 ring-primary/5' : 'border-border'}`}
                             >
                                 <span className="truncate">{selectedCategory || "Toate tipurile"}</span>
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform flex-shrink-0 ${showCategory ? 'rotate-180' : ''}`} />
+                                <ChevronDown size={16} className={`text-muted-foreground transition-transform flex-shrink-0 ${showCategory ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
                         <AnimatePresence>
@@ -250,12 +254,12 @@ const EventList = () => {
                                     initial={{ opacity: 0, y: 5, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
+                                    className="absolute left-0 top-full mt-2 z-[50] w-full bg-card rounded-2xl shadow-xl border border-border overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
                                 >
                                     <div className="p-1">
                                         <button 
                                             onClick={() => { setSelectedCategory(""); setShowCategory(false); }}
-                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedCategory ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                            className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${!selectedCategory ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                         >
                                             Toate tipurile
                                         </button>
@@ -263,7 +267,7 @@ const EventList = () => {
                                             <button 
                                                 key={cat}
                                                 onClick={() => { setSelectedCategory(cat); setShowCategory(false); }}
-                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedCategory === cat ? 'bg-primary/5 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}
+                                                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-colors truncate ${selectedCategory === cat ? 'bg-primary/5 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                                             >
                                                 {cat.charAt(0) + cat.slice(1).toLowerCase()}
                                             </button>
@@ -276,15 +280,15 @@ const EventList = () => {
 
                     {/* Date Filter */}
                     <div className="space-y-2 relative">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Data desfășurării</label>
+                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Data desfășurării</label>
                         <div className="relative group">
-                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
+                            <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-4.5 w-4.5 group-focus-within:text-primary transition-colors z-10" />
                             <button 
                                 onClick={() => setShowCalendar(!showCalendar)}
-                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-white text-gray-700 text-sm font-medium transition-all hover:border-gray-300 hover:shadow-sm shadow-gray-100 flex items-center justify-between ${showCalendar ? 'border-primary ring-4 ring-primary/5' : 'border-gray-200'}`}
+                                className={`w-full pl-11 pr-4 py-3.5 rounded-2xl border bg-card text-foreground text-sm font-medium transition-all hover:border-border hover:shadow-sm flex items-center justify-between ${showCalendar ? 'border-primary ring-4 ring-primary/5' : 'border-border'}`}
                             >
                                 <span>{selectedDate ? new Date(selectedDate).toLocaleDateString('ro-RO') : "Alege data"}</span>
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform ${showCalendar ? 'rotate-180' : ''}`} />
+                                <ChevronDown size={16} className={`text-muted-foreground transition-transform ${showCalendar ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
 
@@ -295,7 +299,7 @@ const EventList = () => {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-2 z-[100] w-[280px] shadow-2xl shadow-gray-200"
+                                    className="absolute right-0 top-full mt-2 z-[100] w-[280px] shadow-2xl bg-card border border-border rounded-2xl overflow-hidden"
                                 >
                                     <CalendarWidget 
                                         events={events}

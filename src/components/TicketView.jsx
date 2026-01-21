@@ -57,19 +57,19 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
     };
 
     if (loading) return (
-        <div className={isModal ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm" : "flex h-[80vh] items-center justify-center bg-[#f9fafb]"}>
+        <div className={isModal ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm" : "flex h-[80vh] items-center justify-center bg-background"}>
              <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <p className="text-gray-500 font-medium">Se generează biletul...</p>
+                <p className="text-muted-foreground font-medium">Se generează biletul...</p>
              </div>
         </div>
     );
 
     if (error) return (
-        <div className={isModal ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-8 text-center" : "flex flex-col items-center justify-center h-[60vh] px-4 text-center bg-[#f9fafb]"}>
-            <div className="bg-white p-8 rounded-[2rem] max-w-md shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
+        <div className={isModal ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-8 text-center" : "flex flex-col items-center justify-center h-[60vh] px-4 text-center bg-background"}>
+            <div className="bg-card p-8 rounded-[2rem] max-w-md shadow-2xl border border-border animate-in fade-in zoom-in duration-200">
                 <h3 className="text-xl font-bold mb-2 text-red-600">Eroare</h3>
-                <p className="mb-6 text-gray-500">{error}</p>
+                <p className="mb-6 text-muted-foreground">{error}</p>
                 <button 
                     onClick={() => isModal ? onClose() : navigate('/my-tickets')}
                     className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-primary/20"
@@ -84,7 +84,7 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
         <div 
             className={isModal 
                 ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" 
-                : "min-h-screen bg-[#f9fafb] py-12 px-4 flex flex-col items-center justify-center font-['Inter',_sans-serif]"
+                : "min-h-screen bg-background py-12 px-4 flex flex-col items-center justify-center font-['Inter',_sans-serif]"
             }
             onClick={isModal ? onClose : undefined}
         >
@@ -93,7 +93,7 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                 <div className="w-full max-w-md flex justify-start mb-6 print:hidden">
                     <button 
                         onClick={() => navigate('/my-tickets')}
-                        className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-bold text-sm"
+                        className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-bold text-sm"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         Înapoi
@@ -103,7 +103,7 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
 
             {/* Ticket Card Wrapper */}
             <div 
-                className={`bg-white w-full max-w-md rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col relative print:shadow-none print:w-full print:max-w-none overflow-hidden ${isModal ? 'max-h-[85vh] animate-in fade-in zoom-in duration-200 shadow-none' : ''}`}
+                className={`bg-card w-full max-w-md rounded-[2rem] shadow-2xl border border-border flex flex-col relative print:shadow-none print:w-full print:max-w-none overflow-hidden ${isModal ? 'max-h-[85vh] animate-in fade-in zoom-in duration-200 shadow-none' : ''}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 
@@ -130,13 +130,12 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                             <p className="text-white/90 text-sm font-medium opacity-90">ID: #{ticket.qrCode?.substring(0, 8)}</p>
                         </div>
                         
-                        {/* Abstract Pattern Overlay */}
                         <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white to-transparent"></div>
                     </div>
 
                     {/* QR Section */}
-                    <div className="bg-white p-8 pb-4 flex flex-col items-center justify-center relative">
-                        <div className="p-4 bg-white border-4 border-gray-900 rounded-2xl shadow-sm mb-4">
+                    <div className="bg-card p-8 pb-4 flex flex-col items-center justify-center relative">
+                        <div className="p-4 bg-white border-4 border-foreground rounded-2xl shadow-sm mb-4">
                             <QRCode 
                                 value={ticket.qrCode || ""} 
                                 size={180}
@@ -144,76 +143,75 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                                 className="w-full h-auto"
                             />
                         </div>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-6">Scanează la intrare</p>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-6">Scanează la intrare</p>
                         
-                        {/* Dotted Line */}
-                        <div className="w-full border-t-2 border-dashed border-gray-200"></div>
+                        <div className="w-full border-t-2 border-dashed border-border"></div>
                     </div>
 
                     {/* Details Section */}
-                    <div className="p-8 pt-4 space-y-6 bg-white">
+                    <div className="p-8 pt-4 space-y-6 bg-card">
                         
-                        {/* 1. Date & Time */}
+                        {/* Date & Time */}
                         <div className="flex items-start gap-4">
-                            <div className="bg-orange-50 p-3 rounded-2xl text-primary shrink-0">
+                            <div className="bg-primary/10 p-3 rounded-2xl text-primary shrink-0">
                                 <Calendar className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Data și Ora</p>
-                                <p className="font-bold text-gray-900 text-lg leading-tight">
+                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Data și Ora</p>
+                                <p className="font-bold text-foreground text-lg leading-tight">
                                     {new Date(ticket.eventDate).toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                 </p>
-                                <p className="text-sm font-semibold text-gray-600">
+                                <p className="text-sm font-semibold text-foreground/80">
                                     {new Date(ticket.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             </div>
                         </div>
 
-                        {/* 2. Location */}
+                        {/*Location */}
                         <div className="flex items-start gap-4">
-                            <div className="bg-orange-50 p-3 rounded-2xl text-primary shrink-0">
+                            <div className="bg-primary/10 p-3 rounded-2xl text-primary shrink-0">
                                 <MapPin className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Locație</p>
-                                <p className="font-bold text-gray-900 text-lg leading-tight">
+                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Locație</p>
+                                <p className="font-bold text-foreground text-lg leading-tight">
                                     {ticket.eventLocation}
                                 </p>
                             </div>
                         </div>
 
-                        {/* 3. Participant */}
+                        {/*Participant */}
                         <div className="flex items-start gap-4">
-                            <div className="bg-orange-50 p-3 rounded-2xl text-primary shrink-0">
+                            <div className="bg-primary/10 p-3 rounded-2xl text-primary shrink-0">
                                 <User className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Participant</p>
-                                <p className="font-bold text-gray-900 text-lg">{ticket.studentName}</p>
+                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Participant</p>
+                                <p className="font-bold text-foreground text-lg">{ticket.studentName}</p>
                             </div>
                         </div>
 
-                        {/* 4. Ticket ID */}
+                        {/*Ticket ID */}
                         <div className="flex items-start gap-4">
-                            <div className="bg-orange-50 p-3 rounded-2xl text-primary shrink-0">
+                            <div className="bg-primary/10 p-3 rounded-2xl text-primary shrink-0">
                                 <Ticket className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">ID Bilet</p>
-                                <p className="font-bold text-gray-900 text-sm font-mono tracking-wider">
+                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">ID Bilet</p>
+                                <p className="font-bold text-foreground text-sm font-mono tracking-wider">
                                     {ticket.qrCode}
                                 </p>
                             </div>
                         </div>
 
-                        {/* 5. Purchase Date */}
-                        <div className="flex items-start gap-4 border-t border-gray-100 pt-4 mt-2">
-                            <div className="bg-gray-50 p-3 rounded-2xl text-gray-400 shrink-0">
+                        {/*Purchase Date */}
+                        <div className="flex items-start gap-4 border-t border-border pt-4 mt-2">
+                            <div className="bg-muted p-3 rounded-2xl text-muted-foreground shrink-0">
                                 <Clock className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Data procurării</p>
-                                <p className="font-bold text-gray-700 text-md">
+                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Data procurării</p>
+                                <p className="font-bold text-foreground text-md">
                                     {new Date(ticket.purchaseDate || Date.now()).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' })}
                                 </p>
                             </div>
@@ -221,7 +219,7 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                     </div>
 
                     {/* Footer Buttons */}
-                    <div className="p-8 pt-4 pb-8 bg-white">
+                    <div className="p-8 pt-4 pb-8 bg-card">
                         <div className="grid grid-cols-2 gap-4 mb-4">
                             <button 
                                 className="bg-gradient-to-r from-primary to-orange-600 hover:to-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
@@ -231,13 +229,13 @@ const TicketView = ({ ticket: propTicket, onClose }) => {
                             </button>
                             <button 
                                 onClick={handlePrint}
-                                className="bg-white border-2 border-primary text-primary hover:bg-orange-50 font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
+                                className="bg-card border-2 border-primary text-primary hover:bg-primary/10 font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 text-sm"
                             >
                                 <Printer className="w-4 h-4" />
                                 Print
                             </button>
                         </div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Arată codul la intrare</p>
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">Arată codul la intrare</p>
                     </div>
                 </div>
             </div>

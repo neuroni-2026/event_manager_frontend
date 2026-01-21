@@ -143,12 +143,12 @@ const Settings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent pb-20 pt-28">
+    <div className="min-h-screen bg-background text-foreground pb-20 pt-28 transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-10">
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Setări Cont</h1>
-            <p className="text-gray-500 mt-2 text-lg">Gestionează-ți profilul, securitatea și preferințele.</p>
+            <h1 className="text-4xl font-bold text-foreground tracking-tight">Setări Cont</h1>
+            <p className="text-muted-foreground mt-2 text-lg">Gestionează-ți profilul, securitatea și preferințele.</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-10">
@@ -164,12 +164,12 @@ const Settings = () => {
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
                         activeTab === tab.id
-                            ? 'bg-white shadow-lg shadow-orange-500/5 text-gray-900 ring-1 ring-orange-100'
-                            : 'bg-transparent hover:bg-white hover:shadow-sm text-gray-500 hover:text-gray-900'
+                            ? 'bg-card shadow-lg shadow-orange-500/5 text-foreground ring-1 ring-primary/20'
+                            : 'bg-transparent hover:bg-card hover:shadow-sm text-muted-foreground hover:text-foreground'
                     }`}
                 >
                     <div className="flex items-center gap-4 relative z-10">
-                        <div className={`p-2.5 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-gradient-to-br from-primary to-orange-500 text-white shadow-md' : 'bg-gray-100 group-hover:bg-gray-50 text-gray-400'}`}>
+                        <div className={`p-2.5 rounded-xl transition-colors ${activeTab === tab.id ? 'bg-gradient-to-br from-primary to-orange-500 text-white shadow-md' : 'bg-muted group-hover:bg-muted/80 text-muted-foreground'}`}>
                             <tab.icon className="w-5 h-5" />
                         </div>
                         <div className="text-left">
@@ -183,7 +183,7 @@ const Settings = () => {
                             className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary to-orange-500 rounded-r-full"
                         />
                     )}
-                    <ChevronRight className={`w-4 h-4 transition-transform ${activeTab === tab.id ? 'text-primary translate-x-1' : 'text-gray-300 group-hover:text-gray-400'}`} />
+                    <ChevronRight className={`w-4 h-4 transition-transform ${activeTab === tab.id ? 'text-primary translate-x-1' : 'text-muted-foreground group-hover:text-foreground'}`} />
                 </button>
             ))}
           </div>
@@ -197,26 +197,26 @@ const Settings = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-white rounded-[2.5rem] p-8 lg:p-10 shadow-xl shadow-gray-200/50 border border-white"
+                    className="bg-card rounded-[2.5rem] p-8 lg:p-10 shadow-xl shadow-black/5 border border-border"
                 >
             
             {activeTab === 'profile' && (
               <form onSubmit={handleProfileUpdate} className="space-y-8">
                 
                 {/* Profile Header Card */}
-                <div className="bg-gray-50/80 rounded-[2rem] p-6 flex items-center gap-6 border border-gray-100 shadow-sm relative overflow-hidden">
+                <div className="bg-muted/50 rounded-[2rem] p-6 flex items-center gap-6 border border-border shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-blue-600/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     
                     <div className="w-20 h-20 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary/20 shrink-0 relative z-10">
                         {profileData.firstName ? profileData.firstName[0].toUpperCase() : 'U'}
                     </div>
                     <div className="flex flex-col relative z-10">
-                        <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-0.5">
+                        <h2 className="text-2xl font-bold text-foreground leading-tight mb-0.5">
                             {profileData.firstName} {profileData.lastName}
                         </h2>
-                        <p className="text-sm text-gray-500 font-medium mb-3">{user?.email}</p>
+                        <p className="text-sm text-muted-foreground font-medium mb-3">{user?.email}</p>
                         <div>
-                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-white border border-gray-200 text-gray-700 text-[10px] font-black uppercase tracking-widest shadow-sm">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full bg-background border border-border text-foreground text-[10px] font-black uppercase tracking-widest shadow-sm">
                                 {user?.role || 'STUDENT'}
                             </span>
                         </div>
@@ -225,56 +225,56 @@ const Settings = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Prenume</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Prenume</label>
                     <input
                       type="text"
                       value={profileData.firstName}
                       onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Nume</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Nume</label>
                     <input
                       type="text"
                       value={profileData.lastName}
                       onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Telefon</label>
                     <input
                       type="tel"
                       value={profileData.phoneNumber}
                       onChange={(e) => setProfileData({...profileData, phoneNumber: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       placeholder="07xxxxxxxx"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Email</label>
                     <input
                       type="email"
                       value={user?.email || ''}
                       disabled
-                      className="w-full px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-muted text-muted-foreground cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-400 mt-1">Email-ul nu poate fi schimbat.</p>
+                    <p className="text-xs text-muted-foreground mt-1">Email-ul nu poate fi schimbat.</p>
                   </div>
 
                   {user?.role === 'ORGANIZER' && (
                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Nume Organizație</label>
+                        <label className="block text-sm font-medium text-foreground mb-2">Nume Organizație</label>
                         <input
                           type="text"
                           value={profileData.organizationName}
                           onChange={(e) => setProfileData({...profileData, organizationName: e.target.value})}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                         />
                      </div>
                   )}
@@ -282,30 +282,33 @@ const Settings = () => {
                   {user?.role === 'STUDENT' && (
                      <>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Facultate</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">Facultate</label>
                             <select
                                 value={profileData.faculty}
                                 onChange={(e) => setProfileData({...profileData, faculty: e.target.value})}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             >
                                 <option value="">Selectează Facultatea</option>
                                 <option value="FIESC">FIESC</option>
-                                <option value="FEAA">FEAA</option>
-                                <option value="MEDICINA">Medicina</option>
-                                <option value="DREPT">Drept</option>
-                                <option value="LITERE">Litere</option>
-                                <option value="SILVICULTURA">Silvicultura</option>
-                                <option value="MECANICA">Mecanica</option>
-                                <option value="ISTORIE">Istorie</option>
-                                <option value="SPORT">Sport</option>
+                                <option value="FEAA">FIMAR</option>
+                                <option value="FIM">FEEA</option>
+                                <option value="FLSC">FDSA</option>
+                                <option value="FLSC">FIA</option>
+                                <option value="FLSC">FEFS</option>
+                                <option value="FLSC">FMSB</option>
+                                <option value="FLSC">FIG</option>
+                                <option value="FLSC">FLSC</option>
+                                <option value="FLSC">FSED</option>
+                                <option value="FLSC">SILVIC</option>
+                                <option value="FLSC">ALTELE</option>
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">An de Studiu</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">An de Studiu</label>
                             <select
                                 value={profileData.yearOfStudy}
                                 onChange={(e) => setProfileData({...profileData, yearOfStudy: e.target.value})}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                             >
                                 <option value="">Selectează Anul</option>
                                 <option value="1">Anul 1</option>
@@ -334,46 +337,46 @@ const Settings = () => {
             {activeTab === 'security' && (
               <form onSubmit={handlePasswordChange} className="space-y-10">
                 <div className="flex items-center space-x-5">
-                    <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-red-500/20 ring-4 ring-white">
+                    <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-red-500/20 ring-4 ring-card">
                         <Shield className="w-10 h-10" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Securitate și Parolă</h2>
-                        <p className="text-gray-500 font-medium">Gestionează accesul la contul tău</p>
+                        <h2 className="text-2xl font-black text-foreground tracking-tight">Securitate și Parolă</h2>
+                        <p className="text-muted-foreground font-medium">Gestionează accesul la contul tău</p>
                     </div>
                 </div>
 
                 <div className="space-y-4 max-w-lg">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Parola Curentă</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Parola Curentă</label>
                     <input
                       type="password"
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       required
                     />
                   </div>
                   
                   <div className="pt-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Parola Nouă</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Parola Nouă</label>
                     <input
                       type="password"
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       required
                       minLength={6}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Confirmă Parola Nouă</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Confirmă Parola Nouă</label>
                     <input
                       type="password"
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                       required
                       minLength={6}
                     />
@@ -384,7 +387,7 @@ const Settings = () => {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center space-x-2 bg-gray-900 hover:bg-black text-white px-8 py-3.5 rounded-2xl font-semibold text-sm shadow-xl shadow-gray-200 transition-all active:scale-95 disabled:opacity-50"
+                    className="flex items-center space-x-2 bg-foreground text-background hover:bg-foreground/90 px-8 py-3.5 rounded-2xl font-semibold text-sm shadow-xl shadow-foreground/10 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
                     <span>{saving ? 'Se procesează...' : 'Actualizează Parola'}</span>
@@ -396,28 +399,28 @@ const Settings = () => {
             {activeTab === 'organizer' && (
               <div className="space-y-10">
                 <div className="flex items-center space-x-5">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-blue-500/20 ring-4 ring-white">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-blue-500/20 ring-4 ring-card">
                         <Briefcase className="w-10 h-10" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Cont Organizator</h2>
-                        <p className="text-gray-500 font-medium">Statutul tău în comunitate</p>
+                        <h2 className="text-2xl font-black text-foreground tracking-tight">Cont Organizator</h2>
+                        <p className="text-muted-foreground font-medium">Statutul tău în comunitate</p>
                     </div>
                 </div>
 
                 {user?.role === 'ADMIN' ? (
-                    <div className="p-8 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 rounded-2xl text-purple-900 shadow-sm relative overflow-hidden">
+                    <div className="p-8 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-2xl text-foreground shadow-sm relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Shield className="w-32 h-32" />
+                            <Shield className="w-32 h-32 text-purple-500" />
                         </div>
-                        <h3 className="font-black text-xl mb-3 flex items-center gap-2 italic uppercase tracking-tighter">
+                        <h3 className="font-black text-xl mb-3 flex items-center gap-2 italic uppercase tracking-tighter text-purple-500">
                             <Shield className="w-7 h-7" /> Status Administrator
                         </h3>
                         <div className="space-y-4 relative z-10">
-                            <p className="text-gray-700 leading-relaxed">
+                            <p className="text-muted-foreground leading-relaxed">
                                 Ești logat cu un cont de <strong>Administrator Sistem</strong>. Acest rang îți oferă autoritate deplină asupra platformei EventManager.
                             </p>
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm font-medium text-purple-800">
+                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 text-sm font-medium text-foreground/80">
                                 <li className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 bg-purple-400 rounded-full" /> Aprobare / Respingere Evenimente
                                 </li>
@@ -434,41 +437,41 @@ const Settings = () => {
                         </div>
                     </div>
                 ) : user?.role === 'ORGANIZER' ? (
-                    <div className="p-6 bg-green-50 border border-green-100 rounded-xl text-green-800">
+                    <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-600">
                         <h3 className="font-bold text-lg mb-2">Felicitări!</h3>
                         <p>Ești deja organizator activ pentru: <strong>{user.organizationName}</strong>.</p>
                         <p className="mt-2 text-sm">Poți crea și gestiona evenimente din Dashboard.</p>
                     </div>
                 ) : user?.pendingUpgradeRequest ? (
-                    <div className="p-6 bg-yellow-50 border border-yellow-100 rounded-xl text-yellow-800">
+                    <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-600">
                         <h3 className="font-bold text-lg mb-2">Cerere în Așteptare</h3>
                         <p>Ai solicitat upgrade pentru organizația: <strong>{user.pendingOrganizationName || "..."}</strong>.</p>
                         <p className="mt-2 text-sm">Un administrator va revizui cererea ta în curând.</p>
                     </div>
                 ) : (
                     <form onSubmit={handleOrganizerRequest} className="space-y-4 max-w-lg">
-                        <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600 mb-4 border border-gray-100">
+                        <div className="p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground mb-4 border border-border">
                             Ca organizator, vei putea publica evenimente, scana bilete și gestiona participarea studenților.
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Numele Organizației / Asociației</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">Numele Organizației / Asociației</label>
                             <input
                               type="text"
                               value={organizerRequestName}
                               onChange={(e) => setOrganizerRequestName(e.target.value)}
-                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                              className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                               required
                               placeholder="ex: Liga Studenților FIESC"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">De ce dorești să devii organizator?</label>
+                            <label className="block text-sm font-medium text-foreground mb-2">De ce dorești să devii organizator?</label>
                             <textarea
                               value={organizerRequestReason}
                               onChange={(e) => setOrganizerRequestReason(e.target.value)}
-                              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-h-[100px]"
+                              className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-h-[100px]"
                               required
                               placeholder="Descrie pe scurt activitățile tale..."
                             />
