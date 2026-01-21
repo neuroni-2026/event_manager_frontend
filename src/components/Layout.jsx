@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const Layout = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col relative">
+    <div className="min-h-screen flex flex-col relative bg-background transition-colors duration-300">
       <Navbar />
       
       <main className="flex-grow relative">

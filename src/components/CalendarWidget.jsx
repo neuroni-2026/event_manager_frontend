@@ -48,7 +48,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+        <div className="bg-card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
@@ -60,13 +60,13 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
                 <div className="flex items-center gap-1">
                     <button 
                         onClick={prevMonth}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-400"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button 
                         onClick={nextMonth}
-                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-400"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </button>
@@ -98,7 +98,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
                                 relative h-9 w-full rounded-lg text-sm flex items-center justify-center transition-all duration-200
                                 ${!isCurrentMonth ? 'text-gray-300 dark:text-gray-600' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}
                                 ${isSelected ? '!bg-primary !text-white shadow-md shadow-primary/30 font-bold' : ''}
-                                ${isDayToday && !isSelected ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : ''}
+                                ${isDayToday && !isSelected ? 'text-primary font-bold bg-primary/5 dark:bg-primary/20' : ''}
                                 ${dayHasEvent && !isSelected ? 'font-semibold' : ''}
                             `}
                         >
@@ -115,7 +115,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
 
             {/* Footer / Clear Action */}
             {selectedDate && (
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-center">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 flex justify-center">
                     <button 
                         onClick={() => onDateSelect(null)}
                         className="text-xs font-medium text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -127,7 +127,7 @@ const CalendarWidget = ({ events = [], selectedDate, onDateSelect }) => {
             )}
             
             {!selectedDate && (
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
                     <p className="text-xs text-gray-400 dark:text-gray-500">Select a date to filter events</p>
                 </div>
             )}
