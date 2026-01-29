@@ -647,7 +647,7 @@ const AdminDashboard = () => {
                                 { id: 'users', label: 'Utilizatori', icon: Users },
                                 { id: 'reports', label: 'Statistici', icon: BarChart3 }
                             ].map(tab => (
-                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-xs flex-1 md:flex-none justify-center whitespace-nowrap transition-all duration-300 ${activeTab === tab.id ? 'bg-white dark:bg-gray-800 shadow-md ring-1 ring-black/5 dark:ring-white/5' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-800/50'}`}>
+                                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-xs flex-1 md:flex-none justify-center whitespace-nowrap transition-all duration-300 ${activeTab === tab.id ? 'bg-card shadow-md ring-1 ring-border text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                                     <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-primary' : ''}`} />
                                     <span className={activeTab === tab.id ? 'bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent' : ''}>
                                         {tab.label}
@@ -679,8 +679,11 @@ const AdminDashboard = () => {
                                                 <div className="flex-grow">
                                                     <h3 className="font-bold text-lg text-gray-900 dark:text-white">{evt.title}</h3>
                                                     <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2 font-medium">
-                                                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5"/> {new Date(evt.date).toLocaleDateString()}</span>
-                                                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> {evt.location}</span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-3.5 h-3.5"/> 
+                                                            {evt.date ? new Date(evt.date).toLocaleDateString() : (evt.startTime ? new Date(evt.startTime).toLocaleDateString() : 'Dată Necunoscută')}
+                                                        </span>
+                                                        <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5"/> {evt.location || 'Locație N/A'}</span>
                                                     </div>
                                                     <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-3 leading-relaxed">{evt.description}</p>
                                                 </div>

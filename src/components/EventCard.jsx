@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const categoryColors = {
-  ACADEMIC: 'bg-blue-50 text-blue-700 border-blue-100',
-  SOCIAL: 'bg-orange-50 text-orange-700 border-orange-100',
-  CAREER: 'bg-purple-50 text-purple-700 border-purple-100',
-  SPORT: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  VOLUNTEERING: 'bg-amber-50 text-amber-700 border-amber-100',
-  OTHER: 'bg-gray-50 text-gray-700 border-gray-100'
+  ACADEMIC: 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800',
+  SOCIAL: 'bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800',
+  CAREER: 'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800',
+  SPORT: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800',
+  VOLUNTEERING: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800',
+  OTHER: 'bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 };
 
 const formatDate = (dateString) => {

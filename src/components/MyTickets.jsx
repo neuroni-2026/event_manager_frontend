@@ -104,7 +104,7 @@ const MyTickets = () => {
                                         
                                         {/* Status Badge */}
                                         <div className="flex justify-between items-start mb-6">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
+                                            <span className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider border border-emerald-500/20">
                                                 Valid
                                             </span>
                                             <div className="text-right">

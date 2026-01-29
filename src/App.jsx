@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Lenis from 'lenis';
 import './index.css';
 
@@ -22,6 +22,22 @@ import Settings from './components/Settings';
 import ScanTicket from './components/ScanTicket';
 
 function App() {
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   useEffect(() => {
     const lenis = new Lenis();
 
@@ -35,8 +51,8 @@ function App() {
 
   return (
     <Router>
-      <Toaster position="top-center" richColors />
-      <Layout>
+      <Toaster position="top-center" richColors theme={theme} />
+      <Layout theme={theme} toggleTheme={toggleTheme}>
         <Routes>
             {/* Main Public Route: Home/Event List */}
             <Route path="/" element={<EventList />} />

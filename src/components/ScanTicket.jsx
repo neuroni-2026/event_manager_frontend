@@ -16,11 +16,8 @@ const ScanTicket = () => {
     const qrRegionId = "reader";
 
     useEffect(() => {
-       
         scannerRef.current = new Html5Qrcode(qrRegionId);
-
         return () => {
-          
             if (scannerRef.current && scannerRef.current.isScanning) {
                 scannerRef.current.stop().catch(err => console.error("Error stopping scanner", err));
             }
@@ -29,22 +26,13 @@ const ScanTicket = () => {
 
     const startScanner = async () => {
         if (!scannerRef.current) return;
-
         try {
             setIsScannerStarted(true);
             await scannerRef.current.start(
                 { facingMode: "environment" },
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                },
-                (decodedText) => {
-                    
-                    handleScanSuccess(decodedText);
-                },
-                (errorMessage) => {
-               
-                }
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => handleScanSuccess(decodedText),
+                (errorMessage) => {}
             );
         } catch (err) {
             console.error("Failed to start scanner", err);
@@ -66,15 +54,11 @@ const ScanTicket = () => {
         try {
             const response = await api.post('/tickets/validate', { qrCode: code });
             setScanResult(response.data);
-            
-            if (response.data.valid) {
-                toast.success("Bilet validat!");
-            } else {
-                toast.error(response.data.message || "Bilet invalid!");
-            }
+            if (response.data.valid) toast.success("Bilet validat!");
+            else toast.error(response.data.message || "Bilet invalid!");
         } catch (error) {
             console.error(error);
-            setScanResult({ valid: false, message: "Eroare la conexiune sau cod invalid.", ticketStatus: "ERROR" });
+            setScanResult({ valid: false, message: "Eroare la conexiune.", ticketStatus: "ERROR" });
         } finally {
             setLoading(false);
         }
@@ -82,9 +66,7 @@ const ScanTicket = () => {
 
     const handleManualSubmit = (e) => {
         e.preventDefault();
-        if (manualCode.trim()) {
-            handleScanSuccess(manualCode.trim());
-        }
+        if (manualCode.trim()) handleScanSuccess(manualCode.trim());
     };
 
     const resetScan = () => {
@@ -93,134 +75,99 @@ const ScanTicket = () => {
         setTimeout(() => startScanner(), 500);
     };
 
-    const commonGradient = "bg-gradient-to-r from-[#ffffff] to-[#93c5fd] dark:from-slate-900 dark:to-blue-900";
-
     return (
-        <div className={`min-h-screen ${commonGradient} text-slate-900 dark:text-white flex flex-col`}>
+        <div className="min-h-screen bg-background text-foreground flex flex-col transition-colors duration-300">
             {/* Header */}
-            <div className={`p-4 flex items-center justify-center ${commonGradient} backdrop-blur-md border-b border-blue-200 dark:border-blue-800 sticky top-0 z-20 shadow-sm`}>
-                <h1 className="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                    <Scan className="w-5 h-5 text-blue-600 dark:text-blue-400" /> Scaner Eveniment
+            <div className="p-4 flex items-center justify-center bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-20 shadow-sm">
+                <h1 className="text-lg font-bold flex items-center gap-2">
+                    <Scan className="w-5 h-5 text-blue-600" /> Scaner Eveniment
                 </h1>
             </div>
 
             <div className="flex-grow flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full">
-                
                 <AnimatePresence mode='wait'>
                     {!scanResult ? (
-                        <motion.div 
-                            key="scanner-ui"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="w-full space-y-8"
-                        >
-                            {/* Camera Box */}
-                            <div className={`relative w-full rounded-[2.5rem] overflow-hidden border-2 border-blue-200 dark:border-blue-800 shadow-xl shadow-blue-900/5 dark:shadow-blue-900/20 ${!isScannerStarted ? 'min-h-[350px] bg-white dark:bg-slate-800' : 'bg-black'}`}>
+                        <motion.div key="scanner-ui" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full space-y-8">
+                            {/* Camera Box - Vibrant Version */}
+                            <div className="relative w-full aspect-square bg-slate-900 rounded-[2.5rem] overflow-hidden border-4 border-white dark:border-slate-800 shadow-2xl shadow-blue-900/20">
                                 <div id={qrRegionId} className="w-full h-full"></div>
                                 
                                 {!isScannerStarted && (
-                                    <div className={`absolute inset-0 flex flex-col items-center justify-center ${commonGradient} z-10 p-8 text-center`}>
-                                        <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mb-6">
-                                            <Camera className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10 p-8 text-center text-white">
+                                        <div className="w-20 h-20 bg-blue-500/20 rounded-3xl flex items-center justify-center mb-6 ring-1 ring-blue-400/30">
+                                            <Camera className="w-10 h-10 text-blue-400" />
                                         </div>
-                                        <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-white">Sistem Scanare</h3>
-                                        <p className="text-slate-500 dark:text-slate-300 text-sm mb-8">Apasă butonul de mai jos pentru a activa camera.</p>
-                                        <button 
-                                            onClick={startScanner}
-                                            className="bg-blue-600 dark:bg-blue-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 dark:shadow-blue-900/30 active:scale-95 transition-transform uppercase tracking-widest text-xs hover:bg-blue-700 dark:hover:bg-blue-600"
-                                        >
+                                        <h3 className="text-xl font-bold mb-2">Sistem Scanare</h3>
+                                        <p className="text-slate-400 text-sm mb-8">Activează camera pentru a valida bilete</p>
+                                        <button onClick={startScanner} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-900/40 active:scale-95 transition-all uppercase tracking-widest text-xs hover:bg-blue-500">
                                             Pornește Camera
                                         </button>
                                     </div>
                                 )}
 
                                 {loading && (
-                                    <div className="absolute inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center z-20 backdrop-blur-sm">
+                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-20 backdrop-blur-sm">
                                         <div className="flex flex-col items-center gap-3">
-                                            <Loader2 className="w-10 h-10 animate-spin text-blue-600 dark:text-blue-400" />
-                                            <span className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Validare...</span>
+                                            <Loader2 className="w-10 h-10 animate-spin text-blue-400" />
+                                            <span className="text-xs font-bold uppercase tracking-widest text-white">Validare...</span>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Manual Input Section */}
+                            {/* Manual Input */}
                             <div className="space-y-4">
-                                <div className="flex items-center gap-4 text-slate-400 dark:text-slate-500">
-                                    <div className="h-px bg-blue-200 dark:bg-blue-800 flex-grow"></div>
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">Sau introdu manual</span>
-                                    <div className="h-px bg-blue-200 dark:bg-blue-800 flex-grow"></div>
+                                <div className="flex items-center gap-4 text-muted-foreground">
+                                    <div className="h-px bg-border flex-grow"></div>
+                                    <span className="text-xs font-bold uppercase tracking-widest opacity-80">Sau introdu manual</span>
+                                    <div className="h-px bg-border flex-grow"></div>
                                 </div>
 
-                              <form onSubmit={handleManualSubmit} className="flex flex-col sm:flex-row gap-3">
-                            <input 
-                                type="text" 
-                                placeholder="Cod Bilet" 
-                                value={manualCode}
-                                onChange={(e) => setManualCode(e.target.value)}
-                                className="w-full sm:flex-grow bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 rounded-2xl px-5 py-3.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-mono shadow-sm"
-                            />
-                            <button 
-                                type="submit" 
-                                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-8 py-3.5 sm:py-0 rounded-2xl font-bold transition-colors shadow-lg active:scale-95"
-                            >
-                                OK
-                            </button>
-                            </form>
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div 
-                            key="result-ui"
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            className={`w-full p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden ${commonGradient} border-4 ${
-                                scanResult.valid ? 'border-emerald-500' : 
-                                scanResult.ticketStatus === 'USED' ? 'border-amber-400' : 'border-rose-500'
-                            }`}
-                        >
-                            {/* Background Pattern */}
-                            <div className="absolute inset-0 opacity-10 pointer-events-none">
-                                <div className="absolute inset-0 bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_24px]"></div>
+                                <form onSubmit={handleManualSubmit} className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Cod Bilet" 
+                                        value={manualCode}
+                                        onChange={(e) => setManualCode(e.target.value)}
+                                        className="flex-grow bg-card border border-input rounded-2xl px-5 py-3.5 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-mono shadow-sm"
+                                    />
+                                    <button 
+                                        type="submit" 
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 rounded-2xl font-bold transition-colors border border-primary shadow-lg shadow-primary/20"
+                                    >
+                                        OK
+                                    </button>
+                                </form>
                             </div>
 
+                        </motion.div>
+                    ) : (
+                        /* Result UI - Very Vibrant */
+                        <motion.div key="result-ui" initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                            className={`w-full p-10 rounded-[3rem] text-center shadow-2xl relative overflow-hidden text-white ${
+                                scanResult.valid ? 'bg-emerald-600' : 
+                                scanResult.ticketStatus === 'USED' ? 'bg-amber-500' : 'bg-rose-600'
+                            }`}
+                        >
+                            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_24px]"></div>
                             <div className="relative z-10">
-                                <div className={`w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-8 backdrop-blur-md shadow-inner ring-1 ring-black/5 dark:ring-white/10 ${
-                                    scanResult.valid ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 
-                                    scanResult.ticketStatus === 'USED' ? 'bg-amber-400/20 text-amber-600 dark:text-amber-400' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
-                                }`}>
+                                <div className="w-24 h-24 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-8 backdrop-blur-md shadow-inner ring-1 ring-white/30">
                                     {scanResult.valid ? <CheckCircle className="w-12 h-12" /> : 
                                      scanResult.ticketStatus === 'USED' ? <Scan className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
                                 </div>
-                                
-                                <h2 className={`text-3xl font-black mb-2 leading-tight tracking-tight uppercase ${
-                                    scanResult.valid ? 'text-emerald-600 dark:text-emerald-400' : 
-                                    scanResult.ticketStatus === 'USED' ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400'
-                                }`}>
-                                    {scanResult.valid ? "ACCES PERMIS" : 
-                                     scanResult.ticketStatus === 'USED' ? "DEJA FOLOSIT" : "ACCES RESPINS"}
+                                <h2 className="text-3xl font-black mb-2 uppercase tracking-tight">
+                                    {scanResult.valid ? "ACCES PERMIS" : scanResult.ticketStatus === 'USED' ? "DEJA FOLOSIT" : "ACCES RESPINS"}
                                 </h2>
-                                <p className="text-slate-700 dark:text-slate-200 font-medium text-lg mb-10 leading-relaxed px-2">{scanResult.message}</p>
+                                <p className="text-white/90 font-medium text-lg mb-10">{scanResult.message}</p>
 
                                 {(scanResult.valid || scanResult.ticketStatus === 'USED') && (
-                                    <div className="bg-white/40 dark:bg-black/20 rounded-3xl p-6 mb-10 text-left space-y-4 backdrop-blur-md border border-blue-100 dark:border-blue-800 shadow-inner">
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-widest">Participant</p>
-                                            <p className="text-xl font-bold text-slate-800 dark:text-white">{scanResult.studentName}</p>
-                                        </div>
-                                        <div className="h-px bg-blue-100 dark:bg-blue-800"></div>
-                                        <div className="space-y-1">
-                                            <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-widest">Eveniment</p>
-                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-snug">{scanResult.eventTitle}</p>
-                                        </div>
+                                    <div className="bg-black/20 rounded-3xl p-6 mb-10 text-left space-y-4 backdrop-blur-xl border border-white/10">
+                                        <div><p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Participant</p><p className="text-xl font-bold">{scanResult.studentName}</p></div>
+                                        <div className="h-px bg-white/10"></div>
+                                        <div><p className="text-[10px] uppercase font-bold text-white/50 tracking-widest">Eveniment</p><p className="text-sm font-semibold">{scanResult.eventTitle}</p></div>
                                     </div>
                                 )}
-
-                                <button 
-                                    onClick={resetScan} 
-                                    className="w-full bg-slate-900 dark:bg-black text-white py-4 rounded-[1.5rem] font-bold text-lg hover:bg-black active:scale-95 transition-all shadow-lg border-none"
-                                >
+                                <button onClick={resetScan} className="w-full bg-white text-slate-900 py-4.5 rounded-2xl font-bold text-lg shadow-xl active:scale-95 transition-all border-none">
                                     Scanează Următorul
                                 </button>
                             </div>

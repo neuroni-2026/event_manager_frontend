@@ -6,30 +6,15 @@ import { toast } from 'sonner';
 import NotificationDropdown from './ui/NotificationDropdown';
 import api from '../services/api';
 
-const Navbar = () => {
+const Navbar = ({ theme, toggleTheme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingAdminCount, setPendingAdminCount] = useState(0);
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
 
   const checkAuth = () => {
     const storedUser = localStorage.getItem('user');
@@ -112,8 +97,8 @@ const Navbar = () => {
         className={`
           relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 no-underline
           ${active 
-            ? 'bg-primary/5 shadow-sm ring-1 ring-primary/10 font-bold' 
-            : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+            ? 'bg-primary/10 dark:bg-primary/20 shadow-sm ring-1 ring-primary/10 dark:ring-primary/20 font-bold text-primary dark:text-primary-foreground' 
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
           }
         `}
       >
@@ -130,14 +115,9 @@ const Navbar = () => {
   const isStudent = user && user.roles && user.roles.includes('ROLE_STUDENT');
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800 shadow-sm transition-all duration-300 supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full bg-background border-b border-border shadow-sm transition-all duration-300">
       
-      {showNotifications && (
-          <div 
-            className="fixed inset-0 z-40 bg-transparent cursor-default" 
-            onClick={() => setShowNotifications(false)}
-          ></div>
-      )}
+      {/* Backdrop for closing notifications */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50">
         <div className="flex justify-between h-20 items-center">
@@ -148,7 +128,8 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-gray-50/50 dark:bg-gray-900/50 p-1.5 rounded-full border border-gray-100/50 dark:border-gray-800 backdrop-blur-sm">
+          {/* Desktop Navigation - Absolute Center */}
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-muted/50 border border-border p-1.5 rounded-full backdrop-blur-sm">
             <NavLink to="/events">Evenimente</NavLink>
 
             {/* Role Based Links */}
@@ -226,25 +207,25 @@ const Navbar = () => {
             
             {/* User Profile Capsule */}
             {user ? (
-                <div className="flex items-center p-1 pl-1.5 pr-2 bg-white dark:bg-card border border-gray-200 dark:border-gray-800 rounded-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all ml-2 gap-2">
+                <div className="flex items-center p-1 pl-1.5 pr-2 bg-card border border-border rounded-full shadow-sm hover:shadow-md hover:border-primary/30 transition-all ml-2 gap-2">
                     <Link to="/settings" className="flex items-center gap-2.5 group cursor-pointer no-underline">
-                        <div className="w-9 h-9 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner ring-2 ring-white group-hover:scale-105 transition-transform">
+                        <div className="w-9 h-9 bg-gradient-to-br from-primary to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner ring-2 ring-white dark:ring-gray-800 group-hover:scale-105 transition-transform">
                             {user.firstName ? user.firstName[0].toUpperCase() : 'U'}
                         </div>
                         <div className="flex flex-col leading-none pr-1">
-                            <span className="text-xs font-bold text-gray-900 group-hover:text-primary transition-colors">
+                            <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
                                 {user.firstName}
                             </span>
-                            <span className="text-[10px] text-gray-400 font-medium">Contul meu</span>
+                            <span className="text-[10px] text-muted-foreground font-medium">Contul meu</span>
                         </div>
                     </Link>
                     
-                    <div className="h-6 w-px bg-gray-200 mx-0.5"></div>
+                    <div className="h-6 w-px bg-border mx-0.5"></div>
                     
                     <div className="flex items-center">
                         <Link
                             to="/settings"
-                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all no-underline"
+                            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all no-underline"
                             title="Setări"
                         >
                             <Settings className="w-4 h-4" />
