@@ -30,7 +30,11 @@ const ScanTicket = () => {
             setIsScannerStarted(true);
             await scannerRef.current.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
+                { 
+                    fps: 10,
+                    // qrbox removed to disable the dark shading overlay
+                    aspectRatio: 1.0 
+                },
                 (decodedText) => handleScanSuccess(decodedText),
                 (errorMessage) => {}
             );
@@ -83,6 +87,20 @@ const ScanTicket = () => {
                     <Scan className="w-5 h-5 text-blue-600" /> Scaner Eveniment
                 </h1>
             </div>
+
+            <style>{`
+                #reader video {
+                    object-fit: cover !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    border-radius: 2.5rem;
+                }
+                #reader {
+                    width: 100% !important;
+                    height: 100% !important;
+                    border: none !important;
+                }
+            `}</style>
 
             <div className="flex-grow flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full">
                 <AnimatePresence mode='wait'>
